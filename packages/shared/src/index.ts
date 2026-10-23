@@ -14,3 +14,19 @@ export {
 } from "./memberships";
 export { pickCurrentCompany, type CurrentCompanyChoice } from "./current-company";
 export { requestLoginCode, verifyLoginCode, loginCodeErrorMessage, WRONG_CODE_MESSAGE } from "./login";
+export {
+  addOnLabel,
+  listAddOns,
+  companyHasAddOn,
+  summariseAddOn,
+  startCheckout,
+  openBillingPortal,
+  functionErrorMessage,
+  setBillingEmail,
+  getCompanyBilling,
+  type AddOn,
+  type AddOnState,
+  type AddOnSummary,
+  type CheckoutInput,
+  type CompanyBilling,
+} from "./billing";
