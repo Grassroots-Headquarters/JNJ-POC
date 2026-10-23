@@ -1,0 +1,67 @@
+# Ships a JavaScript-only fix to installed Mobile builds without a store
+# release. Run it by hand from the Actions tab: pick the channel and describe
+# the change. Updates to the production channel wait for the same approval as
+# a release.
+name: eas-update
+
+on:
+  workflow_dispatch:
+    inputs:
+      channel:
+        description: EAS Update channel (which installed builds receive the update)
+        type: choice
+        required: true
+        options: [staging, production]
+      message:
+        description: What changed (shown in the EAS dashboard)
+        type: string
+        required: true
+
+concurrency:
+  group: eas-update-${{ inputs.channel }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  SENTRY_URL: ${{ vars.SENTRY_URL || 'https://sentry.io' }}
+
+jobs:
+  update:
+    name: eas update to ${{ inputs.channel }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: ${{ inputs.channel }}
+    env:
+      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+      SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+      SENTRY_ORG: ${{ vars.SENTRY_ORG }}
+      SENTRY_PROJECT: ${{ vars.SENTRY_PROJECT_MOBILE }}
+      # EAS environment whose variables (EXPO_PUBLIC_*) are inlined into the bundle.
+      EAS_ENVIRONMENT: ${{ inputs.channel == 'production' && 'production' || 'preview' }}
+    steps:
+      - uses: actions/checkout@v7
+      - name: EXPO_TOKEN is required
+        if: env.EXPO_TOKEN == ''
+        run: |
+          echo "::error::EXPO_TOKEN is not set; run scripts/setup-accounts.sh first."
+          exit 1
+      - uses: pnpm/setup@v3
+        with:
+          cache: true
+          require-lockfile: true
+      - uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+          packager: pnpm
+      - name: Publish the update
+        working-directory: apps/mobile
+        env:
+          MESSAGE: ${{ inputs.message }}
+        run: eas update --channel "${{ inputs.channel }}" --environment "$EAS_ENVIRONMENT" --message "$MESSAGE" --non-interactive
+      - name: Upload the update's source maps to Sentry
+        if: env.SENTRY_AUTH_TOKEN != '' && env.SENTRY_ORG != ''
+        working-directory: apps/mobile
+        run: pnpm exec sentry-expo-upload-sourcemaps dist

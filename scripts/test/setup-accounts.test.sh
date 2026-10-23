@@ -89,7 +89,8 @@ SUPABASE_STAGING_PROJECT_REF"
 expected_vars="SENTRY_ORG
 SENTRY_PROJECT_ADMIN
 SENTRY_PROJECT_EDGE
-SENTRY_PROJECT_MOBILE"
+SENTRY_PROJECT_MOBILE
+SENTRY_URL"
 found_secrets=$(grep -oE '^[[:space:]]*set_secret [A-Z_]+' "$SCRIPT" | awk '{print $2}' | sort -u)
 found_vars=$(grep -oE '^[[:space:]]*set_var [A-Z_]+' "$SCRIPT" | awk '{print $2}' | sort -u)
 if [[ "$found_secrets" == "$expected_secrets" ]]; then ok "set_secret names match the delivery contracts"

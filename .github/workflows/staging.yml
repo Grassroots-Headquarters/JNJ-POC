@@ -1,0 +1,96 @@
+# Staging delivery: every push to main applies migrations and Edge Functions to
+# the staging Supabase project, starts a staging Mobile build for TestFlight and
+# Play internal testing, and labels the Sentry releases. The Admin app and the
+# Mobile web test site are deployed by Vercel's Git integration, not here
+# (see docs/delivery.md).
+name: staging
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# One staging deploy at a time; a running migration is never cancelled.
+concurrency:
+  group: staging
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  SENTRY_URL: ${{ vars.SENTRY_URL || 'https://sentry.io' }}
+
+jobs:
+  supabase:
+    name: migrations and edge functions to staging
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: staging
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_STAGING_DB_PASSWORD }}
+      PROJECT_REF: ${{ secrets.SUPABASE_STAGING_PROJECT_REF }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: supabase/setup-cli@v3
+        with:
+          version: 2.122.0
+      - run: supabase link --project-ref "$PROJECT_REF"
+      - run: supabase db push
+      - name: Deploy every Edge Function (verify_jwt per function comes from supabase/config.toml)
+        run: supabase functions deploy --project-ref "$PROJECT_REF" --use-api
+      - name: Label the Edge Function release
+        run: supabase secrets set --project-ref "$PROJECT_REF" SENTRY_RELEASE=edge@${{ github.sha }} SENTRY_ENVIRONMENT=staging
+      - name: Sentry release edge@<sha>
+        if: vars.SENTRY_ORG != ''
+        uses: getsentry/action-release@v3
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ vars.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ vars.SENTRY_PROJECT_EDGE }}
+        with:
+          environment: staging
+          release: edge@${{ github.sha }}
+
+  mobile:
+    name: EAS staging build to TestFlight and Play internal testing
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: supabase
+    environment: staging
+    env:
+      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+    steps:
+      - uses: actions/checkout@v7
+      - name: No EXPO_TOKEN secret, so no Mobile build
+        if: env.EXPO_TOKEN == ''
+        run: echo "::notice::EXPO_TOKEN is not set; skipping the staging Mobile build. Run scripts/setup-accounts.sh."
+      - uses: pnpm/setup@v3
+        if: env.EXPO_TOKEN != ''
+        with:
+          cache: true
+          require-lockfile: true
+      - uses: expo/expo-github-action@v8
+        if: env.EXPO_TOKEN != ''
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+          packager: pnpm
+      - name: Build for both stores and hand the builds to EAS Submit
+        if: env.EXPO_TOKEN != ''
+        working-directory: apps/mobile
+        run: eas build --profile staging --platform all --non-interactive --no-wait --auto-submit
+      - name: Read the Mobile app version
+        id: version
+        run: echo "version=$(jq -r .expo.version apps/mobile/app.json)" >> "$GITHUB_OUTPUT"
+      - name: Sentry release mobile@<version>+<sha>
+        if: vars.SENTRY_ORG != ''
+        uses: getsentry/action-release@v3
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ vars.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ vars.SENTRY_PROJECT_MOBILE }}
+        with:
+          environment: staging
+          release: mobile@${{ steps.version.outputs.version }}+${{ github.sha }}

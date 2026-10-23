@@ -580,7 +580,7 @@ write_env ADMIN_APP_URL "$ADMIN_APP_URL"
 say "Environment variables for jnj-admin:"
 say "  Production : NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY = production project, NEXT_PUBLIC_APP_URL = $ADMIN_APP_URL"
 say "  Preview+Dev: NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY = staging project"
-say "  All        : NEXT_PUBLIC_SENTRY_DSN, SENTRY_ORG, SENTRY_PROJECT=$SENTRY_PROJECT_ADMIN, SENTRY_AUTH_TOKEN (sensitive)"
+say "  All        : NEXT_PUBLIC_SENTRY_DSN, SENTRY_ORG, SENTRY_PROJECT=$SENTRY_PROJECT_ADMIN, SENTRY_URL, SENTRY_AUTH_TOKEN (sensitive)"
 if confirm "Write them with the Vercel CLI now (it links apps/admin to the project)?" && vercel_link "$REPO_ROOT/apps/admin" jnj-admin; then
   vercel_env "$REPO_ROOT/apps/admin" NEXT_PUBLIC_SUPABASE_URL "$SUPABASE_PRODUCTION_URL" production
   vercel_env "$REPO_ROOT/apps/admin" NEXT_PUBLIC_SUPABASE_ANON_KEY "$SUPABASE_PRODUCTION_ANON_KEY" production
@@ -593,6 +593,7 @@ if confirm "Write them with the Vercel CLI now (it links apps/admin to the proje
     vercel_env "$REPO_ROOT/apps/admin" NEXT_PUBLIC_SENTRY_DSN "$SENTRY_DSN_ADMIN" "$environment"
     vercel_env "$REPO_ROOT/apps/admin" SENTRY_ORG "$SENTRY_ORG" "$environment"
     vercel_env "$REPO_ROOT/apps/admin" SENTRY_PROJECT "$SENTRY_PROJECT_ADMIN" "$environment"
+    vercel_env "$REPO_ROOT/apps/admin" SENTRY_URL "$SENTRY_URL" "$environment"
     vercel_env "$REPO_ROOT/apps/admin" SENTRY_AUTH_TOKEN "$SENTRY_AUTH_TOKEN" "$environment"
   done
 else
@@ -644,6 +645,7 @@ set_var SENTRY_ORG "$SENTRY_ORG"
 set_var SENTRY_PROJECT_ADMIN "$SENTRY_PROJECT_ADMIN"
 set_var SENTRY_PROJECT_MOBILE "$SENTRY_PROJECT_MOBILE"
 set_var SENTRY_PROJECT_EDGE "$SENTRY_PROJECT_EDGE"
+set_var SENTRY_URL "$SENTRY_URL"
 ask INVITE_LINK_BASE_URL "Invite link base URL (Enter for $ADMIN_APP_URL; becomes https://app.example.com's real domain later):"
 INVITE_LINK_BASE_URL="${INVITE_LINK_BASE_URL:-$ADMIN_APP_URL}"
 write_env INVITE_LINK_BASE_URL "${INVITE_LINK_BASE_URL%/}"
@@ -679,7 +681,8 @@ else
     "SENTRY_DSN=$SENTRY_DSN_EDGE"
 fi
 note "SENTRY_RELEASE is set per deploy by the release workflow, not here."
-note "Keep $ENV_FILE private (mode 600, git-ignored). The EAS build profiles read the staging/production Supabase URL and anon key from it when ticket #26 wires eas.json."
+note "Keep $ENV_FILE private (mode 600, git-ignored)."
+note "Next: the first-run checklist in docs/delivery.md (EAS environment variables, submit profile ids, GitHub environments)."
 
 finish
 }
