@@ -43,7 +43,9 @@ pnpm gen:types
 cleanup() {
   echo
   echo "==> Stopping dev servers"
-  kill 0 2>/dev/null || true
+  trap - EXIT INT TERM
+  jobs -p | xargs -r kill 2>/dev/null || true
+  wait 2>/dev/null || true
   if [ -z "${KEEP_SUPABASE:-}" ]; then
     echo "==> Stopping local Supabase"
     pnpm supabase stop --no-backup
