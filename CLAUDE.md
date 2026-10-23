@@ -4,7 +4,7 @@
 
 ### Issue tracker
 
-Issues and specs are GitHub issues on davidhayes03/jnj-poc, managed through `gh api` (REST). See `docs/agents/issue-tracker.md`.
+Issues and specs are GitHub issues on grassroots-headquarters/jnj-poc, managed through `gh api` (REST). See `docs/agents/issue-tracker.md`.
 
 ### Triage labels
 
