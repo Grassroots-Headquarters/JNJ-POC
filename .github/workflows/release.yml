@@ -1,0 +1,110 @@
+# Production delivery: pushing a tag vX.Y.Z pauses on the production GitHub
+# environment until a reviewer approves, then applies migrations and Edge
+# Functions to the production Supabase project, starts store builds of the
+# Mobile app, labels the Sentry releases and publishes GitHub release notes.
+# The Admin app's production deploy comes from Vercel on main, not from the tag
+# (see docs/delivery.md).
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+
+# One release at a time; a running migration is never cancelled.
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  SENTRY_URL: ${{ vars.SENTRY_URL || 'https://sentry.io' }}
+
+jobs:
+  # The approval gate. Only this job references the environment so one
+  # approval covers the whole release; the other jobs chain after it.
+  supabase:
+    name: migrations and edge functions to production (needs approval)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: production
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_PRODUCTION_DB_PASSWORD }}
+      PROJECT_REF: ${{ secrets.SUPABASE_PRODUCTION_PROJECT_REF }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: supabase/setup-cli@v3
+        with:
+          version: 2.122.0
+      - run: supabase link --project-ref "$PROJECT_REF"
+      - run: supabase db push
+      - name: Deploy every Edge Function (verify_jwt per function comes from supabase/config.toml)
+        run: supabase functions deploy --project-ref "$PROJECT_REF" --use-api
+      - name: Label the Edge Function release
+        run: supabase secrets set --project-ref "$PROJECT_REF" SENTRY_RELEASE=edge@${{ github.sha }}
+      - name: Sentry release edge@<sha>
+        if: vars.SENTRY_ORG != ''
+        uses: getsentry/action-release@v3
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ vars.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ vars.SENTRY_PROJECT_EDGE }}
+        with:
+          environment: production
+          release: edge@${{ github.sha }}
+
+  mobile:
+    name: EAS production build to the stores
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: supabase
+    env:
+      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+    steps:
+      - uses: actions/checkout@v7
+      - name: No EXPO_TOKEN secret, so no Mobile build
+        if: env.EXPO_TOKEN == ''
+        run: echo "::notice::EXPO_TOKEN is not set; skipping the production Mobile build. Run scripts/setup-accounts.sh."
+      - uses: pnpm/setup@v3
+        if: env.EXPO_TOKEN != ''
+        with:
+          cache: true
+          require-lockfile: true
+      - uses: expo/expo-github-action@v8
+        if: env.EXPO_TOKEN != ''
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+          packager: pnpm
+      - name: Build store versions and hand them to EAS Submit
+        if: env.EXPO_TOKEN != ''
+        working-directory: apps/mobile
+        run: eas build --profile production --platform all --non-interactive --no-wait --auto-submit
+      - name: Read the Mobile app version
+        id: version
+        run: echo "version=$(jq -r .expo.version apps/mobile/app.json)" >> "$GITHUB_OUTPUT"
+      - name: Sentry release mobile@<version>+<sha>
+        if: vars.SENTRY_ORG != ''
+        uses: getsentry/action-release@v3
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ vars.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ vars.SENTRY_PROJECT_MOBILE }}
+        with:
+          environment: production
+          release: mobile@${{ steps.version.outputs.version }}+${{ github.sha }}
+
+  notes:
+    name: GitHub release notes
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: [supabase, mobile]
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v7
+      - run: gh release create "$GITHUB_REF_NAME" --verify-tag --generate-notes --title "$GITHUB_REF_NAME"
