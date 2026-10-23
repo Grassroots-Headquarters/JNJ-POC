@@ -12,6 +12,15 @@ const nextConfig: NextConfig = {
   cacheComponents: false,
   transpilePackages: ["@jnj/shared"],
   ...(release ? { env: { NEXT_PUBLIC_SENTRY_RELEASE: release } } : {}),
+  async headers() {
+    return [
+      {
+        // iOS reads the universal links file as JSON even though it has no extension.
+        source: "/.well-known/apple-app-site-association",
+        headers: [{ key: "Content-Type", value: "application/json" }],
+      },
+    ];
+  },
   turbopack: {
     rules: {
       "*.css": {

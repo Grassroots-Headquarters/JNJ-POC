@@ -9,6 +9,11 @@ describe("isPublicPath", () => {
     expect(isPublicPath("/invite/ABC123")).toBe(true);
   });
 
+  it("lets the stores' link-verification files be fetched", () => {
+    expect(isPublicPath("/.well-known/apple-app-site-association")).toBe(true);
+    expect(isPublicPath("/.well-known/assetlinks.json")).toBe(true);
+  });
+
   it("gates everything else behind login", () => {
     expect(isPublicPath("/")).toBe(false);
     expect(isPublicPath("/choose-company")).toBe(false);
