@@ -56,6 +56,36 @@ _Avoid_: Foreman, site manager
 The conversation on a Job between its Client and the Company, seen only by the Client, Admins and the Job lead.
 _Avoid_: Client group, WhatsApp group
 
+**Client suggestion**:
+A photo or note a Site team member puts forward for the Client; it reaches Client chat only once an Admin or the Job lead approves it.
+_Avoid_: Draft, pending post
+
+**Materials request**:
+A request from someone on a Job for materials, moving from Requested to Ordered to Delivered; it records who ordered it and when.
+_Avoid_: Order, shopping list
+
+**Quiet hours**:
+The Company's overnight window in which notifications are held until morning; messages still arrive.
+_Avoid_: Do not disturb, out of hours
+
+**Urgent**:
+A flag an Admin puts on a message so its notification is sent during Quiet hours.
+_Avoid_: Priority, emergency
+
 **On site**:
 Physically present at a Job's address. "Site" is only ever used this way, never as a name for the Job itself.
 _Avoid_: Using "site" as a noun for a Job
+
+### Billing
+
+**Add-on**:
+A paid feature a Company switches on for all its Jobs, priced per Company per month.
+_Avoid_: Module, plan, tier, plugin
+
+**Client Portal**:
+The Add-on that gives Clients access to their Job: updates, Client chat, choices, and extras and deductions.
+_Avoid_: Client side, customer app
+
+**Referral code**:
+A Company's code that a new Company enters at sign-up; when the new Company first pays for an Add-on, both earn a free month.
+_Avoid_: Promo code, voucher
