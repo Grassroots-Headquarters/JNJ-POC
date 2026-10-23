@@ -41,7 +41,7 @@ jobs:
       - name: Deploy every Edge Function (verify_jwt per function comes from supabase/config.toml)
         run: supabase functions deploy --project-ref "$PROJECT_REF" --use-api
       - name: Label the Edge Function release
-        run: supabase secrets set --project-ref "$PROJECT_REF" SENTRY_RELEASE=edge@${{ github.sha }}
+        run: supabase secrets set --project-ref "$PROJECT_REF" SENTRY_RELEASE=edge@${{ github.sha }} SENTRY_ENVIRONMENT=staging
       - name: Sentry release edge@<sha>
         if: vars.SENTRY_ORG != ''
         uses: getsentry/action-release@v3
