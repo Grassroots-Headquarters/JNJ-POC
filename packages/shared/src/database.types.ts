@@ -23,7 +23,47 @@ export type Database = {
           }
         },"public": {
           Tables: {
-            "platform_status": {
+            "companies": {
+                  Row: {
+                    "created_at": string,"id": string,"name": string,"referral_code": string,"referred_by_company_id": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"id"?: string,"name": string,"referral_code": string,"referred_by_company_id"?: string | null
+                  }
+                  Update: {
+                    "created_at"?: string,"id"?: string,"name"?: string,"referral_code"?: string,"referred_by_company_id"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "companies_referred_by_company_id_fkey"
+      columns: ["referred_by_company_id"]
+isOneToOne: false
+      referencedRelation: "companies"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"memberships": {
+                  Row: {
+                    "company_id": string,"created_at": string,"role": Database["public"]['Enums']["role"],"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "company_id": string,"created_at"?: string,"role": Database["public"]['Enums']["role"],"user_id": string
+                  }
+                  Update: {
+                    "company_id"?: string,"created_at"?: string,"role"?: Database["public"]['Enums']["role"],"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "memberships_company_id_fkey"
+      columns: ["company_id"]
+isOneToOne: false
+      referencedRelation: "companies"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"platform_status": {
                   Row: {
                     "id": number,"message": string
                   }
@@ -37,16 +77,44 @@ export type Database = {
                   Relationships: [
                     
                   ]
+                },"profiles": {
+                  Row: {
+                    "billing_email": string | null,"created_at": string,"full_name": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "billing_email"?: string | null,"created_at"?: string,"full_name"?: string,"user_id": string
+                  }
+                  Update: {
+                    "billing_email"?: string | null,"created_at"?: string,"full_name"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
                 }
           }
           Views: {
             [_ in never]: never
           }
           Functions: {
-            [_ in never]: never
+            "generate_referral_code":
+{ Args: Record<PropertyKey, never>; Returns: string
+                           },
+"is_admin":
+{ Args: { "company": string }; Returns: boolean
+                           },
+"is_member":
+{ Args: { "company": string }; Returns: boolean
+                           },
+"membership_role":
+{ Args: { "company": string }; Returns: Database["public"]['Enums']["role"]
+                           },
+"sign_up_company":
+{ Args: { "company_name": string,"full_name": string,"referral_code"?: string }; Returns: string
+                           }
           }
           Enums: {
-            [_ in never]: never
+            "role": "admin"|"site_team"|"subcontractor"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -166,7 +234,7 @@ export const Constants = {
           }
         },"public": {
           Enums: {
-            
+            "role": ["admin", "site_team", "subcontractor"]
           }
         }
 } as const
