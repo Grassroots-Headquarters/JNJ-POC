@@ -1,8 +1,18 @@
 # JNJ Site App
 
-A mobile app that gives each building job one place for team chat, materials, photos, issues and site attendance, replacing per-job WhatsApp groups. Any construction company can sign up; JNJ is the pilot company.
+An app that gives each building job one place for team chat, materials, photos, issues and site attendance, replacing per-job WhatsApp groups. Any construction company can sign up; JNJ is the pilot company.
 
 ## Language
+
+### Product
+
+**Mobile app**:
+The app on iOS and Android that everyone uses: Site team, Subcontractors, Job leads, Clients, and Admins when away from a desk.
+_Avoid_: Builder app, site app
+
+**Admin app**:
+The web app where Admins run their Company; it has features the Mobile app does not.
+_Avoid_: Back office, dashboard, portal
 
 ### Organisation
 

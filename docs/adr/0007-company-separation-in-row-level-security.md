@@ -1,0 +1,3 @@
+# Company separation enforced in row-level security, not login claims
+
+Every row a Company owns carries its Company id, and Postgres row-level security decides access by looking up the User's Membership (and Role) or, for Clients, their Assignment, on every query through shared database functions. Roles and Companies are deliberately not put in the login token: a User can belong to many Companies (ADR 0003) and a Role change must apply at once, not at the next token refresh. We accept the cost of a lookup per query, and require a test for every Company-owned table proving one Company cannot read another's data.
