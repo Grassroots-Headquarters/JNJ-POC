@@ -43,16 +43,36 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
-                },"memberships": {
+                },"invites": {
                   Row: {
-                    "company_id": string,"created_at": string,"role": Database["public"]['Enums']["role"],"user_id": string
+                    "accepted_at": string | null,"accepted_by": string | null,"cancelled_at": string | null,"code": string,"company_id": string,"created_at": string,"created_by": string | null,"expires_at": string,"full_name": string | null,"id": string,"phone": string,"role": Database["public"]['Enums']["role"]
                   }
                   ComputedFields: never
                   Insert: {
-                    "company_id": string,"created_at"?: string,"role": Database["public"]['Enums']["role"],"user_id": string
+                    "accepted_at"?: string | null,"accepted_by"?: string | null,"cancelled_at"?: string | null,"code": string,"company_id": string,"created_at"?: string,"created_by"?: string | null,"expires_at"?: string,"full_name"?: string | null,"id"?: string,"phone": string,"role": Database["public"]['Enums']["role"]
                   }
                   Update: {
-                    "company_id"?: string,"created_at"?: string,"role"?: Database["public"]['Enums']["role"],"user_id"?: string
+                    "accepted_at"?: string | null,"accepted_by"?: string | null,"cancelled_at"?: string | null,"code"?: string,"company_id"?: string,"created_at"?: string,"created_by"?: string | null,"expires_at"?: string,"full_name"?: string | null,"id"?: string,"phone"?: string,"role"?: Database["public"]['Enums']["role"]
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "invites_company_id_fkey"
+      columns: ["company_id"]
+isOneToOne: false
+      referencedRelation: "companies"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"memberships": {
+                  Row: {
+                    "company_id": string,"created_at": string,"role": Database["public"]['Enums']["role"],"trade": string | null,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "company_id": string,"created_at"?: string,"role": Database["public"]['Enums']["role"],"trade"?: string | null,"user_id": string
+                  }
+                  Update: {
+                    "company_id"?: string,"created_at"?: string,"role"?: Database["public"]['Enums']["role"],"trade"?: string | null,"user_id"?: string
                   }
                   Relationships: [
                     {
@@ -61,7 +81,27 @@ isOneToOne: false
 isOneToOne: false
       referencedRelation: "companies"
       referencedColumns: ["id"]
+    },{
+      foreignKeyName: "memberships_user_id_profiles_fkey"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["user_id"]
     }
+                  ]
+                },"outbound_sms": {
+                  Row: {
+                    "body": string,"created_at": string,"id": number,"to": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "body": string,"created_at"?: string,"id"?: never,"to": string
+                  }
+                  Update: {
+                    "body"?: string,"created_at"?: string,"id"?: never,"to"?: string
+                  }
+                  Relationships: [
+                    
                   ]
                 },"platform_status": {
                   Row: {
@@ -97,8 +137,49 @@ isOneToOne: false
             [_ in never]: never
           }
           Functions: {
-            "generate_referral_code":
+            "accept_invite":
+{ Args: { "code": string,"full_name": string,"trade"?: string }; Returns: string
+                           },
+"cancel_invite":
+{ Args: { "invite": string }; Returns: undefined
+                           },
+"change_member_role":
+{ Args: { "company": string,"role": Database["public"]['Enums']["role"],"user_id": string }; Returns: undefined
+                           },
+"create_invite":
+{ Args: { "company": string,"full_name"?: string,"phone": string,"role": Database["public"]['Enums']["role"] }; Returns: {
+              "accepted_at": string | null,
+"accepted_by": string | null,
+"cancelled_at": string | null,
+"code": string,
+"company_id": string,
+"created_at": string,
+"created_by": string | null,
+"expires_at": string,
+"full_name": string | null,
+"id": string,
+"phone": string,
+"role": Database["public"]['Enums']["role"]
+            }
+                          SetofOptions: {
+        from: "*"
+        to: "invites"
+        isOneToOne: true
+        isSetofReturn: false
+      } },
+"generate_invite_code":
 { Args: Record<PropertyKey, never>; Returns: string
+                           },
+"generate_referral_code":
+{ Args: Record<PropertyKey, never>; Returns: string
+                           },
+"invite_preview":
+{ Args: { "code": string }; Returns: {
+              "company_name": string,"invited_name": string,"role": Database["public"]['Enums']["role"],"status": string
+            }[]
+                           },
+"invite_status":
+{ Args: { "accepted_at": string,"cancelled_at": string,"expires_at": string }; Returns: string
                            },
 "is_admin":
 { Args: { "company": string }; Returns: boolean
@@ -109,6 +190,33 @@ isOneToOne: false
 "membership_role":
 { Args: { "company": string }; Returns: Database["public"]['Enums']["role"]
                            },
+"normalise_phone":
+{ Args: { "input": string }; Returns: string
+                           },
+"remove_member":
+{ Args: { "company": string,"user_id": string }; Returns: undefined
+                           },
+"resend_invite":
+{ Args: { "invite": string }; Returns: {
+              "accepted_at": string | null,
+"accepted_by": string | null,
+"cancelled_at": string | null,
+"code": string,
+"company_id": string,
+"created_at": string,
+"created_by": string | null,
+"expires_at": string,
+"full_name": string | null,
+"id": string,
+"phone": string,
+"role": Database["public"]['Enums']["role"]
+            }
+                          SetofOptions: {
+        from: "*"
+        to: "invites"
+        isOneToOne: true
+        isSetofReturn: false
+      } },
 "sign_up_company":
 { Args: { "company_name": string,"full_name": string,"referral_code"?: string }; Returns: string
                            }

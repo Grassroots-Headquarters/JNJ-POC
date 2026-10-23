@@ -213,3 +213,10 @@ enabled = true
 verify_jwt = false
 import_map = "./functions/health/deno.json"
 entrypoint = "./functions/health/index.ts"
+
+[functions.send-invite]
+enabled = true
+# The caller's JWT is checked at the gateway and again inside: the Invite is read under the caller's token.
+verify_jwt = true
+import_map = "./functions/send-invite/deno.json"
+entrypoint = "./functions/send-invite/index.ts"
