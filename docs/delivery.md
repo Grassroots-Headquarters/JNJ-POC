@@ -116,6 +116,13 @@ these are done the workflows either skip (no `EXPO_TOKEN`) or fail at the first
    GitHub secrets and variables, the Vercel projects' variables and the Edge
    Function secrets). Commit the `extra.eas.projectId` that `eas init` wrote to
    `apps/mobile/app.json`.
+   The Stripe stages (7 and 8) also create the Client Portal price, the
+   `referral-free-month` coupon, the webhook endpoint
+   (`<supabase url>/functions/v1/stripe-webhook`, six events) and activate
+   the customer portal, and set the `STRIPE_SECRET_KEY`,
+   `STRIPE_WEBHOOK_SECRET` and `STRIPE_CLIENT_PORTAL_PRICE_ID` Edge Function
+   secrets per project. Without them the Billing page's Stripe buttons answer
+   "Stripe is not set up on this environment" and no Add-on can switch on.
 2. Create the GitHub environments: Settings → Environments → `staging` (no
    rules) and `production` (Required reviewers: the people who may approve a
    release; Deployment branches and tags: tag pattern `v*`).

@@ -32,6 +32,11 @@ export function AppHeader({ current, canSwitch }: { current: Membership; canSwit
         </span>
         <span className="text-xs text-[#64748B]">{roleLabel[current.role]}</span>
       </div>
+      {current.role === "admin" && (
+        <Link href="/billing" className="text-[15px] font-semibold text-primary">
+          Billing
+        </Link>
+      )}
       {canSwitch && (
         <Link href="/choose-company" className="text-[15px] font-semibold text-primary">
           Switch

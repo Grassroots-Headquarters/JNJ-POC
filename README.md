@@ -32,7 +32,7 @@ pnpm dev
 
 To run the Mobile app on a phone, use a development build (`cd apps/mobile && pnpm exec expo start`); Expo Go is not used.
 
-Phone login uses fixed test numbers locally (`+447700900001` to `+447700900019`, code `123456`); see `supabase/config.toml`. The seed (`supabase/seed.sql`) creates Users for 001-005 (Alex Admin and Sam Site of "JNJ Building", Bea Boss of "Hart Builders", Dee Dual in both, Cleo Client in neither) so you can log straight in; 006-019 are unseeded and free for sign-up flows (Playwright uses 006, the integration tests 007-008). Two local-only quirks worth knowing: the CLI only enables phone login when an SMS provider block is enabled, so `[auth.sms.twilio_verify]` is on with placeholder values (test numbers never reach it), and `max_frequency` is 1ms so the same User can request codes back to back.
+Phone login uses fixed test numbers locally (`+447700900001` to `+447700900019`, code `123456`); see `supabase/config.toml`. The seed (`supabase/seed.sql`) creates Users for 001-005 (Alex Admin and Sam Site of "JNJ Building", Bea Boss of "Hart Builders", Dee Dual in both, Cleo Client in neither) so you can log straight in; 006-019 are unseeded and free for sign-up flows (Playwright uses 006, the integration tests 007-008 and, for billing, 016-019). Two local-only quirks worth knowing: the CLI only enables phone login when an SMS provider block is enabled, so `[auth.sms.twilio_verify]` is on with placeholder values (test numbers never reach it), and `max_frequency` is 1ms so the same User can request codes back to back.
 
 ## Test
 
@@ -71,4 +71,8 @@ Every schema change is a migration: `pnpm supabase migration new <name>`, edit t
 
 ## Environment variables
 
-Each app has a committed `.env.example`; copy it to `.env.local` (git-ignored) or let `pnpm dev` write it. Leaving the Sentry DSN empty switches Sentry off. Edge Function secrets live in `supabase/functions/.env` (see `supabase/functions/.env.example`). No secret is ever committed; hosted keys live in GitHub Actions secrets and Vercel settings, set by `scripts/setup-accounts.sh`.
+Each app has a committed `.env.example`; copy it to `.env.local` (git-ignored) or let `pnpm dev` write it. Leaving the Sentry DSN empty switches Sentry off. Edge Function secrets live in `supabase/functions/.env` (see `supabase/functions/.env.example`); the local edge runtime reads that file when `supabase start` runs, so copy the example before starting (CI does the same). No secret is ever committed; hosted keys live in GitHub Actions secrets and Vercel settings, set by `scripts/setup-accounts.sh`.
+
+## Billing
+
+Each Company is a Stripe customer and each Add-on (so far `client_portal`) a monthly subscription (ADR 0008). Admins open Stripe Checkout and the Stripe customer portal from the Admin app's `/billing` page through the `billing-checkout` and `billing-portal` Edge Functions; only the `stripe-webhook` Edge Function switches an Add-on on or off, by writing `add_on_subscriptions` through `apply_stripe_subscription`. Apps read `company_has_add_on(company, add_on)` or the table. Locally and in CI there is no `STRIPE_SECRET_KEY`: the two hosted-page functions answer 503, and `integration/tests/billing.test.ts` drives the webhook with test-mode events signed with the local-only `STRIPE_WEBHOOK_SECRET` from `supabase/functions/.env.example`. The Mobile app shows no prices and only reads whether an Add-on is on.
