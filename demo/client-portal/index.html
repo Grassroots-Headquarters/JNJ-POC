@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Client Portal Demo</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a phone-sized app column, with a "what just happened" log beside it on wide screens and under it on phones. */
+:root {
+  --bg: #0A0A0C; --surface: #16161A; --surface-2: #1C1C22; --border: #24242B;
+  --fg: #F1F5F9; --muted: #94A3B8; --faint: #64748B;
+  --sky: #38BDF8; --purple: #A855F7; --rose: #F43F5E; --green: #10B981; --amber: #F59E0B;
+  --font: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { background: var(--bg); color: var(--fg); font-family: var(--font); font-size: 15px; }
+body { margin: 0; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 16px 48px; }
+button { font: inherit; color: inherit; cursor: pointer; }
+button:disabled { opacity: .45; cursor: not-allowed; }
+button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible, a:focus-visible { outline: 2px solid var(--sky); outline-offset: 2px; }
+input, textarea, select { font: inherit; color: var(--fg); background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 12px; width: 100%; }
+label.f { display: grid; gap: 6px; color: var(--muted); font-size: 13px; }
+a { color: var(--sky); }
+
+.wrap { display: grid; grid-template-columns: minmax(0, 390px) minmax(0, 1fr); gap: 32px; max-width: 980px; margin: 0 auto; align-items: start; }
+@media (max-width: 760px) { .wrap { grid-template-columns: minmax(0, 1fr); gap: 20px; } }
+.intro { grid-column: 1 / -1; display: grid; gap: 6px; max-width: 70ch; }
+.intro h1 { margin: 0; font-size: 22px; font-weight: 600; text-wrap: balance; }
+.intro p { margin: 0; color: var(--muted); line-height: 1.5; }
+.tag { display: inline-block; font: 500 11px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--amber); }
+.tag a { color: inherit; }
+
+.phone { background: var(--surface); border: 1px solid var(--border); border-radius: 28px; min-height: 680px; display: flex; flex-direction: column; overflow: hidden; }
+.bar { display: flex; align-items: center; gap: 10px; padding: 16px; border-bottom: 1px solid var(--border); min-height: 60px; }
+.bar h2 { margin: 0; font-size: 17px; font-weight: 600; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bar .act { background: none; border: 0; color: var(--sky); font-weight: 600; padding: 4px 0; flex: none; }
+.back { background: none; border: 0; color: var(--sky); padding: 4px 6px 4px 0; font-weight: 500; flex: none; }
+.screen { flex: 1; padding: 16px; display: flex; flex-direction: column; gap: 12px; min-height: 0; overflow-y: auto; }
+.who { font-size: 12px; color: var(--faint); }
+.h3 { margin: 4px 0 0; font-size: 13px; font-weight: 600; color: var(--muted); letter-spacing: .04em; text-transform: uppercase; }
+
+.row { background: var(--surface-2); border: 1px solid var(--border); border-radius: 14px; padding: 14px; text-align: left; display: grid; gap: 4px; width: 100%; }
+.row b { font-weight: 600; }
+.row span, .row small { color: var(--muted); font-size: 13px; }
+.row .line { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+.actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
+
+.pill { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border); color: var(--muted); white-space: nowrap; }
+.pill .dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.pill.green { color: var(--green); border-color: color-mix(in srgb, var(--green) 50%, transparent); background: color-mix(in srgb, var(--green) 12%, transparent); }
+.pill.amber { color: var(--amber); border-color: color-mix(in srgb, var(--amber) 50%, transparent); background: color-mix(in srgb, var(--amber) 12%, transparent); }
+.pill.sky { color: var(--sky); border-color: color-mix(in srgb, var(--sky) 50%, transparent); background: color-mix(in srgb, var(--sky) 12%, transparent); }
+.pill.rose { color: var(--rose); border-color: color-mix(in srgb, var(--rose) 50%, transparent); background: color-mix(in srgb, var(--rose) 12%, transparent); }
+.pill.purple { color: var(--purple); border-color: color-mix(in srgb, var(--purple) 50%, transparent); background: color-mix(in srgb, var(--purple) 12%, transparent); }
+
+.primary { background: var(--sky); color: #04131C; border: 0; border-radius: 12px; padding: 14px; font-weight: 600; width: 100%; }
+.small { background: var(--sky); color: #04131C; border: 0; border-radius: 10px; padding: 8px 12px; font-weight: 600; font-size: 13px; }
+.ghost { background: none; border: 1px solid var(--border); border-radius: 10px; padding: 8px 12px; font-weight: 500; font-size: 13px; }
+.danger { background: color-mix(in srgb, var(--rose) 14%, transparent); border: 1px solid color-mix(in srgb, var(--rose) 50%, transparent); color: var(--fg); border-radius: 12px; padding: 14px; font-weight: 600; width: 100%; }
+
+.toast { background: color-mix(in srgb, var(--green) 14%, transparent); border: 1px solid color-mix(in srgb, var(--green) 45%, transparent); border-radius: 12px; padding: 10px 12px; font-size: 13px; }
+.note { background: color-mix(in srgb, var(--amber) 12%, transparent); border: 1px solid color-mix(in srgb, var(--amber) 45%, transparent); border-radius: 12px; padding: 10px 12px; font-size: 13px; }
+.locked { border: 1px dashed var(--border); border-radius: 14px; padding: 14px; color: var(--muted); display: grid; gap: 4px; }
+
+.tabs { display: flex; gap: 2px; padding: 0 12px; border-bottom: 1px solid var(--border); overflow-x: auto; }
+.tabs button { background: none; border: 0; border-bottom: 2px solid transparent; padding: 12px 10px; font-size: 13px; color: var(--muted); white-space: nowrap; }
+.tabs button.sel { color: var(--fg); border-bottom-color: var(--sky); font-weight: 600; }
+.tabs .count { margin-left: 4px; font: 500 11px var(--mono); color: var(--amber); }
+
+.nav { display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid var(--border); }
+.nav button { background: none; border: 0; padding: 10px 4px 14px; font-size: 12px; color: var(--muted); display: grid; justify-items: center; gap: 4px; }
+.nav button.sel { color: var(--sky); font-weight: 600; }
+.nav svg { width: 22px; height: 22px; }
+
+.chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.chip { border: 1px solid var(--border); border-radius: 999px; padding: 8px 12px; background: none; font-size: 13px; }
+.chip.sel { border-color: var(--sky); color: var(--sky); background: color-mix(in srgb, var(--sky) 12%, transparent); }
+
+.tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.tile { aspect-ratio: 1.15; max-width: 100%; border-radius: 16px; border: 1px solid var(--border); background: var(--surface-2); display: grid; place-content: center; gap: 8px; justify-items: center; font-weight: 600; }
+.tile svg { width: 28px; height: 28px; }
+
+.signbox { border-radius: 14px; padding: 14px; display: flex; align-items: center; justify-content: space-between; gap: 10px; border: 1px solid var(--border); background: var(--surface-2); }
+.signbox.on { border-color: color-mix(in srgb, var(--green) 50%, transparent); background: color-mix(in srgb, var(--green) 10%, transparent); }
+.signbox small { color: var(--muted); display: block; font-size: 12px; }
+
+.photo { aspect-ratio: 4 / 3; max-width: 100%; width: 100%; border-radius: 12px; border: 1px dashed var(--border); display: grid; place-content: center; color: var(--muted); font-size: 13px; background: repeating-linear-gradient(135deg, var(--surface-2) 0 12px, var(--bg) 12px 24px); }
+.photo.taken { border-style: solid; color: var(--fg); background: linear-gradient(135deg, #1e3a4a, #2a1f3d); }
+.thumbs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.thumb { aspect-ratio: 1; max-width: 100%; border-radius: 10px; background: linear-gradient(135deg, #1e3a4a, #2a1f3d); display: flex; align-items: flex-end; padding: 6px; font-size: 11px; }
+
+.thread { display: flex; flex-direction: column; gap: 8px; flex: 1; }
+.msg { max-width: 82%; background: var(--surface-2); border: 1px solid var(--border); border-radius: 14px; padding: 8px 12px; font-size: 14px; line-height: 1.4; }
+.msg.me { align-self: flex-end; background: color-mix(in srgb, var(--sky) 16%, var(--surface)); border-color: color-mix(in srgb, var(--sky) 35%, transparent); }
+.msg .by { font-size: 11px; color: var(--muted); display: block; margin-bottom: 2px; }
+.msg.urgent { border-color: color-mix(in srgb, var(--rose) 60%, transparent); }
+.sys { align-self: center; font-size: 12px; color: var(--muted); background: var(--bg); border: 1px solid var(--border); border-radius: 999px; padding: 4px 10px; }
+.compose { display: flex; gap: 8px; align-items: center; }
+.compose input[type=text] { border-radius: 999px; padding: 10px 14px; }
+.send { flex: none; width: 44px; height: 44px; border-radius: 50%; border: 0; background: var(--sky); color: #04131C; font-weight: 700; }
+.check { display: flex; gap: 8px; align-items: center; font-size: 13px; color: var(--muted); }
+.check input { width: auto; }
+.row2 { display: flex; gap: 8px; } .row2 > * { flex: 1; min-width: 0; }
+.code { font: 600 28px var(--mono); letter-spacing: .3em; text-align: center; }
+.demo-hint { font: 12px var(--mono); color: var(--amber); }
+
+.log { display: grid; gap: 12px; }
+@media (min-width: 761px) { .log { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 16px); } }
+.log h3 { margin: 0; font-size: 13px; font-weight: 600; color: var(--muted); letter-spacing: .06em; text-transform: uppercase; }
+.panel { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 14px; display: grid; gap: 8px; }
+.panel pre { margin: 0; font: 12px/1.5 var(--mono); color: var(--muted); white-space: pre-wrap; overflow-x: auto; max-height: 340px; overflow-y: auto; }
+.events { display: grid; gap: 6px; font: 12px/1.45 var(--mono); }
+.events div { color: var(--muted); } .events div:first-child { color: var(--fg); }
+.tips { margin: 0; padding-left: 18px; display: grid; gap: 6px; font-size: 13px; color: var(--muted); line-height: 1.45; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="intro">
+    <span class="tag"><a href="../">Site App demos</a> · Client Portal · not the real app</span>
+    <h1>Client Portal: the Job, without the WhatsApp group</h1>
+    <p>Log in as Sam Patel, JNJ's Client at Overbury Avenue. Read the weekly Update, message the team, confirm a Choice and approve a priced Extra. Example data only. Nothing is saved or sent.</p>
+  </header>
+  <main class="phone" id="phone" aria-live="polite"></main>
+  <aside class="log">
+    <div class="panel"><h3>What just happened</h3><div class="events" id="events"></div></div>
+    <div class="panel"><h3>Things to try</h3>
+      <ul class="tips">
+        <li>Confirm the door swing Choice and see the approval record.</li>
+        <li>Approve the priced radiator Extra, or request a new one.</li>
+        <li>Tick "pretend it's 21:30" in chat to see the Quiet hours notice.</li>
+        <li>Open the Complete loft Job: read-only, and no chat.</li>
+      </ul></div>
+    <div class="panel"><h3>Recorded so far</h3><pre id="state"></pre></div>
+  </aside>
+</div>
+<script>
+const now = () => new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const EVENTS = [];
+function log(t) { EVENTS.unshift(`${now()}  ${t}`); if (EVENTS.length > 14) EVENTS.pop(); }
+const ICON = {
+  chat: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h16v11H9l-5 4z"/></svg>',
+  box: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 7l9-4 9 4v10l-9 4-9-4z"/><path d="M3 7l9 4 9-4M12 11v10"/></svg>',
+  cam: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>',
+  flag: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 21V4h11l-2 4 2 4H5"/></svg>',
+  jobs: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11l9-7 9 7v9H3z"/><path d="M9 20v-6h6v6"/></svg>',
+  team: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3.5"/><path d="M2 20c1-4 4-6 7-6s6 2 7 6"/><circle cx="17" cy="9" r="2.5"/><path d="M17 14c2.5 0 4.5 1.6 5 5"/></svg>',
+  cog: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg>',
+  shield: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/></svg>'
+};
+
+/* SMS login, shared by every role (ADR 0005: mobile number + SMS code for everyone). */
+function loginScreens(L, who) {
+  if (L.step === "phone") return `<div class="bar"><h2>Log in</h2></div><div class="screen" style="justify-content:center;gap:16px">
+    <div style="display:grid;gap:4px;text-align:center"><b style="font-size:20px">Site App</b><span class="who">${esc(who)}</span></div>
+    <form data-form="login-phone" style="display:grid;gap:12px">
+      <label class="f">Mobile number<input id="login-mobile" name="mobile" value="${esc(L.mobile)}" inputmode="tel" autocomplete="off"></label>
+      <label class="check"><input type="checkbox" id="login-stay" checked> Stay logged in on this phone</label>
+      <button class="primary">Send login code</button>
+    </form></div>`;
+  return `<div class="bar"><button class="back" data-act="login-back">‹ Back</button><h2>Enter code</h2></div><div class="screen" style="justify-content:center;gap:16px">
+    <p style="margin:0;color:var(--muted);text-align:center">We texted a 6-digit code to ${esc(L.mobile)}</p>
+    <form data-form="login-code" style="display:grid;gap:12px">
+      <input id="login-code" name="code" class="code" value="482913" inputmode="numeric" maxlength="6" aria-label="Login code">
+      <span class="demo-hint" style="text-align:center">Demo: any 6 digits work</span>
+      <button class="primary">Log in</button>
+    </form></div>`;
+}
+
+function paint(phoneHTML, recorded) {
+  document.getElementById("phone").innerHTML = phoneHTML;
+  document.getElementById("events").innerHTML = EVENTS.length ? EVENTS.map(e => `<div>${esc(e)}</div>`).join("") : "<div>Tap through the phone. Each action shows up here.</div>";
+  document.getElementById("state").textContent = JSON.stringify(recorded, null, 2);
+  const t = document.querySelector(".screen"); if (t && t.dataset.bottom) t.scrollTop = t.scrollHeight;
+}
+
+
+const ME = "Sam Patel";
+const S = {
+  login: { step: "phone", mobile: "07700 900789" }, in: false,
+  job: null, screen: "overview", toast: null, night: false,
+  jobs: [
+    { id: "overbury", name: "Overbury Avenue", company: "JNJ Building", status: "Active",
+      updates: [
+        { when: "Fri 17 Oct", title: "Week 5: roof on, kitchen first fix", text: "Roof is watertight. Electrics and plumbing first fix done in the kitchen. Next week: plastering the kitchen and hallway.", video: true, photos: 3 },
+        { when: "Fri 10 Oct", title: "Week 4: steel in", text: "Steel beam is in and signed off by building control. Scaffold up for the roofers.", video: false, photos: 2 }
+      ],
+      reminders: [{ id: 1, text: "Order your kitchen floor tiles: you need 14 m² plus 10% spare", due: "Fri 24 Oct", done: false }],
+      chat: [{ by: "Mark (JNJ)", text: "Morning Sam, plasterers are in Monday." }, { by: ME, text: "Great, could we add a double socket by the island?", me: true }, { by: "Mark (JNJ)", text: "Yes, I've added it to your extras for pricing." }],
+      choices: [
+        { id: 1, title: "Kitchen door swing", ask: "Which way should the kitchen door open?", options: ["Into the kitchen, hinge left", "Into the kitchen, hinge right"], picked: null, approval: null },
+        { id: 2, title: "Skirting style", ask: "Pick a skirting profile for the hallway.", options: ["Torus", "Ogee", "Square edge"], picked: "Ogee", approval: { by: ME, at: "Tue 09:40" } }
+      ],
+      extras: [
+        { id: 1, kind: "Extra", text: "Double socket by the island", price: null, status: "Waiting for price" },
+        { id: 2, kind: "Extra", text: "Move hallway radiator 600mm left", price: 180, status: "Waiting for your approval" },
+        { id: 3, kind: "Deduction", text: "No skirting in the utility room", price: -95, status: "Agreed", approval: { by: ME, at: "Mon 18:02" } }
+      ] },
+    { id: "loft", name: "Holland Road loft", company: "JNJ Building", status: "Complete", completed: "March 2026",
+      updates: [{ when: "Fri 13 Mar", title: "Handover", text: "All finished. Building control certificate attached.", video: false, photos: 4 }],
+      reminders: [], chat: [], choices: [], extras: [{ id: 9, kind: "Extra", text: "Velux blinds", price: 240, status: "Agreed", approval: { by: ME, at: "12 Feb" } }] }
+  ]
+};
+const J = () => S.jobs.find(j => j.id === S.job);
+const toast = () => S.toast ? `<div class="toast" role="status">${esc(S.toast)}</div>` : "";
+const money = p => (p < 0 ? "−£" : "£") + Math.abs(p).toLocaleString("en-GB");
+
+function pick() {
+  return `<div class="bar"><h2>Your jobs</h2></div><div class="screen">
+    ${S.jobs.map(j => `<button class="row" data-job="${j.id}"><div class="line"><b>${esc(j.name)}</b>${j.status === "Complete" ? '<span class="pill">Complete</span>' : '<span class="pill green">In progress</span>'}</div><span>${esc(j.company)}</span></button>`).join("")}</div>`;
+}
+function overview() {
+  const j = J(), done = j.status === "Complete", u = j.updates[0];
+  const waitingC = j.choices.filter(c => !c.picked).length, waitingE = j.extras.filter(x => x.status === "Waiting for your approval").length;
+  const menu = [["updates", "Updates", `${j.updates.length} so far`], ...(done ? [] : [["chat", "Job chat", `Message ${j.company}`]]), ["choices", "Choices", waitingC ? `${waitingC} waiting for you` : "All confirmed"], ["extras", "Extras and deductions", waitingE ? `${waitingE} waiting for your approval` : "Nothing waiting"]];
+  return `<div class="bar"><button class="back" data-act="jobs">‹ Jobs</button><h2>${esc(j.name)}</h2></div><div class="screen">${toast()}
+    ${done ? `<div class="note">Complete since ${esc(j.completed)}. You can look back for 12 months. Chat has closed.</div>` : ""}
+    <button class="row" data-go="updates" style="border-color:color-mix(in srgb,var(--sky) 45%,transparent);background:color-mix(in srgb,var(--sky) 10%,var(--surface-2))"><span class="who" style="color:var(--sky)">Latest update · ${esc(u.when)}</span><b>${esc(u.title)}</b><span>${esc(u.text)}</span></button>
+    ${j.reminders.filter(r => !r.done).map(r => `<div class="row" style="border-color:color-mix(in srgb,var(--amber) 45%,transparent)"><span class="who" style="color:var(--amber)">Reminder · due ${esc(r.due)}</span><b>${esc(r.text)}</b><div class="actions"><button class="small" data-remind="${r.id}">Mark done</button></div></div>`).join("")}
+    ${menu.map(([k, t, s]) => `<button class="row" data-go="${k}"><div class="line"><b>${t}</b><span style="color:var(--sky)">›</span></div><span>${s}</span></button>`).join("")}</div>`;
+}
+function updates() {
+  return J().updates.map(u => `<div class="row"><span class="who">${esc(u.when)}</span><b>${esc(u.title)}</b><span>${esc(u.text)}</span>
+    ${u.video ? '<div class="photo taken" style="margin-top:6px">▶  Video · 1:42</div>' : ""}
+    <div class="thumbs" style="margin-top:6px">${Array.from({ length: u.photos }, (_, i) => `<div class="thumb">Photo ${i + 1}</div>`).join("")}</div></div>`).join("");
+}
+function chat() {
+  const j = J();
+  return `<label class="check"><input type="checkbox" id="c-night" ${S.night ? "checked" : ""}> Demo: pretend it's 21:30</label>
+    ${S.night ? '<div class="note">The team will reply after 07:00. Your message still gets through.</div>' : ""}
+    <div class="thread">${j.chat.map(m => `<div class="msg ${m.me ? "me" : ""}">${m.me ? "" : `<span class="by">${esc(m.by)}</span>`}${esc(m.text)}</div>`).join("")}</div>
+    <form data-form="chat" class="compose"><input type="text" id="c-msg" name="msg" placeholder="Message ${esc(j.company)}" autocomplete="off"><button class="send" aria-label="Send">›</button></form>`;
+}
+function choices() {
+  const done = J().status === "Complete";
+  return J().choices.map(c => `<div class="row"><div class="line"><b>${esc(c.title)}</b>${c.picked ? '<span class="pill green">Confirmed</span>' : '<span class="pill amber">Your choice</span>'}</div><span>${esc(c.ask)}</span>
+    <div class="chips" style="margin-top:6px">${c.options.map(o => `<button class="chip ${c.picked === o || c.draft === o ? "sel" : ""}" ${c.picked || done ? "disabled" : ""} data-option="${c.id}|${esc(o)}">${esc(o)}</button>`).join("")}</div>
+    ${!c.picked && c.draft ? `<div class="actions"><button class="small" data-confirm="${c.id}">Confirm "${esc(c.draft)}"</button></div>` : ""}
+    ${c.approval ? `<span>Confirmed by ${esc(c.approval.by)} at ${esc(c.approval.at)}</span>` : ""}</div>`).join("") || '<span class="who">No choices.</span>';
+}
+function extras() {
+  const done = J().status === "Complete";
+  return J().extras.map(x => `<div class="row"><div class="line"><b>${esc(x.text)}</b>${x.price != null ? `<b style="font-variant-numeric:tabular-nums">${money(x.price)}</b>` : ""}</div>
+    <div class="line"><span>${x.kind}</span><span class="pill ${x.status === "Agreed" ? "green" : x.status.startsWith("Waiting for your") ? "amber" : ""}">${esc(x.status)}</span></div>
+    ${x.status === "Waiting for your approval" && !done ? `<div class="actions"><button class="small" data-approve="${x.id}">Approve ${money(x.price)}</button></div>` : ""}
+    ${x.approval ? `<span>Approved by ${esc(x.approval.by)} at ${esc(x.approval.at)} · ${money(x.price)}</span>` : ""}</div>`).join("") +
+    (done ? "" : `<div class="h3">Ask for something extra</div><form data-form="extra" style="display:grid;gap:10px"><label class="f">What would you like added?<input id="x-what" name="what" placeholder="e.g. Outside tap by the back door" autocomplete="off"></label><button class="primary">Send request</button></form>
+    <span class="who">JNJ prices it, then you approve. Approving records your name, the price and the time. It isn't a signature.</span>`);
+}
+function sub() {
+  const title = { updates: "Updates", chat: "Job chat", choices: "Choices", extras: "Extras and deductions" }[S.screen];
+  const body = { updates, chat, choices, extras }[S.screen]();
+  return `<div class="bar"><button class="back" data-act="overview">‹ ${esc(J().name)}</button><h2></h2></div><div class="screen" ${S.screen === "chat" ? 'data-bottom="1"' : ""}><h2 style="margin:0;font-size:20px">${title}</h2>${toast()}${body}</div>`;
+}
+function render() {
+  let html;
+  if (!S.in) html = loginScreens(S.login, "Invited by JNJ Building");
+  else if (!S.job) html = pick();
+  else if (S.screen === "overview") html = overview();
+  else html = sub();
+  const j = S.jobs[0];
+  paint(html, { choices: j.choices.map(c => ({ title: c.title, picked: c.picked, approval: c.approval })), extrasAndDeductions: j.extras.map(x => ({ kind: x.kind, text: x.text, price: x.price, status: x.status, approval: x.approval || null })), reminders: j.reminders, messagesSent: j.chat.filter(m => m.me).length });
+  const n = document.getElementById("c-night"); if (n) n.onchange = e => { S.night = e.target.checked; log(S.night ? "Demo clock set to 21:30 (Quiet hours)" : "Demo clock back to daytime"); render(); };
+}
+const phone = document.getElementById("phone");
+phone.addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return; const d = b.dataset; S.toast = null;
+  if (d.act === "login-back") S.login.step = "phone";
+  else if (d.job) { S.job = d.job; S.screen = "overview"; log(`Opened ${J().name}`); }
+  else if (d.act === "jobs") S.job = null;
+  else if (d.act === "overview") S.screen = "overview";
+  else if (d.go) S.screen = d.go;
+  else if (d.remind) { const r = J().reminders.find(x => x.id == d.remind); r.done = true; log(`Reminder done: ${r.text}`); S.toast = "Done. JNJ can see you've ordered them."; }
+  else if (d.option) { const [id, o] = d.option.split("|"); J().choices.find(c => c.id == id).draft = o; }
+  else if (d.confirm) { const c = J().choices.find(x => x.id == d.confirm); c.picked = c.draft; c.approval = { by: ME, at: now() }; log(`Choice confirmed: ${c.title} → ${c.picked}`); S.toast = "Confirmed. JNJ has a record of your choice."; }
+  else if (d.approve) { const x = J().extras.find(y => y.id == d.approve); x.status = "Agreed"; x.approval = { by: ME, at: now() }; log(`Approved ${x.kind}: ${x.text} at ${money(x.price)}`); S.toast = `Approved ${money(x.price)}.`; }
+  render();
+});
+phone.addEventListener("submit", e => {
+  e.preventDefault(); const f = e.target, k = f.dataset.form; S.toast = null;
+  if (k === "login-phone") { S.login.mobile = f.elements.mobile.value; S.login.step = "code"; log(`SMS code sent to ${S.login.mobile}`); }
+  else if (k === "login-code") { S.in = true; log("Logged in as Sam Patel (Client)"); }
+  else if (k === "chat") { const t = f.elements.msg.value.trim(); if (!t) return; J().chat.push({ by: ME, text: t, me: true }); log(S.night ? `Message sent; team notified at 07:00: ${t}` : `Message: ${t}`); }
+  else if (k === "extra") { const t = f.elements.what.value.trim(); if (!t) { f.elements.what.focus(); return; } J().extras.unshift({ id: Date.now(), kind: "Extra", text: t, price: null, status: "Waiting for price" }); log(`Requested Extra: ${t}`); S.toast = "Sent. JNJ will price it for you to approve."; }
+  render();
+  const i = document.querySelector(".compose input"); if (i && k === "chat") i.focus();
+});
+render();
+</script>
+
+</body>
+</html>

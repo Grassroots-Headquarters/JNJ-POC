@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Admin Demo</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a phone-sized app column, with a "what just happened" log beside it on wide screens and under it on phones. */
+:root {
+  --bg: #0A0A0C; --surface: #16161A; --surface-2: #1C1C22; --border: #24242B;
+  --fg: #F1F5F9; --muted: #94A3B8; --faint: #64748B;
+  --sky: #38BDF8; --purple: #A855F7; --rose: #F43F5E; --green: #10B981; --amber: #F59E0B;
+  --font: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { background: var(--bg); color: var(--fg); font-family: var(--font); font-size: 15px; }
+body { margin: 0; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 16px 48px; }
+button { font: inherit; color: inherit; cursor: pointer; }
+button:disabled { opacity: .45; cursor: not-allowed; }
+button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible, a:focus-visible { outline: 2px solid var(--sky); outline-offset: 2px; }
+input, textarea, select { font: inherit; color: var(--fg); background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 12px; width: 100%; }
+label.f { display: grid; gap: 6px; color: var(--muted); font-size: 13px; }
+a { color: var(--sky); }
+
+.wrap { display: grid; grid-template-columns: minmax(0, 390px) minmax(0, 1fr); gap: 32px; max-width: 980px; margin: 0 auto; align-items: start; }
+@media (max-width: 760px) { .wrap { grid-template-columns: minmax(0, 1fr); gap: 20px; } }
+.intro { grid-column: 1 / -1; display: grid; gap: 6px; max-width: 70ch; }
+.intro h1 { margin: 0; font-size: 22px; font-weight: 600; text-wrap: balance; }
+.intro p { margin: 0; color: var(--muted); line-height: 1.5; }
+.tag { display: inline-block; font: 500 11px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--amber); }
+.tag a { color: inherit; }
+
+.phone { background: var(--surface); border: 1px solid var(--border); border-radius: 28px; min-height: 680px; display: flex; flex-direction: column; overflow: hidden; }
+.bar { display: flex; align-items: center; gap: 10px; padding: 16px; border-bottom: 1px solid var(--border); min-height: 60px; }
+.bar h2 { margin: 0; font-size: 17px; font-weight: 600; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bar .act { background: none; border: 0; color: var(--sky); font-weight: 600; padding: 4px 0; flex: none; }
+.back { background: none; border: 0; color: var(--sky); padding: 4px 6px 4px 0; font-weight: 500; flex: none; }
+.screen { flex: 1; padding: 16px; display: flex; flex-direction: column; gap: 12px; min-height: 0; overflow-y: auto; }
+.who { font-size: 12px; color: var(--faint); }
+.h3 { margin: 4px 0 0; font-size: 13px; font-weight: 600; color: var(--muted); letter-spacing: .04em; text-transform: uppercase; }
+
+.row { background: var(--surface-2); border: 1px solid var(--border); border-radius: 14px; padding: 14px; text-align: left; display: grid; gap: 4px; width: 100%; }
+.row b { font-weight: 600; }
+.row span, .row small { color: var(--muted); font-size: 13px; }
+.row .line { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+.actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
+
+.pill { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border); color: var(--muted); white-space: nowrap; }
+.pill .dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.pill.green { color: var(--green); border-color: color-mix(in srgb, var(--green) 50%, transparent); background: color-mix(in srgb, var(--green) 12%, transparent); }
+.pill.amber { color: var(--amber); border-color: color-mix(in srgb, var(--amber) 50%, transparent); background: color-mix(in srgb, var(--amber) 12%, transparent); }
+.pill.sky { color: var(--sky); border-color: color-mix(in srgb, var(--sky) 50%, transparent); background: color-mix(in srgb, var(--sky) 12%, transparent); }
+.pill.rose { color: var(--rose); border-color: color-mix(in srgb, var(--rose) 50%, transparent); background: color-mix(in srgb, var(--rose) 12%, transparent); }
+.pill.purple { color: var(--purple); border-color: color-mix(in srgb, var(--purple) 50%, transparent); background: color-mix(in srgb, var(--purple) 12%, transparent); }
+
+.primary { background: var(--sky); color: #04131C; border: 0; border-radius: 12px; padding: 14px; font-weight: 600; width: 100%; }
+.small { background: var(--sky); color: #04131C; border: 0; border-radius: 10px; padding: 8px 12px; font-weight: 600; font-size: 13px; }
+.ghost { background: none; border: 1px solid var(--border); border-radius: 10px; padding: 8px 12px; font-weight: 500; font-size: 13px; }
+.danger { background: color-mix(in srgb, var(--rose) 14%, transparent); border: 1px solid color-mix(in srgb, var(--rose) 50%, transparent); color: var(--fg); border-radius: 12px; padding: 14px; font-weight: 600; width: 100%; }
+
+.toast { background: color-mix(in srgb, var(--green) 14%, transparent); border: 1px solid color-mix(in srgb, var(--green) 45%, transparent); border-radius: 12px; padding: 10px 12px; font-size: 13px; }
+.note { background: color-mix(in srgb, var(--amber) 12%, transparent); border: 1px solid color-mix(in srgb, var(--amber) 45%, transparent); border-radius: 12px; padding: 10px 12px; font-size: 13px; }
+.locked { border: 1px dashed var(--border); border-radius: 14px; padding: 14px; color: var(--muted); display: grid; gap: 4px; }
+
+.tabs { display: flex; gap: 2px; padding: 0 12px; border-bottom: 1px solid var(--border); overflow-x: auto; }
+.tabs button { background: none; border: 0; border-bottom: 2px solid transparent; padding: 12px 10px; font-size: 13px; color: var(--muted); white-space: nowrap; }
+.tabs button.sel { color: var(--fg); border-bottom-color: var(--sky); font-weight: 600; }
+.tabs .count { margin-left: 4px; font: 500 11px var(--mono); color: var(--amber); }
+
+.nav { display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid var(--border); }
+.nav button { background: none; border: 0; padding: 10px 4px 14px; font-size: 12px; color: var(--muted); display: grid; justify-items: center; gap: 4px; }
+.nav button.sel { color: var(--sky); font-weight: 600; }
+.nav svg { width: 22px; height: 22px; }
+
+.chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.chip { border: 1px solid var(--border); border-radius: 999px; padding: 8px 12px; background: none; font-size: 13px; }
+.chip.sel { border-color: var(--sky); color: var(--sky); background: color-mix(in srgb, var(--sky) 12%, transparent); }
+
+.tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.tile { aspect-ratio: 1.15; max-width: 100%; border-radius: 16px; border: 1px solid var(--border); background: var(--surface-2); display: grid; place-content: center; gap: 8px; justify-items: center; font-weight: 600; }
+.tile svg { width: 28px; height: 28px; }
+
+.signbox { border-radius: 14px; padding: 14px; display: flex; align-items: center; justify-content: space-between; gap: 10px; border: 1px solid var(--border); background: var(--surface-2); }
+.signbox.on { border-color: color-mix(in srgb, var(--green) 50%, transparent); background: color-mix(in srgb, var(--green) 10%, transparent); }
+.signbox small { color: var(--muted); display: block; font-size: 12px; }
+
+.photo { aspect-ratio: 4 / 3; max-width: 100%; width: 100%; border-radius: 12px; border: 1px dashed var(--border); display: grid; place-content: center; color: var(--muted); font-size: 13px; background: repeating-linear-gradient(135deg, var(--surface-2) 0 12px, var(--bg) 12px 24px); }
+.photo.taken { border-style: solid; color: var(--fg); background: linear-gradient(135deg, #1e3a4a, #2a1f3d); }
+.thumbs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.thumb { aspect-ratio: 1; max-width: 100%; border-radius: 10px; background: linear-gradient(135deg, #1e3a4a, #2a1f3d); display: flex; align-items: flex-end; padding: 6px; font-size: 11px; }
+
+.thread { display: flex; flex-direction: column; gap: 8px; flex: 1; }
+.msg { max-width: 82%; background: var(--surface-2); border: 1px solid var(--border); border-radius: 14px; padding: 8px 12px; font-size: 14px; line-height: 1.4; }
+.msg.me { align-self: flex-end; background: color-mix(in srgb, var(--sky) 16%, var(--surface)); border-color: color-mix(in srgb, var(--sky) 35%, transparent); }
+.msg .by { font-size: 11px; color: var(--muted); display: block; margin-bottom: 2px; }
+.msg.urgent { border-color: color-mix(in srgb, var(--rose) 60%, transparent); }
+.sys { align-self: center; font-size: 12px; color: var(--muted); background: var(--bg); border: 1px solid var(--border); border-radius: 999px; padding: 4px 10px; }
+.compose { display: flex; gap: 8px; align-items: center; }
+.compose input[type=text] { border-radius: 999px; padding: 10px 14px; }
+.send { flex: none; width: 44px; height: 44px; border-radius: 50%; border: 0; background: var(--sky); color: #04131C; font-weight: 700; }
+.check { display: flex; gap: 8px; align-items: center; font-size: 13px; color: var(--muted); }
+.check input { width: auto; }
+.row2 { display: flex; gap: 8px; } .row2 > * { flex: 1; min-width: 0; }
+.code { font: 600 28px var(--mono); letter-spacing: .3em; text-align: center; }
+.demo-hint { font: 12px var(--mono); color: var(--amber); }
+
+.log { display: grid; gap: 12px; }
+@media (min-width: 761px) { .log { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 16px); } }
+.log h3 { margin: 0; font-size: 13px; font-weight: 600; color: var(--muted); letter-spacing: .06em; text-transform: uppercase; }
+.panel { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 14px; display: grid; gap: 8px; }
+.panel pre { margin: 0; font: 12px/1.5 var(--mono); color: var(--muted); white-space: pre-wrap; overflow-x: auto; max-height: 340px; overflow-y: auto; }
+.events { display: grid; gap: 6px; font: 12px/1.45 var(--mono); }
+.events div { color: var(--muted); } .events div:first-child { color: var(--fg); }
+.tips { margin: 0; padding-left: 18px; display: grid; gap: 6px; font-size: 13px; color: var(--muted); line-height: 1.45; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="intro">
+    <span class="tag"><a href="../">Site App demos</a> · Admin · not the real app</span>
+    <h1>Admin: run every Job from your phone</h1>
+    <p>Log in as Ali, an Admin at JNJ. Log a Job, mark materials ordered, approve what the lads suggest for the Client, resolve Issues and invite people. Example data only. Nothing is saved or sent.</p>
+  </header>
+  <main class="phone" id="phone" aria-live="polite"></main>
+  <aside class="log">
+    <div class="panel"><h3>What just happened</h3><div class="events" id="events"></div></div>
+    <div class="panel"><h3>Things to try</h3>
+      <ul class="tips">
+        <li>Materials tab: mark the timber Ordered and see "Ordered by Ali" appear.</li>
+        <li>Open Overbury Avenue, then the Client tab: approve Jake's suggested photo so it reaches the Client.</li>
+        <li>Send an Urgent message during Quiet hours.</li>
+        <li>Mark a Job Complete and see everything go read-only.</li>
+      </ul></div>
+    <div class="panel"><h3>Recorded so far</h3><pre id="state"></pre></div>
+  </aside>
+</div>
+<script>
+const now = () => new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const EVENTS = [];
+function log(t) { EVENTS.unshift(`${now()}  ${t}`); if (EVENTS.length > 14) EVENTS.pop(); }
+const ICON = {
+  chat: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h16v11H9l-5 4z"/></svg>',
+  box: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 7l9-4 9 4v10l-9 4-9-4z"/><path d="M3 7l9 4 9-4M12 11v10"/></svg>',
+  cam: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>',
+  flag: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 21V4h11l-2 4 2 4H5"/></svg>',
+  jobs: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11l9-7 9 7v9H3z"/><path d="M9 20v-6h6v6"/></svg>',
+  team: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3.5"/><path d="M2 20c1-4 4-6 7-6s6 2 7 6"/><circle cx="17" cy="9" r="2.5"/><path d="M17 14c2.5 0 4.5 1.6 5 5"/></svg>',
+  cog: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg>',
+  shield: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/></svg>'
+};
+
+/* SMS login, shared by every role (ADR 0005: mobile number + SMS code for everyone). */
+function loginScreens(L, who) {
+  if (L.step === "phone") return `<div class="bar"><h2>Log in</h2></div><div class="screen" style="justify-content:center;gap:16px">
+    <div style="display:grid;gap:4px;text-align:center"><b style="font-size:20px">Site App</b><span class="who">${esc(who)}</span></div>
+    <form data-form="login-phone" style="display:grid;gap:12px">
+      <label class="f">Mobile number<input id="login-mobile" name="mobile" value="${esc(L.mobile)}" inputmode="tel" autocomplete="off"></label>
+      <label class="check"><input type="checkbox" id="login-stay" checked> Stay logged in on this phone</label>
+      <button class="primary">Send login code</button>
+    </form></div>`;
+  return `<div class="bar"><button class="back" data-act="login-back">‹ Back</button><h2>Enter code</h2></div><div class="screen" style="justify-content:center;gap:16px">
+    <p style="margin:0;color:var(--muted);text-align:center">We texted a 6-digit code to ${esc(L.mobile)}</p>
+    <form data-form="login-code" style="display:grid;gap:12px">
+      <input id="login-code" name="code" class="code" value="482913" inputmode="numeric" maxlength="6" aria-label="Login code">
+      <span class="demo-hint" style="text-align:center">Demo: any 6 digits work</span>
+      <button class="primary">Log in</button>
+    </form></div>`;
+}
+
+function paint(phoneHTML, recorded) {
+  document.getElementById("phone").innerHTML = phoneHTML;
+  document.getElementById("events").innerHTML = EVENTS.length ? EVENTS.map(e => `<div>${esc(e)}</div>`).join("") : "<div>Tap through the phone. Each action shows up here.</div>";
+  document.getElementById("state").textContent = JSON.stringify(recorded, null, 2);
+  const t = document.querySelector(".screen"); if (t && t.dataset.bottom) t.scrollTop = t.scrollHeight;
+}
+
+
+const ME = "Ali (Admin)";
+const S = {
+  login: { step: "phone", mobile: "07700 900123" }, in: false,
+  tab: "jobs", view: null, job: null, jobTab: "chat", filter: "Active", toast: null, photoTag: "All",
+  quiet: "19:00–07:00", pretendNight: false, clientPortal: true,
+  jobs: [
+    { id: "overbury", name: "Overbury Avenue", addr: "12 Overbury Ave, Beckenham", start: "2026-09-14", status: "Active", lead: "Mark", team: ["Mark (Site team · Job lead)", "Jake (Site team)", "Sparks Ltd (Subcontractor · Electrician)"], onSite: ["Mark", "Jake"], client: "Sam Patel" },
+    { id: "elm", name: "Elm Road extension", addr: "48 Elm Rd, Croydon", start: "2026-10-05", status: "Active", lead: "Dan", team: ["Dan (Site team · Job lead)", "Sparks Ltd (Subcontractor · Electrician)"], onSite: ["Sparks Ltd"], client: null },
+    { id: "loft", name: "Holland Road loft", addr: "7 Holland Rd, Croydon", start: "2026-03-02", status: "Complete", lead: "Mark", team: ["Mark (Site team · Job lead)"], onSite: [], client: "Chris Owen" }
+  ],
+  materials: [
+    { id: 1, job: "overbury", item: "4x2 timber, 3.6m", qty: "20", by: "Mark", neededBy: "Tomorrow", status: "Requested" },
+    { id: 2, job: "elm", item: "Plasterboard 12.5mm", qty: "30", by: "Dan", neededBy: "This week", status: "Ordered", orderedBy: "Dave (Admin)", orderedAt: "09:12" },
+    { id: 3, job: "overbury", item: "Back boxes, 35mm", qty: "12", by: "Sparks Ltd", neededBy: "Today", status: "Requested" }
+  ],
+  photos: [
+    { job: "overbury", tag: "Protection", by: "Jake", at: "08:05" }, { job: "overbury", tag: "Delivery", by: "Mark", at: "08:40" },
+    { job: "overbury", tag: "Building control", by: "Mark", at: "Mon" }, { job: "overbury", tag: "Progress", by: "Jake", at: "Tue" }
+  ],
+  issues: [{ id: 1, job: "overbury", text: "Lintel over kitchen door is 50mm low. Bricklayer's work.", by: "Jake", status: "Open" }],
+  chat: { overbury: [{ by: "Mark (Job lead)", text: "Scaffold's up. Roofers in Thursday." }, { by: "Jake", text: "Skip's nearly full, can we get a swap?" }], elm: [{ by: "Dan (Job lead)", text: "Footings poured." }], loft: [{ by: "Mark", text: "All done, keys handed over." }] },
+  clientChat: { overbury: [{ by: "Sam Patel (Client)", text: "Could we add a double socket by the island?" }, { by: "Mark (Job lead)", text: "Yes, I'll get it priced as an extra." }], elm: [], loft: [] },
+  suggestions: [{ id: 1, job: "overbury", by: "Jake", text: "Photo: kitchen first fix finished", status: "Waiting" }],
+  people: [
+    { name: "Ali", role: "Admin", status: "Active" }, { name: "Dave", role: "Admin", status: "Active" }, { name: "Mark", role: "Site team", status: "Active" },
+    { name: "Jake", role: "Site team", status: "Active" }, { name: "Dan", role: "Site team", status: "Active" }, { name: "Sparks Ltd", role: "Subcontractor", status: "Active" }
+  ]
+};
+const J = () => S.jobs.find(j => j.id === S.job);
+const jobName = id => S.jobs.find(j => j.id === id).name;
+const toast = () => S.toast ? `<div class="toast" role="status">${esc(S.toast)}</div>` : "";
+const isQuiet = () => S.pretendNight;
+const statusPill = s => s === "Requested" ? '<span class="pill amber">Requested</span>' : s === "Ordered" ? '<span class="pill sky">Ordered</span>' : '<span class="pill green">Delivered</span>';
+
+function materialRow(m, showJob) {
+  return `<div class="row"><div class="line"><b>${esc(m.item)} × ${esc(m.qty)}</b>${statusPill(m.status)}</div>
+    <span>${showJob ? esc(jobName(m.job)) + " · " : ""}Requested by ${esc(m.by)} · needed ${esc(m.neededBy)}</span>
+    ${m.orderedBy ? `<span>Ordered by ${esc(m.orderedBy)} at ${esc(m.orderedAt)}</span>` : ""}
+    ${m.deliveredAt ? `<span>Delivered ${esc(m.deliveredAt)}</span>` : ""}
+    ${m.status === "Requested" ? `<div class="actions"><button class="small" data-order="${m.id}">Mark ordered</button></div>` : m.status === "Ordered" ? `<div class="actions"><button class="ghost" data-deliver="${m.id}">Mark delivered</button></div>` : ""}</div>`;
+}
+
+function nav() {
+  const items = [["jobs", "Jobs", ICON.jobs], ["materials", "Materials", ICON.box], ["team", "Team", ICON.team], ["settings", "Settings", ICON.cog]];
+  const waiting = S.materials.filter(m => m.status === "Requested").length;
+  return `<nav class="nav">${items.map(([k, t, ic]) => `<button class="${S.tab === k && !S.view ? "sel" : ""}" data-tab="${k}">${ic}${t}${k === "materials" && waiting ? ` (${waiting})` : ""}</button>`).join("")}</nav>`;
+}
+
+function jobsList() {
+  const list = S.jobs.filter(j => j.status === S.filter);
+  return `<div class="bar"><h2>Jobs</h2><button class="act" data-act="newjob">+ New job</button></div><div class="screen">${toast()}
+    <div class="chips">${["Active", "Complete"].map(f => `<button class="chip ${S.filter === f ? "sel" : ""}" data-filter="${f}">${f}</button>`).join("")}</div>
+    ${list.map(j => { const open = S.materials.filter(m => m.job === j.id && m.status === "Requested").length, iss = S.issues.filter(i => i.job === j.id && i.status === "Open").length;
+      return `<button class="row" data-open="${j.id}"><div class="line"><b>${esc(j.name)}</b>${j.onSite.length ? `<span class="pill green"><span class="dot"></span>${j.onSite.length} on site</span>` : ""}</div>
+      <span>${esc(j.addr)}</span><span>${open ? open + " to order · " : ""}${iss ? iss + " open issue · " : ""}Job lead ${esc(j.lead)}</span></button>`; }).join("") || '<span class="who">No jobs here yet.</span>'}
+  </div>${nav()}`;
+}
+
+function newJob() {
+  return `<div class="bar"><button class="back" data-act="close">Cancel</button><h2>New job</h2></div><div class="screen">
+    <form data-form="newjob" style="display:grid;gap:12px">
+      <label class="f">Job name<input id="nj-name" name="name" placeholder="e.g. Birch Close kitchen" autocomplete="off"></label>
+      <label class="f">Site address<input id="nj-addr" name="addr" placeholder="Street, town" autocomplete="off"></label>
+      <label class="f">Start date<input id="nj-start" name="start" type="date" value="2026-11-02"></label>
+      <label class="f">Job lead<select id="nj-lead" name="lead"><option>Mark</option><option>Dan</option><option>Jake</option></select></label>
+      <label class="check"><input type="checkbox" id="nj-sparks" name="sparks"> Add Sparks Ltd (Subcontractor)</label>
+      <button class="primary">Create job</button>
+    </form></div>`;
+}
+
+function jobView() {
+  const j = J(), done = j.status === "Complete";
+  const waiting = S.suggestions.filter(s => s.job === j.id && s.status === "Waiting").length;
+  const tabs = [["chat", "Chat"], ...(S.clientPortal && j.client ? [["client", "Client"]] : []), ["materials", "Materials"], ["photos", "Photos"], ["issues", "Issues"], ["people", "People"]];
+  let body = "";
+  if (S.jobTab === "chat") {
+    body = `<div class="thread">${S.chat[j.id].map(m => m.sys ? `<div class="sys">${esc(m.sys)}</div>` : `<div class="msg ${m.me ? "me" : ""} ${m.urgent ? "urgent" : ""}">${m.me ? "" : `<span class="by">${esc(m.by)}</span>`}${esc(m.text)}${m.urgent ? '<br><span class="pill rose" style="margin-top:4px">Urgent · notified now</span>' : ""}</div>`).join("")}</div>
+      ${done ? '<div class="note">This Job is Complete, so it is read-only.</div>' : `<form data-form="chat" style="display:grid;gap:8px">
+        ${isQuiet() ? `<div class="note">Quiet hours (${S.quiet}). Messages arrive, but notifications wait until morning unless you mark it Urgent.</div><label class="check"><input type="checkbox" id="chat-urgent" name="urgent"> Urgent: notify the team now</label>` : ""}
+        <div class="compose"><input type="text" id="chat-msg" name="msg" placeholder="Message the team" autocomplete="off"><button class="send" aria-label="Send">›</button></div></form>`}`;
+  } else if (S.jobTab === "client") {
+    const sug = S.suggestions.filter(s => s.job === j.id);
+    body = `<div class="h3">Waiting for your approval</div>
+      ${sug.filter(s => s.status === "Waiting").map(s => `<div class="row"><b>${esc(s.text)}</b><span>Suggested by ${esc(s.by)} for ${esc(j.client)}</span>
+        ${done ? "" : `<div class="actions"><button class="small" data-approve="${s.id}">Approve and send</button><button class="ghost" data-reject="${s.id}">Reject</button></div>`}</div>`).join("") || '<span class="who">Nothing waiting.</span>'}
+      <div class="h3">Client chat with ${esc(j.client)}</div>
+      <div class="thread">${S.clientChat[j.id].map(m => `<div class="msg ${m.me ? "me" : ""}">${m.me ? "" : `<span class="by">${esc(m.by)}</span>`}${esc(m.text)}</div>`).join("")}</div>
+      ${done ? '<div class="note">Client chat closed when the Job was marked Complete.</div>' : `<form data-form="client" class="compose"><input type="text" id="client-msg" name="msg" placeholder="Message ${esc(j.client)}" autocomplete="off"><button class="send" aria-label="Send">›</button></form>`}
+      <span class="who">Only Admins and the Job lead see this tab.</span>`;
+  } else if (S.jobTab === "materials") {
+    body = S.materials.filter(m => m.job === j.id).map(m => materialRow(m, false)).join("") || '<span class="who">No materials requests yet.</span>';
+  } else if (S.jobTab === "photos") {
+    const tags = ["All", "Progress", "Delivery", "Protection", "Building control", "Issue"];
+    const ph = S.photos.filter(p => p.job === j.id && (S.photoTag === "All" || p.tag === S.photoTag));
+    body = `<div class="chips">${tags.map(t => `<button class="chip ${S.photoTag === t ? "sel" : ""}" data-ptag="${t}">${t}</button>`).join("")}</div>
+      <div class="thumbs">${ph.map(p => `<div class="thumb">${esc(p.tag)}</div>`).join("")}</div>
+      ${ph.length ? `<button class="ghost" data-act="export">Share these ${ph.length} photos</button>` : '<span class="who">No photos with this tag.</span>'}`;
+  } else if (S.jobTab === "issues") {
+    body = S.issues.filter(i => i.job === j.id).map(i => `<div class="row"><div class="line"><b>${esc(i.text)}</b>${i.status === "Open" ? '<span class="pill rose">Open</span>' : '<span class="pill green">Resolved</span>'}</div>
+      <span>Raised by ${esc(i.by)}${i.resolvedBy ? ` · resolved by ${esc(i.resolvedBy)} at ${esc(i.resolvedAt)}` : ""}</span>
+      ${i.status === "Open" && !done ? `<div class="actions"><button class="small" data-resolve="${i.id}">Mark resolved</button></div>` : ""}</div>`).join("") || '<span class="who">No issues.</span>';
+    body += '<span class="who">Issues are never shown to the Client.</span>';
+  } else {
+    body = `<div class="row"><b>On site now</b>${j.onSite.length ? j.onSite.map(n => `<span>${esc(n)}</span>`).join("") : "<span>Nobody</span>"}</div>
+      <div class="row"><b>Assigned</b>${j.team.map(n => `<span>${esc(n)}</span>`).join("")}${j.client ? `<span>${esc(j.client)} (Client)</span>` : ""}</div>
+      ${!done && S.clientPortal && !j.client ? `<button class="ghost" data-act="inviteclient">Invite a Client by SMS</button>` : ""}
+      ${done ? '<div class="note">Complete. Read-only for everyone. Photos are kept.</div>' : '<button class="danger" data-act="complete">Mark Job complete</button>'}`;
+  }
+  return `<div class="bar"><button class="back" data-act="close">‹ Jobs</button><h2>${esc(j.name)}</h2>${done ? '<span class="pill">Complete</span>' : ""}</div>
+    <div class="tabs">${tabs.map(([k, t]) => `<button class="${S.jobTab === k ? "sel" : ""}" data-jtab="${k}">${t}${k === "client" && waiting ? `<span class="count">${waiting}</span>` : ""}</button>`).join("")}</div>
+    <div class="screen" ${S.jobTab === "chat" ? 'data-bottom="1"' : ""}>${toast()}${body}</div>`;
+}
+
+function materialsAll() {
+  const groups = ["Requested", "Ordered", "Delivered"];
+  return `<div class="bar"><h2>Materials</h2><span class="who">All jobs</span></div><div class="screen">${toast()}
+    ${groups.map(g => { const ms = S.materials.filter(m => m.status === g); return ms.length ? `<div class="h3">${g}</div>${ms.map(m => materialRow(m, true)).join("")}` : ""; }).join("")}
+  </div>${nav()}`;
+}
+
+function team() {
+  return `<div class="bar"><h2>Team</h2></div><div class="screen">${toast()}
+    ${S.people.map(p => `<div class="row"><div class="line"><b>${esc(p.name)}</b><span class="pill ${p.status === "Invited" ? "amber" : ""}">${esc(p.status === "Invited" ? "Invite sent" : p.role)}</span></div>${p.status === "Invited" ? `<span>${esc(p.role)} · ${esc(p.mobile)}</span>` : ""}</div>`).join("")}
+    <div class="h3">Invite someone</div>
+    <form data-form="invite" style="display:grid;gap:10px">
+      <div class="row2"><label class="f">Name<input id="inv-name" name="name" placeholder="e.g. Tom" autocomplete="off"></label><label class="f">Mobile<input id="inv-mobile" name="mobile" placeholder="07…" inputmode="tel" autocomplete="off"></label></div>
+      <label class="f">Role<select id="inv-role" name="role"><option>Site team</option><option>Subcontractor</option><option>Admin</option></select></label>
+      <button class="primary">Send invite by SMS</button>
+    </form></div>${nav()}`;
+}
+
+function settings() {
+  return `<div class="bar"><h2>Settings</h2></div><div class="screen">${toast()}
+    <div class="row"><b>JNJ Building</b><span>Logged in as ${ME}</span></div>
+    <div class="h3">Quiet hours</div>
+    <label class="f">No notifications between<select id="set-quiet"><option ${S.quiet === "19:00–07:00" ? "selected" : ""}>19:00–07:00</option><option ${S.quiet === "18:00–07:30" ? "selected" : ""}>18:00–07:30</option><option ${S.quiet === "20:00–06:30" ? "selected" : ""}>20:00–06:30</option></select></label>
+    <label class="check"><input type="checkbox" id="set-night" ${S.pretendNight ? "checked" : ""}> Demo: pretend it's 21:30 now</label>
+    <div class="h3">Add-ons</div>
+    <div class="row"><div class="line"><b>Client Portal</b>${S.clientPortal ? '<span class="pill green">On</span>' : '<span class="pill">Off</span>'}</div><span>Billing is managed on the web, not in the app.</span>
+      <div class="actions"><button class="ghost" data-act="portal">Demo: switch ${S.clientPortal ? "off" : "on"}</button></div></div>
+    <div class="locked"><b>H&amp;S</b><span>RAMS, inductions and stage sign-offs. Coming later.</span></div>
+    <div class="row"><b>Referral code</b><span style="font-family:var(--mono)">JNJ-7Q4K</span><span>Share it. When a new company pays its first month, you both get a month free.</span></div>
+  </div>${nav()}`;
+}
+
+function render() {
+  let html;
+  if (!S.in) html = loginScreens(S.login, "Admin at JNJ Building");
+  else if (S.view === "newjob") html = newJob();
+  else if (S.view === "job") html = jobView();
+  else html = { jobs: jobsList, materials: materialsAll, team, settings }[S.tab]();
+  paint(html, { jobs: S.jobs.map(j => ({ name: j.name, status: j.status, jobLead: j.lead, onSite: j.onSite, client: j.client })), materialsRequests: S.materials.map(m => ({ job: jobName(m.job), item: m.item, status: m.status, orderedBy: m.orderedBy || null })), clientSuggestions: S.suggestions, issues: S.issues, invites: S.people.filter(p => p.status === "Invited"), quietHours: S.quiet, clientPortal: S.clientPortal });
+  const q = document.getElementById("set-quiet"); if (q) q.onchange = e => { S.quiet = e.target.value; log(`Quiet hours set to ${S.quiet}`); S.toast = "Quiet hours saved"; render(); };
+  const n = document.getElementById("set-night"); if (n) n.onchange = e => { S.pretendNight = e.target.checked; log(S.pretendNight ? "Demo clock set to 21:30 (Quiet hours)" : "Demo clock back to daytime"); render(); };
+}
+
+const phone = document.getElementById("phone");
+phone.addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return; const d = b.dataset; S.toast = null;
+  if (d.act === "login-back") S.login.step = "phone";
+  else if (d.tab) { S.tab = d.tab; S.view = null; }
+  else if (d.filter) S.filter = d.filter;
+  else if (d.open) { S.job = d.open; S.view = "job"; S.jobTab = "chat"; S.photoTag = "All"; log(`Opened ${jobName(d.open)}`); }
+  else if (d.jtab) S.jobTab = d.jtab;
+  else if (d.ptag) S.photoTag = d.ptag;
+  else if (d.order) { const m = S.materials.find(x => x.id == d.order); m.status = "Ordered"; m.orderedBy = ME; m.orderedAt = now(); log(`Marked ordered: ${m.item}`); S.toast = `Ordered. Everyone now sees "Ordered by Ali at ${m.orderedAt}".`; }
+  else if (d.deliver) { const m = S.materials.find(x => x.id == d.deliver); m.status = "Delivered"; m.deliveredAt = now(); log(`Marked delivered: ${m.item}`); S.toast = `${m.by} can see it's arrived.`; }
+  else if (d.approve) { const s = S.suggestions.find(x => x.id == d.approve); s.status = "Approved"; S.clientChat[s.job].push({ by: "JNJ Building", text: s.text, me: true }); log(`Approved Client suggestion: ${s.text}`); S.toast = "Approved. It's now in Client chat."; }
+  else if (d.reject) { const s = S.suggestions.find(x => x.id == d.reject); s.status = "Rejected"; log(`Rejected Client suggestion: ${s.text}`); S.toast = "Rejected. The Client never sees it."; }
+  else if (d.resolve) { const i = S.issues.find(x => x.id == d.resolve); i.status = "Resolved"; i.resolvedBy = "Ali"; i.resolvedAt = now(); log(`Resolved issue: ${i.text}`); }
+  else if (d.act === "newjob") S.view = "newjob";
+  else if (d.act === "close") S.view = null;
+  else if (d.act === "export") { log(`Shared ${S.photoTag} photos from ${J().name}`); S.toast = "Demo: this would open the share sheet with the photos."; }
+  else if (d.act === "complete") { const j = J(); j.status = "Complete"; j.onSite = []; log(`Marked ${j.name} Complete`); S.toast = "Complete. Read-only for everyone; the Client loses chat now."; }
+  else if (d.act === "inviteclient") { const j = J(); j.client = "New client"; S.clientChat[j.id] = S.clientChat[j.id] || []; log(`Invited a Client to ${j.name} by SMS`); S.toast = "Client invited by SMS. A Client tab now appears."; }
+  else if (d.act === "portal") { S.clientPortal = !S.clientPortal; log(`Client Portal switched ${S.clientPortal ? "on" : "off"} (demo)`); }
+  render();
+});
+phone.addEventListener("submit", e => {
+  e.preventDefault(); const f = e.target, k = f.dataset.form; S.toast = null;
+  if (k === "login-phone") { S.login.mobile = f.elements.mobile.value; S.login.step = "code"; log(`SMS code sent to ${S.login.mobile}`); }
+  else if (k === "login-code") { S.in = true; log("Logged in as Ali (Admin)"); }
+  else if (k === "newjob") {
+    const name = f.elements.name.value.trim(); if (!name) { f.elements.name.focus(); return; }
+    const id = "j" + Date.now(); S.jobs.unshift({ id, name, addr: f.elements.addr.value.trim() || "Address to follow", start: f.elements.start.value, status: "Active", lead: f.elements.lead.value, team: [`${f.elements.lead.value} (Site team · Job lead)`, ...(f.elements.sparks.checked ? ["Sparks Ltd (Subcontractor · Electrician)"] : [])], onSite: [], client: null });
+    S.chat[id] = []; S.clientChat[id] = []; S.view = null; S.filter = "Active"; log(`Created job ${name}, Job lead ${f.elements.lead.value}`); S.toast = `${name} created. ${f.elements.lead.value} can see it now.`;
+  } else if (k === "chat") {
+    const t = f.elements.msg.value.trim(); if (!t) return; const urgent = f.elements.urgent && f.elements.urgent.checked;
+    S.chat[S.job].push({ by: ME, text: t, me: true, urgent }); log(`${urgent ? "Urgent message" : isQuiet() ? "Message (notifications held till morning)" : "Message"}: ${t}`);
+  } else if (k === "client") {
+    const t = f.elements.msg.value.trim(); if (!t) return; S.clientChat[S.job].push({ by: ME, text: t, me: true }); log(`Client chat: ${t}`);
+  } else if (k === "invite") {
+    const name = f.elements.name.value.trim(), mobile = f.elements.mobile.value.trim(); if (!name || !mobile) { (name ? f.elements.mobile : f.elements.name).focus(); return; }
+    S.people.push({ name, role: f.elements.role.value, mobile, status: "Invited" }); log(`Invited ${name} as ${f.elements.role.value}`); S.toast = `Invite sent to ${mobile}.`;
+  }
+  render();
+  const i = document.querySelector(".compose input"); if (i && (k === "chat" || k === "client")) i.focus();
+});
+render();
+</script>
+
+</body>
+</html>

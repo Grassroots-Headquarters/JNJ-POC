@@ -1,3 +1,8 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Site Team Flow</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -118,10 +123,11 @@ label.f { display: grid; gap: 6px; color: var(--muted); font-size: 13px; }
 .switcher span { font-size: 13px; font-weight: 600; padding: 0 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 </style>
-
+</head>
+<body>
 <div class="wrap">
   <header class="intro">
-    <span class="tag">Prototype · not the real app</span>
+    <span class="tag"><a href="../">Site App demos</a> · Site team · not the real app</span>
     <h1>Which Site team app would the lads actually use?</h1>
     <p>Three different layouts of the same flow: pick a job, sign in on site, request materials, add a photo, flag an issue, message the team. Switch with the pill at the bottom or the arrow keys. Nothing is saved or sent.</p>
   </header>
@@ -210,8 +216,8 @@ const A = {
     }
   },
   material(form) {
-    const item = form.item.value.trim(), qty = form.qty.value.trim(), by = form.by.value;
-    if (!item) { form.item.focus(); return false; }
+    const item = form.elements.mat.value.trim(), qty = form.elements.qty.value.trim(), by = form.elements.by.value;
+    if (!item) { form.elements.mat.focus(); return false; }
     const r = { job: jobById(S.job).name, item, qty: qty || "—", neededBy: by, status: "Requested", by: ME, at: now() };
     S.materials.push(r); S.messages[S.job].push({ card: "mat", text: `${item}${qty ? " × " + qty : ""}`, sub: `Needed ${by} · Requested` });
     log(`Materials request: ${item}${qty ? " × " + qty : ""} (${by})`); S.toast = "Sent to the office. You'll see when it's ordered."; return true;
@@ -223,14 +229,14 @@ const A = {
     log(`Photo saved, tagged ${S.draftTag}`); S.toast = `Photo saved to ${jobById(S.job).name}`; S.photoTaken = false; return true;
   },
   issue(form) {
-    const text = form.what.value.trim(); if (!text) { form.what.focus(); return false; }
+    const text = form.elements.what.value.trim(); if (!text) { form.elements.what.focus(); return false; }
     S.issues.push({ job: jobById(S.job).name, text, status: "Open", by: ME, at: now(), visibleTo: "Admins + Job lead" });
     S.messages[S.job].push({ card: "iss", text, sub: "Only the office and Job lead see this" });
     log(`Issue flagged: ${text}`); S.toast = "Sent to the office and Job lead. The client won't see it."; return true;
   },
   say(form) {
-    const t = form.msg.value.trim(); if (!t) return false;
-    S.messages[S.job].push({ by: ME, text: t, me: true }); log(`Message: ${t}`); form.msg.value = ""; return true;
+    const t = form.elements.msg.value.trim(); if (!t) return false;
+    S.messages[S.job].push({ by: ME, text: t, me: true }); log(`Message: ${t}`); form.elements.msg.value = ""; return true;
   }
 };
 
@@ -243,7 +249,7 @@ const signBox = () => {
 const onSiteList = () => `<div class="onsite"><b>On site now</b>${S.onSite[S.job].length ? S.onSite[S.job].map(n => `<span>${esc(n)}</span>`).join("") : "<span>Nobody yet</span>"}</div>`;
 const toast = () => S.toast ? `<div class="toast" role="status">${esc(S.toast)}</div>` : "";
 const materialForm = () => `<form class="mform" data-form="material" style="display:grid;gap:10px">
-  <label class="f">What do you need?<input id="m-item" name="item" placeholder="e.g. 4x2 timber, 3.6m" autocomplete="off"></label>
+  <label class="f">What do you need?<input id="m-item" name="mat" placeholder="e.g. 4x2 timber, 3.6m" autocomplete="off"></label>
   <div class="row2"><label class="f">How many?<input id="m-qty" name="qty" inputmode="numeric" placeholder="20"></label>
   <label class="f">Needed by<select id="m-by" name="by"><option>Today</option><option selected>Tomorrow</option><option>This week</option></select></label></div>
   <button class="primary">Send request</button></form>`;
@@ -375,3 +381,5 @@ document.addEventListener("keydown", e => {
 const start = (location.hash || "").slice(1);
 setVariant(VARIANTS.some(v => v.key === start) ? start : "tiles");
 </script>
+</body>
+</html>

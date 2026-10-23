@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Site App Demos</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a phone-sized app column, with a "what just happened" log beside it on wide screens and under it on phones. */
+:root {
+  --bg: #0A0A0C; --surface: #16161A; --surface-2: #1C1C22; --border: #24242B;
+  --fg: #F1F5F9; --muted: #94A3B8; --faint: #64748B;
+  --sky: #38BDF8; --purple: #A855F7; --rose: #F43F5E; --green: #10B981; --amber: #F59E0B;
+  --font: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { background: var(--bg); color: var(--fg); font-family: var(--font); font-size: 15px; }
+body { margin: 0; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 16px 48px; }
+button { font: inherit; color: inherit; cursor: pointer; }
+button:disabled { opacity: .45; cursor: not-allowed; }
+button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible, a:focus-visible { outline: 2px solid var(--sky); outline-offset: 2px; }
+input, textarea, select { font: inherit; color: var(--fg); background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 12px; width: 100%; }
+label.f { display: grid; gap: 6px; color: var(--muted); font-size: 13px; }
+a { color: var(--sky); }
+
+.wrap { display: grid; grid-template-columns: minmax(0, 390px) minmax(0, 1fr); gap: 32px; max-width: 980px; margin: 0 auto; align-items: start; }
+@media (max-width: 760px) { .wrap { grid-template-columns: minmax(0, 1fr); gap: 20px; } }
+.intro { grid-column: 1 / -1; display: grid; gap: 6px; max-width: 70ch; }
+.intro h1 { margin: 0; font-size: 22px; font-weight: 600; text-wrap: balance; }
+.intro p { margin: 0; color: var(--muted); line-height: 1.5; }
+.tag { display: inline-block; font: 500 11px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--amber); }
+.tag a { color: inherit; }
+
+.phone { background: var(--surface); border: 1px solid var(--border); border-radius: 28px; min-height: 680px; display: flex; flex-direction: column; overflow: hidden; }
+.bar { display: flex; align-items: center; gap: 10px; padding: 16px; border-bottom: 1px solid var(--border); min-height: 60px; }
+.bar h2 { margin: 0; font-size: 17px; font-weight: 600; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bar .act { background: none; border: 0; color: var(--sky); font-weight: 600; padding: 4px 0; flex: none; }
+.back { background: none; border: 0; color: var(--sky); padding: 4px 6px 4px 0; font-weight: 500; flex: none; }
+.screen { flex: 1; padding: 16px; display: flex; flex-direction: column; gap: 12px; min-height: 0; overflow-y: auto; }
+.who { font-size: 12px; color: var(--faint); }
+.h3 { margin: 4px 0 0; font-size: 13px; font-weight: 600; color: var(--muted); letter-spacing: .04em; text-transform: uppercase; }
+
+.row { background: var(--surface-2); border: 1px solid var(--border); border-radius: 14px; padding: 14px; text-align: left; display: grid; gap: 4px; width: 100%; }
+.row b { font-weight: 600; }
+.row span, .row small { color: var(--muted); font-size: 13px; }
+.row .line { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+.actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
+
+.pill { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border); color: var(--muted); white-space: nowrap; }
+.pill .dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.pill.green { color: var(--green); border-color: color-mix(in srgb, var(--green) 50%, transparent); background: color-mix(in srgb, var(--green) 12%, transparent); }
+.pill.amber { color: var(--amber); border-color: color-mix(in srgb, var(--amber) 50%, transparent); background: color-mix(in srgb, var(--amber) 12%, transparent); }
+.pill.sky { color: var(--sky); border-color: color-mix(in srgb, var(--sky) 50%, transparent); background: color-mix(in srgb, var(--sky) 12%, transparent); }
+.pill.rose { color: var(--rose); border-color: color-mix(in srgb, var(--rose) 50%, transparent); background: color-mix(in srgb, var(--rose) 12%, transparent); }
+.pill.purple { color: var(--purple); border-color: color-mix(in srgb, var(--purple) 50%, transparent); background: color-mix(in srgb, var(--purple) 12%, transparent); }
+
+.primary { background: var(--sky); color: #04131C; border: 0; border-radius: 12px; padding: 14px; font-weight: 600; width: 100%; }
+.small { background: var(--sky); color: #04131C; border: 0; border-radius: 10px; padding: 8px 12px; font-weight: 600; font-size: 13px; }
+.ghost { background: none; border: 1px solid var(--border); border-radius: 10px; padding: 8px 12px; font-weight: 500; font-size: 13px; }
+.danger { background: color-mix(in srgb, var(--rose) 14%, transparent); border: 1px solid color-mix(in srgb, var(--rose) 50%, transparent); color: var(--fg); border-radius: 12px; padding: 14px; font-weight: 600; width: 100%; }
+
+.toast { background: color-mix(in srgb, var(--green) 14%, transparent); border: 1px solid color-mix(in srgb, var(--green) 45%, transparent); border-radius: 12px; padding: 10px 12px; font-size: 13px; }
+.note { background: color-mix(in srgb, var(--amber) 12%, transparent); border: 1px solid color-mix(in srgb, var(--amber) 45%, transparent); border-radius: 12px; padding: 10px 12px; font-size: 13px; }
+.locked { border: 1px dashed var(--border); border-radius: 14px; padding: 14px; color: var(--muted); display: grid; gap: 4px; }
+
+.tabs { display: flex; gap: 2px; padding: 0 12px; border-bottom: 1px solid var(--border); overflow-x: auto; }
+.tabs button { background: none; border: 0; border-bottom: 2px solid transparent; padding: 12px 10px; font-size: 13px; color: var(--muted); white-space: nowrap; }
+.tabs button.sel { color: var(--fg); border-bottom-color: var(--sky); font-weight: 600; }
+.tabs .count { margin-left: 4px; font: 500 11px var(--mono); color: var(--amber); }
+
+.nav { display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid var(--border); }
+.nav button { background: none; border: 0; padding: 10px 4px 14px; font-size: 12px; color: var(--muted); display: grid; justify-items: center; gap: 4px; }
+.nav button.sel { color: var(--sky); font-weight: 600; }
+.nav svg { width: 22px; height: 22px; }
+
+.chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.chip { border: 1px solid var(--border); border-radius: 999px; padding: 8px 12px; background: none; font-size: 13px; }
+.chip.sel { border-color: var(--sky); color: var(--sky); background: color-mix(in srgb, var(--sky) 12%, transparent); }
+
+.tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.tile { aspect-ratio: 1.15; max-width: 100%; border-radius: 16px; border: 1px solid var(--border); background: var(--surface-2); display: grid; place-content: center; gap: 8px; justify-items: center; font-weight: 600; }
+.tile svg { width: 28px; height: 28px; }
+
+.signbox { border-radius: 14px; padding: 14px; display: flex; align-items: center; justify-content: space-between; gap: 10px; border: 1px solid var(--border); background: var(--surface-2); }
+.signbox.on { border-color: color-mix(in srgb, var(--green) 50%, transparent); background: color-mix(in srgb, var(--green) 10%, transparent); }
+.signbox small { color: var(--muted); display: block; font-size: 12px; }
+
+.photo { aspect-ratio: 4 / 3; max-width: 100%; width: 100%; border-radius: 12px; border: 1px dashed var(--border); display: grid; place-content: center; color: var(--muted); font-size: 13px; background: repeating-linear-gradient(135deg, var(--surface-2) 0 12px, var(--bg) 12px 24px); }
+.photo.taken { border-style: solid; color: var(--fg); background: linear-gradient(135deg, #1e3a4a, #2a1f3d); }
+.thumbs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.thumb { aspect-ratio: 1; max-width: 100%; border-radius: 10px; background: linear-gradient(135deg, #1e3a4a, #2a1f3d); display: flex; align-items: flex-end; padding: 6px; font-size: 11px; }
+
+.thread { display: flex; flex-direction: column; gap: 8px; flex: 1; }
+.msg { max-width: 82%; background: var(--surface-2); border: 1px solid var(--border); border-radius: 14px; padding: 8px 12px; font-size: 14px; line-height: 1.4; }
+.msg.me { align-self: flex-end; background: color-mix(in srgb, var(--sky) 16%, var(--surface)); border-color: color-mix(in srgb, var(--sky) 35%, transparent); }
+.msg .by { font-size: 11px; color: var(--muted); display: block; margin-bottom: 2px; }
+.msg.urgent { border-color: color-mix(in srgb, var(--rose) 60%, transparent); }
+.sys { align-self: center; font-size: 12px; color: var(--muted); background: var(--bg); border: 1px solid var(--border); border-radius: 999px; padding: 4px 10px; }
+.compose { display: flex; gap: 8px; align-items: center; }
+.compose input[type=text] { border-radius: 999px; padding: 10px 14px; }
+.send { flex: none; width: 44px; height: 44px; border-radius: 50%; border: 0; background: var(--sky); color: #04131C; font-weight: 700; }
+.check { display: flex; gap: 8px; align-items: center; font-size: 13px; color: var(--muted); }
+.check input { width: auto; }
+.row2 { display: flex; gap: 8px; } .row2 > * { flex: 1; min-width: 0; }
+.code { font: 600 28px var(--mono); letter-spacing: .3em; text-align: center; }
+.demo-hint { font: 12px var(--mono); color: var(--amber); }
+
+.log { display: grid; gap: 12px; }
+@media (min-width: 761px) { .log { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 16px); } }
+.log h3 { margin: 0; font-size: 13px; font-weight: 600; color: var(--muted); letter-spacing: .06em; text-transform: uppercase; }
+.panel { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 14px; display: grid; gap: 8px; }
+.panel pre { margin: 0; font: 12px/1.5 var(--mono); color: var(--muted); white-space: pre-wrap; overflow-x: auto; max-height: 340px; overflow-y: auto; }
+.events { display: grid; gap: 6px; font: 12px/1.45 var(--mono); }
+.events div { color: var(--muted); } .events div:first-child { color: var(--fg); }
+.tips { margin: 0; padding-left: 18px; display: grid; gap: 6px; font-size: 13px; color: var(--muted); line-height: 1.45; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+
+.hub { max-width: 760px; margin: 0 auto; display: grid; gap: 20px; }
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+.card { display: grid; gap: 6px; text-decoration: none; color: var(--fg); background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 18px; }
+.card:hover { border-color: var(--sky); }
+.card b { font-size: 17px; font-weight: 600; }
+.card span { color: var(--muted); font-size: 14px; line-height: 1.45; }
+.card .k { font: 500 11px var(--mono); letter-spacing: .08em; text-transform: uppercase; }
+</style>
+</head>
+<body>
+<div class="hub">
+  <header class="intro">
+    <span class="tag">Prototype · not the real app</span>
+    <h1>Site App demos</h1>
+    <p>One clickable demo per kind of user, built from the MVP brief and wireframes. Everything runs in your browser with example data. Nothing is saved or sent. Each demo starts at the SMS login; any 6-digit code works.</p>
+  </header>
+  <div class="cards">
+    <a class="card" href="./site-team/"><span class="k" style="color:var(--green)">Site team</span><b>Site team</b><span>Sign in on site, request materials, tagged photos, flag issues, team chat. Three layouts to compare.</span></a>
+    <a class="card" href="./admin/"><span class="k" style="color:var(--sky)">Admin</span><b>Admin</b><span>Jobs, materials across every Job, approving Client suggestions, Issues, team invites, Quiet hours.</span></a>
+    <a class="card" href="./subcontractor/"><span class="k" style="color:var(--amber)">Subcontractor</span><b>Subcontractor</b><span>One login across builders, choose contractor, sign in, materials, photos, issues. H&amp;S comes later.</span></a>
+    <a class="card" href="./client-portal/"><span class="k" style="color:var(--purple)">Client · paid add-on</span><b>Client Portal</b><span>Weekly Updates, Client chat, Choices, Extras and Deductions with approvals, Reminders.</span></a>
+  </div>
+</div>
+
+</body>
+</html>
