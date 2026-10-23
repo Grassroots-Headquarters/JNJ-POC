@@ -1,0 +1,26 @@
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Native
+.kotlin/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+/ios
+/android
+
+# Metro
+.metro-health-check*
+
+# env files (examples are committed)
+.env*
+!.env.example
+
+# typescript
+*.tsbuildinfo
