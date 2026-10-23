@@ -104,6 +104,18 @@ _Avoid_: Sign-off, signature, agreement
 The state of a finished Job. It becomes read-only for everyone; the Client loses Client chat at once and loses all access 12 months later, while the Company keeps the Job and its photos.
 _Avoid_: Closed, archived, done
 
+**Invite**:
+An SMS link that brings a User into a Company (sent by an Admin) or onto a Job as its Client (sent by an Admin or the Job lead, only when the Company has the Client Portal).
+_Avoid_: Sign-up link, onboarding
+
+**Update**:
+A post to the Client about the Job's progress, made of text, photos and short videos; posted by Admins or the Job lead.
+_Avoid_: Report, newsletter, weekly video
+
+**Reminder**:
+A note pinned on the Client's view of a Job asking them to do something, with an optional due date, until the Client marks it done.
+_Avoid_: Nudge, task, alert
+
 **On site**:
 Physically present at a Job's address. "Site" is only ever used this way, never as a name for the Job itself.
 _Avoid_: Using "site" as a noun for a Job
