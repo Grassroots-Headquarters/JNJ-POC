@@ -55,3 +55,23 @@ export async function signUpCompany(client: TypedClient, input: SignUpCompanyInp
   if (error) throw new Error(error.message);
   return data;
 }
+
+export type Profile = {
+  userId: string;
+  fullName: string;
+  billingEmail: string | null;
+};
+
+/** The logged-in User's own profile. */
+export async function getMyProfile(client: TypedClient): Promise<Profile> {
+  const { data: session } = await client.auth.getSession();
+  const userId = session.session?.user.id;
+  if (!userId) throw new Error("Not logged in");
+  const { data, error } = await client
+    .from("profiles")
+    .select("user_id, full_name, billing_email")
+    .eq("user_id", userId)
+    .single();
+  if (error) throw new Error(error.message);
+  return { userId: data.user_id, fullName: data.full_name, billingEmail: data.billing_email };
+}

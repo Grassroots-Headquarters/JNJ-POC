@@ -1,9 +1,5 @@
-import { ConnectedCard } from "@/components/connected-card";
+import { Home } from "@/components/home";
 
-export default function Home() {
-  return (
-    <main className="flex flex-1 items-center justify-center p-6">
-      <ConnectedCard />
-    </main>
-  );
+export default function HomePage() {
+  return <Home />;
 }

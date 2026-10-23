@@ -1,14 +1,14 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import type { Database } from "@jnj/shared";
+import { isPublicPath } from "@/lib/public-paths";
 
 /**
  * Refresh the Supabase session cookie on every request so Server Components
- * see a live session. Login gating is added by the login ticket.
+ * see a live session, and send visitors without one to the login page.
  */
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
-
   const supabase = createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -27,9 +27,22 @@ export async function updateSession(request: NextRequest) {
       },
     },
   );
-
   // Do not put code between createServerClient and this call.
-  await supabase.auth.getClaims();
+  const { data } = await supabase.auth.getClaims();
+  const loggedIn = Boolean(data?.claims);
+  const { pathname } = request.nextUrl;
 
+  if (!loggedIn && !isPublicPath(pathname)) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/login";
+    url.search = "";
+    return NextResponse.redirect(url);
+  }
+  if (loggedIn && pathname === "/login") {
+    const url = request.nextUrl.clone();
+    url.pathname = "/";
+    url.search = "";
+    return NextResponse.redirect(url);
+  }
   return supabaseResponse;
 }
