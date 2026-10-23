@@ -31,6 +31,7 @@ jobs:
         run: pnpm supabase start -x "$SUPABASE_EXCLUDE"
       - run: pnpm supabase db reset
       - run: pnpm test:db
+      - run: pnpm test:integration
       - name: Generated types must match the schema
         run: pnpm gen:types && git diff --exit-code -- packages/shared/src/database.types.ts
       - run: pnpm supabase stop --no-backup

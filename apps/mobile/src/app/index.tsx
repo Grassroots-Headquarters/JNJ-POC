@@ -1,40 +1,84 @@
-import { getPlatformStatus } from "@jnj/shared";
-import { useQuery } from "@tanstack/react-query";
-import { Stack } from "expo-router";
+import { pickCurrentCompany, roleLabel } from "@jnj/shared";
+import { useQueryClient } from "@tanstack/react-query";
+import { Redirect, useRouter } from "expo-router";
 import { Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
+import { Bar, BarAction, GhostButton, PrimaryButton } from "@/components/ui";
+import { useMemberships, useMyProfile, useRememberedCompanyId } from "@/lib/queries";
 import { supabase } from "@/lib/supabase";
 
-/** The Mobile app's "connected" screen: reads platform_status from Supabase. */
-export default function HomeScreen() {
-  const status = useQuery({
-    queryKey: ["platform_status"],
-    queryFn: () => getPlatformStatus(supabase),
-    retry: false,
-  });
+/** My jobs: the screen every Member lands on. No Jobs exist yet, so it is always empty. */
+export default function MyJobsScreen() {
+  const memberships = useMemberships();
+  const remembered = useRememberedCompanyId();
+  const profile = useMyProfile();
+  const router = useRouter();
+  const queryClient = useQueryClient();
 
+  async function logOut() {
+    await supabase.auth.signOut();
+    queryClient.clear();
+  }
+
+  if (memberships.isPending || remembered.isPending) {
+    return (
+      <SafeAreaView className="flex-1 bg-bg">
+        <Text className="p-4 text-muted">Loading…</Text>
+      </SafeAreaView>
+    );
+  }
+  if (memberships.isError) {
+    return (
+      <SafeAreaView className="flex-1 bg-bg">
+        <View accessibilityRole="alert" className="gap-3 p-4">
+          <Text className="font-medium text-rose">Could not load your Companies</Text>
+          <Text className="text-sm text-muted">{memberships.error.message}</Text>
+          <GhostButton title="Log out" onPress={logOut} />
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  const choice = pickCurrentCompany(memberships.data, remembered.data ?? null);
+  if (choice.kind === "choose") return <Redirect href="/choose-company" />;
+
+  if (choice.kind === "none") {
+    return (
+      <SafeAreaView className="flex-1 bg-bg">
+        <Bar title="My jobs" />
+        <View className="flex-1 justify-center gap-3 p-4">
+          <Text className="text-center text-xl font-semibold text-fg">You are not part of a Company yet</Text>
+          <Text className="text-center text-[13px] text-muted">Ask your office to invite you by SMS.</Text>
+          <PrimaryButton title="Log out" onPress={logOut} />
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  const { membership } = choice;
   return (
-    <View className="flex-1 items-center justify-center bg-bg p-4">
-      <Stack.Screen options={{ title: "JNJ Site App" }} />
-      <View className="w-full max-w-sm gap-2 rounded-2xl border border-border bg-surface p-4" testID="connected-card">
-        <Text className="text-xl font-semibold text-fg">JNJ Site App</Text>
-        <Text className="text-sm text-muted">Mobile app</Text>
-        {status.isPending && <Text className="text-muted">Connecting…</Text>}
-        {status.isError && (
-          <View accessibilityRole="alert" className="gap-1">
-            <Text className="font-medium text-rose">Not connected</Text>
-            <Text className="text-sm text-muted">{status.error.message}</Text>
+    <SafeAreaView className="flex-1 bg-bg">
+      <Bar
+        title="My jobs"
+        right={
+          <View className="flex-row items-center gap-3">
+            {memberships.data.length > 1 && (
+              <BarAction title="Switch" onPress={() => router.push("/choose-company")} />
+            )}
+            <GhostButton title="Log out" onPress={logOut} />
           </View>
-        )}
-        {status.isSuccess && (
-          <View className="gap-1" testID="connected">
-            <Text className="font-medium text-green">Connected</Text>
-            <Text className="text-sm text-muted" testID="platform-message">
-              {status.data.message}
-            </Text>
-          </View>
-        )}
+        }
+      />
+      <View className="flex-1 gap-3 p-4">
+        <Text className="text-xs text-faint" testID="current-company">
+          {membership.companyName} · {roleLabel[membership.role]}
+          {profile.data?.fullName ? ` · Logged in as ${profile.data.fullName}` : ""}
+        </Text>
+        <Text className="text-xs text-faint" testID="jobs-empty">
+          No jobs yet. Your office will assign you to one.
+        </Text>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }

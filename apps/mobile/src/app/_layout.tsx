@@ -5,20 +5,40 @@ import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 
 import { Sentry } from "@/lib/sentry";
+import { SessionProvider, useSession } from "@/lib/session";
 
 const queryClient = new QueryClient();
+
+function RootNavigator() {
+  const { session } = useSession();
+  // Keep the splash up until the stored session has been read.
+  if (session === undefined) return null;
+
+  return (
+    <Stack
+      screenOptions={{
+        headerShown: false,
+        contentStyle: { backgroundColor: "#0A0A0C" },
+      }}
+    >
+      <Stack.Protected guard={session === null}>
+        <Stack.Screen name="login" />
+      </Stack.Protected>
+      <Stack.Protected guard={session !== null}>
+        <Stack.Screen name="index" />
+        <Stack.Screen name="choose-company" />
+      </Stack.Protected>
+    </Stack>
+  );
+}
 
 function RootLayout() {
   return (
     <QueryClientProvider client={queryClient}>
-      <StatusBar style="light" />
-      <Stack
-        screenOptions={{
-          headerStyle: { backgroundColor: "#16161A" },
-          headerTintColor: "#F1F5F9",
-          contentStyle: { backgroundColor: "#0A0A0C" },
-        }}
-      />
+      <SessionProvider>
+        <StatusBar style="light" />
+        <RootNavigator />
+      </SessionProvider>
     </QueryClientProvider>
   );
 }
