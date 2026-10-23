@@ -1,0 +1,15 @@
+# JNJ Site App
+
+## Agent skills
+
+### Issue tracker
+
+Issues and specs are GitHub issues on davidhayes03/jnj-poc, managed through `gh api` (REST). See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+The default five roles, each label named after its role (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`). See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: `CONTEXT.md` and `docs/adr/` at the repo root. See `docs/agents/domain.md`.
