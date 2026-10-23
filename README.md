@@ -58,6 +58,10 @@ pnpm supabase stop --no-backup
 
 `.github/workflows/ci.yml` runs all of the above on every pull request.
 
+## Delivery
+
+Merging to `main` deploys to staging; a `vX.Y.Z` tag, after approval, deploys to production. See `docs/delivery.md` for what deploys when, which environment points where, how to cut a release or ship a JavaScript-only fix, and the first-run checklist.
+
 ## Database changes
 
 Every schema change is a migration: `pnpm supabase migration new <name>`, edit the file under `supabase/migrations/`, then `pnpm supabase db reset` and `pnpm gen:types`. Add a pgTAP test under `supabase/tests/` for every new table's access rules.
