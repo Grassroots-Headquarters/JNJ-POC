@@ -72,6 +72,38 @@ _Avoid_: Do not disturb, out of hours
 A flag an Admin puts on a message so its notification is sent during Quiet hours.
 _Avoid_: Priority, emergency
 
+**Photo tag**:
+One of a fixed set of labels on a Job photo: Progress, Delivery, Protection, Building control or Issue.
+_Avoid_: Category, folder, section
+
+**Sign-in**:
+A record that a Site team member or Subcontractor is On site at a Job, from arrival until they sign out. A Sign-in still open when Quiet hours begin is closed automatically and marked "auto signed out".
+_Avoid_: Check-in, clock-in, attendance
+
+**Issue**:
+A problem on a Job raised privately to the Admins and Job lead, either Open or Resolved; never seen by the Client or other Subcontractors.
+_Avoid_: Snag, defect, ticket
+
+**Extra**:
+Work added to a Job at the Client's request, priced by an Admin or the Job lead.
+_Avoid_: Variation, change order
+
+**Deduction**:
+Work removed from a Job, reducing its price.
+_Avoid_: Credit, omission
+
+**Choice**:
+A decision the Company puts to the Client as a set of options, which the Client confirms.
+_Avoid_: Selection, poll
+
+**Client approval**:
+A record that the Client accepted an Extra, Deduction or Choice: who accepted it, the price shown, and when. It is not a signature.
+_Avoid_: Sign-off, signature, agreement
+
+**Complete**:
+The state of a finished Job. It becomes read-only for everyone; the Client loses Client chat at once and loses all access 12 months later, while the Company keeps the Job and its photos.
+_Avoid_: Closed, archived, done
+
 **On site**:
 Physically present at a Job's address. "Site" is only ever used this way, never as a name for the Job itself.
 _Avoid_: Using "site" as a noun for a Job
