@@ -5,7 +5,7 @@ import type { ConfigContext, ExpoConfig } from "expo/config";
  * comes from whichever system is building: EAS Build, Vercel (web test site)
  * or GitHub Actions (eas update). `EXPO_PUBLIC_SENTRY_RELEASE` overrides it.
  */
-export function sentryRelease(version: string | undefined, env: NodeJS.ProcessEnv): string | undefined {
+export function sentryRelease(version: string | undefined, env: Record<string, string | undefined>): string | undefined {
   if (env.EXPO_PUBLIC_SENTRY_RELEASE) return env.EXPO_PUBLIC_SENTRY_RELEASE;
   const sha = env.EAS_BUILD_GIT_COMMIT_HASH ?? env.VERCEL_GIT_COMMIT_SHA ?? env.GITHUB_SHA;
   return version && sha ? `mobile@${version}+${sha}` : undefined;
