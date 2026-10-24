@@ -9,10 +9,10 @@ import { expect, test, type Browser, type Page } from "@playwright/test";
 // +447700900013 and +447700900014 are reserved for this journey (contracts: #29 uses 013-015).
 const ADMIN_MOBILE = "07700 900013";
 const ADMIN_PHONE = "+447700900013";
-const SITE_MOBILE = "07700 900014";
-const SITE_PHONE = "+447700900014";
+const SITE_TEAM_MOBILE = "07700 900014";
+const SITE_TEAM_PHONE = "+447700900014";
 const COMPANY = "Slice Builders";
-const SITE_NAME = "Tia Trowel";
+const SITE_TEAM_NAME = "Tia Trowel";
 const JOB = "Birch Close kitchen";
 const JOB_ADDRESS = "3 Birch Close, Bromley";
 const MOBILE_WEB_URL = "http://localhost:8081";
@@ -59,9 +59,9 @@ test.beforeEach(async () => {
     const companies = (data ?? []).map((m) => m.company_id);
     if (companies.length) await service.from("companies").delete().in("id", companies);
   }
-  const site = await userIdFor(SITE_PHONE);
-  if (site) await service.from("memberships").delete().eq("user_id", site);
-  await service.from("invites").delete().eq("phone", SITE_PHONE);
+  const siteTeamMember = await userIdFor(SITE_TEAM_PHONE);
+  if (siteTeamMember) await service.from("memberships").delete().eq("user_id", siteTeamMember);
+  await service.from("invites").delete().eq("phone", SITE_TEAM_PHONE);
 });
 
 test("an Admin signs up, logs a Job and invites a Site team member, who sees it in the Mobile app; another Company cannot", async ({
@@ -81,16 +81,16 @@ test("an Admin signs up, logs a Job and invites a Site team member, who sees it 
   await expect(page).toHaveURL(/\/welcome$/);
   await expect(page.getByRole("heading", { name: "Log your first Job" })).toBeVisible();
   await page.getByLabel("Job name").fill(JOB);
-  await page.getByLabel("Site address").fill(JOB_ADDRESS);
+  await page.getByLabel("Address", { exact: true }).fill(JOB_ADDRESS);
   await page.getByLabel("Start date").fill("2026-11-02");
   await page.getByRole("button", { name: "Create job" }).click();
 
   await expect(page.getByRole("heading", { name: `Invite your team to ${JOB}` })).toBeVisible();
-  await page.getByLabel("Name", { exact: true }).fill(SITE_NAME);
-  await page.getByLabel("Mobile", { exact: true }).fill(SITE_MOBILE);
+  await page.getByLabel("Name", { exact: true }).fill(SITE_TEAM_NAME);
+  await page.getByLabel("Mobile", { exact: true }).fill(SITE_TEAM_MOBILE);
   await page.getByLabel("Role", { exact: true }).selectOption({ label: "Site team" });
   await page.getByRole("button", { name: "Send invite by SMS" }).click();
-  await expect(page.getByText(`Invite sent to ${SITE_MOBILE}.`)).toBeVisible();
+  await expect(page.getByText(`Invite sent to ${SITE_TEAM_MOBILE}.`)).toBeVisible();
   await page.getByRole("link", { name: "Done" }).click();
 
   // The Job page shows the Job and the Invite waiting to be accepted.
@@ -98,17 +98,17 @@ test("an Admin signs up, logs a Job and invites a Site team member, who sees it 
   const jobUrl = page.url();
   await expect(page.getByTestId("job-details")).toContainText(JOB_ADDRESS);
   await expect(page.getByTestId("job-details")).toContainText("Starts 2 Nov 2026");
-  await expect(page.getByTestId("job-invite").filter({ hasText: SITE_NAME })).toContainText("Invite sent");
+  await expect(page.getByTestId("job-invite").filter({ hasText: SITE_TEAM_NAME })).toContainText("Invite sent");
 
   // 3. The Site team member opens the Invite, logs into the Mobile app by SMS code and sees the Job.
-  const code = await inviteCodeTextedTo(SITE_PHONE);
+  const code = await inviteCodeTextedTo(SITE_TEAM_PHONE);
   const phone = await (await browser.newContext()).newPage();
   await phone.goto(`${MOBILE_WEB_URL}/invite/${code}`);
-  await phone.getByLabel("Mobile number").fill(SITE_MOBILE);
+  await phone.getByLabel("Mobile number").fill(SITE_TEAM_MOBILE);
   await phone.getByRole("button", { name: "Send login code" }).click();
   await phone.getByLabel("Login code").fill("123456");
   await phone.getByRole("button", { name: "Log in" }).click();
-  await expect(phone.getByLabel("Your name")).toHaveValue(SITE_NAME);
+  await expect(phone.getByLabel("Your name")).toHaveValue(SITE_TEAM_NAME);
   await phone.getByRole("button", { name: `Join ${COMPANY}` }).click();
 
   await expect(phone.getByText("My jobs")).toBeVisible();
@@ -117,7 +117,7 @@ test("an Admin signs up, logs a Job and invites a Site team member, who sees it 
 
   // The Admin marks her Job lead; the Mobile app says so.
   await page.reload();
-  const person = page.getByTestId("job-person").filter({ hasText: SITE_NAME });
+  const person = page.getByTestId("job-person").filter({ hasText: SITE_TEAM_NAME });
   await expect(person).toContainText("Site team");
   await person.getByRole("button", { name: "Make Job lead" }).click();
   await expect(person).toContainText("Site team · Job lead");
@@ -133,16 +133,16 @@ test("an Admin signs up, logs a Job and invites a Site team member, who sees it 
   await expect(phone.getByTestId("job")).toHaveCount(0);
 
   // Assigning her again, as Job lead, brings it back.
-  await page.getByLabel("Person").selectOption({ label: `${SITE_NAME} (Site team)` });
+  await page.getByLabel("Person").selectOption({ label: `${SITE_TEAM_NAME} (Site team)` });
   await page.getByLabel("Job lead").check();
   await page.getByRole("button", { name: "Assign" }).click();
-  await expect(page.getByTestId("job-person").filter({ hasText: SITE_NAME })).toContainText("Job lead");
+  await expect(page.getByTestId("job-person").filter({ hasText: SITE_TEAM_NAME })).toContainText("Job lead");
   await phone.reload();
   await expect(phone.getByTestId("job").filter({ hasText: JOB })).toContainText("You're the Job lead");
 
   // The Admin's Jobs list shows it with its Job lead.
   await page.getByRole("link", { name: "‹ Jobs" }).click();
-  await expect(page.getByTestId("job").filter({ hasText: JOB })).toContainText(`Job lead ${SITE_NAME}`);
+  await expect(page.getByTestId("job").filter({ hasText: JOB })).toContainText(`Job lead ${SITE_TEAM_NAME}`);
 
   // 4. A User from a second Company cannot see the Job, in either app.
   const bea = await logInToAdminApp(browser, "07700 900003");

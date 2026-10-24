@@ -12,7 +12,7 @@ import { createClient } from "@/lib/supabase/client";
 import { jobsQueryKey } from "@/lib/use-jobs";
 
 /**
- * The Admin demo's "New job" form: Job name, Site address, Start date and,
+ * The Admin demo's "New job" form: Job name, Address, Start date and,
  * when the Company has Site team, a Job lead. Calls `onCreated` with the Job
  * and the Job lead's name, if one was chosen.
  */
@@ -69,7 +69,7 @@ export function JobForm({
         />
       </Label>
       <Label>
-        Site address
+        Address
         <Input
           name="address"
           placeholder="Street, town"
