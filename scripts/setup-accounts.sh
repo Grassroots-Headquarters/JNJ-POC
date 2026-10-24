@@ -200,7 +200,7 @@ finish() {
 # My Builder App account setup (ticket #25 of spec #23).
 #
 # Walks a human through creating every service account the platform needs,
-# all owned by Grassroots Headquarters, and stores each key where the delivery
+# all owned by DnD Development UK, and stores each key where the delivery
 # pipeline reads it: GitHub Actions secrets/variables, Vercel environment
 # settings and Supabase Edge Function secrets. Captured values are also kept
 # in a git-ignored .env.accounts at the repo root so the wizard can be re-run
@@ -215,7 +215,7 @@ REPO_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 SENTRY_PROJECT_ADMIN="my-builder-admin"
 SENTRY_PROJECT_MOBILE="my-builder-mobile"
 SENTRY_PROJECT_EDGE="my-builder-edge-functions"
-APP_ID="com.grassrootshq.mybuilderapp"
+APP_ID="com.dnddevelopmentuk.mybuilderapp"
 
 die() { warn "$1"; exit 1; }
 
@@ -284,7 +284,7 @@ vercel_env() {
 vercel_link() {
   local dir="$1" project="$2"
   if ! npx -y vercel@latest whoami >/dev/null 2>&1; then
-    step "The Vercel CLI needs to log in: follow its prompts (pick the Grassroots Headquarters team)."
+    step "The Vercel CLI needs to log in: follow its prompts (pick the DnD Development UK team)."
     npx -y vercel@latest login || return 1
   fi
   (cd "$dir" && npx -y vercel@latest link --yes --scope "$VERCEL_TEAM" --project "$project" >/dev/null 2>&1)
@@ -314,7 +314,7 @@ fi
 GITHUB_REPO=$(gh api repos/{owner}/{repo} --jq .full_name 2>/dev/null) \
   || die "couldn't work out the GitHub repository from this checkout's remote"
 say "Repository: $GITHUB_REPO"
-step "Check the repository belongs to the Grassroots Headquarters organisation (not a personal account); transfer it first if not."
+step "Check the repository belongs to the DnD Development UK organisation (not a personal account); transfer it first if not."
 pause
 say "Creating the GitHub environments the release pipeline deploys through."
 if gh api -X PUT "repos/$GITHUB_REPO/environments/staging" >/dev/null 2>&1; then
@@ -339,8 +339,8 @@ pause
 # ── 2. Supabase organisation + token ──────────────────────────────────────
 stage "Supabase: organisation and access token"
 open_url "https://supabase.com/dashboard/organizations"
-step "Sign in with a Grassroots Headquarters login (not a personal one)."
-step "If there is no organisation called 'Grassroots Headquarters', click New organization, name it that, and choose the Pro plan."
+step "Sign in with a DnD Development UK login (not a personal one)."
+step "If there is no organisation called 'DnD Development UK', click New organization, name it that, and choose the Pro plan."
 note "Production must be on Pro (daily backups, never pauses). Staging lives in the same organisation; it adds a small compute charge."
 pause "Press Enter when the organisation exists"
 open_url "https://supabase.com/dashboard/account/tokens"
@@ -356,7 +356,7 @@ fi
 # ── 3. Supabase staging ───────────────────────────────────────────────────
 stage "Supabase: staging project"
 open_url "https://supabase.com/dashboard/new"
-step "Organisation: Grassroots Headquarters. Name: my-builder-app-staging. Region: West EU (London)."
+step "Organisation: DnD Development UK. Name: my-builder-app-staging. Region: West EU (London)."
 step "Click Generate a password for the database and copy it now; the dashboard never shows it again."
 ask_secret SUPABASE_STAGING_DB_PASSWORD "Paste the staging database password:"
 write_env SUPABASE_STAGING_DB_PASSWORD "$SUPABASE_STAGING_DB_PASSWORD"
@@ -374,7 +374,7 @@ write_env SUPABASE_STAGING_ANON_KEY "$SUPABASE_STAGING_ANON_KEY"
 # ── 4. Supabase production ────────────────────────────────────────────────
 stage "Supabase: production project (Pro, daily backups)"
 open_url "https://supabase.com/dashboard/new"
-step "Organisation: Grassroots Headquarters. Name: my-builder-app-production. Region: West EU (London)."
+step "Organisation: DnD Development UK. Name: my-builder-app-production. Region: West EU (London)."
 step "Generate a database password and copy it now."
 ask_secret SUPABASE_PRODUCTION_DB_PASSWORD "Paste the production database password:"
 write_env SUPABASE_PRODUCTION_DB_PASSWORD "$SUPABASE_PRODUCTION_DB_PASSWORD"
@@ -395,7 +395,7 @@ confirm "Are daily backups enabled on production?" || SKIPPED+=("Supabase produc
 # ── 5. Twilio ─────────────────────────────────────────────────────────────
 stage "Twilio: account and Verify service"
 open_url "https://console.twilio.com"
-step "Sign in to the Grassroots Headquarters Twilio account (create one at twilio.com/try-twilio if needed, as a business)."
+step "Sign in to the DnD Development UK Twilio account (create one at twilio.com/try-twilio if needed, as a business)."
 step "Upgrade it from trial (Billing → add a payment method): trial accounts can only text verified numbers."
 step "On the console home, Account Info shows the Account SID (AC…) and Auth Token."
 ask TWILIO_ACCOUNT_SID "Paste the Account SID:"
@@ -436,7 +436,7 @@ note "Local development and CI use Supabase's fixed test numbers; Twilio is only
 # ── 7. Stripe test mode ───────────────────────────────────────────────────
 stage "Stripe: test mode (staging)"
 open_url "https://dashboard.stripe.com/login"
-step "Sign in to the Grassroots Headquarters Stripe account (register at dashboard.stripe.com/register as a business if there is none)."
+step "Sign in to the DnD Development UK Stripe account (register at dashboard.stripe.com/register as a business if there is none)."
 step "Switch the Test mode toggle (top right) ON for this stage."
 open_url "https://dashboard.stripe.com/test/products/create"
 step "Name: Client Portal. Recurring, Monthly, GBP; the amount is the Add-on's price per Company per month (agree it with the business; new prices can be added later). Save product."
@@ -494,7 +494,7 @@ fi
 # ── 9. Sentry ─────────────────────────────────────────────────────────────
 stage "Sentry: organisation, projects and auth token"
 open_url "https://sentry.io/organizations/new/"
-step "Sign in (sign up with a Grassroots Headquarters login if needed). Create organisation 'Grassroots Headquarters' if it is missing."
+step "Sign in (sign up with a DnD Development UK login if needed). Create organisation 'DnD Development UK' if it is missing."
 note "If asked for a data storage location, choose the EU."
 step "Copy the organisation's address from the browser: https://<slug>.sentry.io or https://<slug>.de.sentry.io for EU."
 ask SENTRY_URL "Paste the organisation URL:"
@@ -523,7 +523,7 @@ write_env SENTRY_AUTH_TOKEN "$SENTRY_AUTH_TOKEN"
 # ── 10. Expo / EAS ────────────────────────────────────────────────────────
 stage "Expo / EAS: organisation, token and project"
 open_url "https://expo.dev/signup"
-step "Sign in or sign up, then go to Accounts → Create organization: name it grassroots-headquarters and invite the team."
+step "Sign in or sign up, then go to Accounts → Create organization: name it dnd-development-uk and invite the team."
 ask EXPO_ORG "Expo organisation name (from https://expo.dev/accounts/<name>):"
 write_env EXPO_ORG "$EXPO_ORG"
 open_url "https://expo.dev/accounts/$EXPO_ORG/settings/access-tokens"
@@ -553,13 +553,13 @@ fi
 # ── 11. Apple + Google ────────────────────────────────────────────────────
 stage "Apple Developer Program and Google Play Console"
 open_url "https://developer.apple.com/programs/enroll/"
-step "Enrol as an Organization under Grassroots Headquarters (needs the company's D-U-N-S number and someone with legal authority; approval takes days)."
-step "Use a shared Grassroots Headquarters Apple ID as Account Holder, not a personal one."
+step "Enrol as an Organization under DnD Development UK (needs the company's D-U-N-S number and someone with legal authority; approval takes days)."
+step "Use a shared DnD Development UK Apple ID as Account Holder, not a personal one."
 confirm "Is the Apple Developer Program enrolment done (or submitted)?" || SKIPPED+=("Apple Developer Program enrolment")
 ask APPLE_TEAM_ID "Apple Team ID (Membership details; leave blank if not yet known):"
 [[ -n "$APPLE_TEAM_ID" ]] && write_env APPLE_TEAM_ID "$APPLE_TEAM_ID"
 open_url "https://play.google.com/console/signup"
-step "Create an Organization developer account (one-off fee) owned by a Grassroots Headquarters Google Workspace account, not a personal Gmail."
+step "Create an Organization developer account (one-off fee) owned by a DnD Development UK Google Workspace account, not a personal Gmail."
 confirm "Is the Google Play Console organisation account created?" || SKIPPED+=("Google Play Console organisation account")
 warn "Do not create the App Store Connect or Play app records yet."
 warn "App id $APP_ID is a placeholder and becomes permanent at the first store upload: confirm the final id, and the app.example.com domain, with the business before the first store build."
@@ -568,7 +568,7 @@ pause
 # ── 12. Vercel: Admin app ─────────────────────────────────────────────────
 stage "Vercel: my-builder-admin (Admin app)"
 open_url "https://vercel.com/new"
-step "Sign in; choose or create the Grassroots Headquarters team. Import Git Repository → install the Vercel GitHub app on the organisation with access to $GITHUB_REPO → Import."
+step "Sign in; choose or create the DnD Development UK team. Import Git Repository → install the Vercel GitHub app on the organisation with access to $GITHUB_REPO → Import."
 step "Project name: my-builder-admin. Framework: Next.js. Root Directory: apps/admin (tick 'Include source files outside of the Root Directory')."
 step "Leave build/install defaults (pnpm is detected from packageManager). Deploy; a failed first build is fine before the app exists on main."
 step "After creating: Settings → Git → Production Branch: main. Previews are built for every pull request by default."

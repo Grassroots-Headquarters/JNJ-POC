@@ -148,7 +148,7 @@ these are done the workflows either skip (no `EXPO_TOKEN`) or fail at the first
    `ascAppId` (App Store Connect → the app → App Information → Apple ID) and
    `appleTeamId` (`.env.accounts` `APPLE_TEAM_ID`). The Play app needs one
    manual upload before `eas submit` can target a track.
-5. Confirm the bundle id `com.grassrootshq.mybuilderapp` and the domain before the
+5. Confirm the bundle id `com.dnddevelopmentuk.mybuilderapp` and the domain before the
    first store build; the bundle id is permanent once in the stores.
 6. Merge to `main` and watch the `staging` run: `supabase db push` succeeds,
    the EAS build appears in the dashboard, Sentry shows `edge@<sha>` and

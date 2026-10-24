@@ -4,7 +4,7 @@
 
 ### Issue tracker
 
-Issues and specs are GitHub issues on grassroots-headquarters/my-builder-app, managed through `gh api` (REST). See `docs/agents/issue-tracker.md`.
+Issues and specs are GitHub issues on DnD-Development-UK/my-builder-app, managed through `gh api` (REST). See `docs/agents/issue-tracker.md`.
 
 ### Triage labels
 

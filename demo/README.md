@@ -11,6 +11,6 @@ Start at [index.html](./index.html), or open a demo directly:
 | [subcontractor](./subcontractor/) | One login across contractors, choose contractor, sign in, materials, photos, issues; H&S shown as coming later | [Subcontractor Demo](https://claude.ai/artifact/32EuYbZcHcNNJmG8nK74SF) |
 | [client-portal](./client-portal/) | Updates, Client chat with the Quiet hours notice, Choices, Extras and Deductions with Client approvals, Reminders, a Complete Job | [Client Portal Demo](https://claude.ai/artifact/F5ov1ZufKVNTXmDVk944qq) |
 
-GitHub Pages serves this repo from main (Settings → Pages → Deploy from a branch → main, / root), so the demos are public at https://grassroots-headquarters.github.io/my-builder-app/demo/.
+GitHub Pages serves this repo from main (Settings → Pages → Deploy from a branch → main, / root), so the demos are public at https://dnd-development-uk.github.io/my-builder-app/demo/.
 
 The first Site team prototype lives on the `prototype/site-team-flow` branch.

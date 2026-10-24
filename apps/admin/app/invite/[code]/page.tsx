@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 
 // Placeholders until the apps are in the stores (spec: Accounts and identity).
 const APP_STORE_URL = "https://apps.apple.com/app/id0000000000";
-const GOOGLE_PLAY_URL = "https://play.google.com/store/apps/details?id=com.grassrootshq.mybuilderapp";
+const GOOGLE_PLAY_URL = "https://play.google.com/store/apps/details?id=com.dnddevelopmentuk.mybuilderapp";
 
 /**
  * The fallback for an Invite link when the Mobile app is not installed: what

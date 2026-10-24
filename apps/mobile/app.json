@@ -17,12 +17,12 @@
     "userInterfaceStyle": "dark",
     "backgroundColor": "#0A0A0C",
     "ios": {
-      "bundleIdentifier": "com.grassrootshq.mybuilderapp",
+      "bundleIdentifier": "com.dnddevelopmentuk.mybuilderapp",
       "supportsTablet": false,
       "associatedDomains": ["applinks:app.example.com"]
     },
     "android": {
-      "package": "com.grassrootshq.mybuilderapp",
+      "package": "com.dnddevelopmentuk.mybuilderapp",
       "adaptiveIcon": {
         "backgroundColor": "#0A0A0C",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -57,7 +57,7 @@
       [
         "@sentry/react-native/expo",
         {
-          "organization": "grassroots-headquarters",
+          "organization": "dnd-development-uk",
           "project": "my-builder-mobile",
           "url": "https://sentry.io/"
         }

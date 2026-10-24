@@ -2,7 +2,7 @@
   "applinks": {
     "details": [
       {
-        "appIDs": ["TEAMID0000.com.grassrootshq.mybuilderapp"],
+        "appIDs": ["TEAMID0000.com.dnddevelopmentuk.mybuilderapp"],
         "components": [
           { "/": "/invite/*", "comment": "Invite links open the Mobile app" }
         ]
