@@ -5,6 +5,7 @@ const ADMIN_MOBILE = "07700 900006";
 
 test("an Admin signs their Company up with an SMS code and lands on the guided first Job", async ({ page }) => {
   await page.goto("/sign-up");
+  await expect(page).toHaveTitle("My Builder App");
   await page.getByLabel("Company name").fill("Playwright Builders");
   await page.getByLabel("Your name").fill("Pat Playwright");
   await page.getByLabel("Mobile number").fill(ADMIN_MOBILE);
@@ -33,9 +34,12 @@ test("an Admin signs their Company up with an SMS code and lands on the guided f
   await expect(page).toHaveURL(/\/$/);
   await expect(page.getByTestId("current-company")).toHaveText("Playwright Builders");
   await expect(page.getByTestId("jobs-empty")).toContainText("No jobs here yet.");
+  await expect(page).toHaveTitle("Playwright Builders");
   await expect(page.getByTestId("connected")).toContainText("Connected");
 
   await page.getByRole("button", { name: "Log out" }).click();
   await expect(page).toHaveURL(/\/login$/);
   await expect(page.getByLabel("Mobile number")).toBeVisible();
+  // Logged out, the tab carries the product name again.
+  await expect(page).toHaveTitle("My Builder App");
 });

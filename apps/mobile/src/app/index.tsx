@@ -6,6 +6,7 @@ import { RefreshControl, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Bar, BarAction, GhostButton, PrimaryButton } from "@/components/ui";
+import { useCompanyTitle } from "@/lib/company-title";
 import { getPendingInviteCode } from "@/lib/pending-invite";
 import { useJobs, useMemberships, useMyUser, useRememberedCompanyId } from "@/lib/queries";
 import { useSession } from "@/lib/session";
@@ -93,6 +94,7 @@ export default function MyJobsScreen() {
 
 function JobList({ membership, loggedInAs }: { membership: Membership; loggedInAs: string | undefined }) {
   const jobs = useJobs(membership.companyId);
+  useCompanyTitle(membership.companyName);
   const { session } = useSession();
   const me = session?.user.id;
 

@@ -12,9 +12,12 @@ async function logIn(page: Page, mobile: string) {
 
 test("an Admin opens Billing and sees the Client Portal off", async ({ page }) => {
   await logIn(page, "07700 900001");
+  // Logged in, the browser tab names the Company rather than the product.
+  await expect(page).toHaveTitle("JNJ Building");
   await page.getByRole("link", { name: "Billing" }).click();
 
   await expect(page).toHaveURL(/\/billing$/);
+  await expect(page).toHaveTitle("JNJ Building");
   await expect(page.getByRole("heading", { name: "Billing" })).toBeVisible();
   await expect(page.getByTestId("client-portal-state")).toHaveText("Off");
   await expect(page.getByTestId("client-portal-detail")).toHaveText("Not switched on.");

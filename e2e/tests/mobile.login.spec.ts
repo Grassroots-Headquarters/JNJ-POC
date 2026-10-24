@@ -4,6 +4,7 @@ test("a Site team member logs into the Mobile app with an SMS code and sees an e
   page,
 }) => {
   await page.goto("/");
+  await expect(page).toHaveTitle("My Builder App");
   await page.getByLabel("Mobile number").fill("07700 900002");
   await page.getByRole("button", { name: "Send login code" }).click();
 
@@ -14,6 +15,8 @@ test("a Site team member logs into the Mobile app with an SMS code and sees an e
   await expect(page.getByText("My jobs")).toBeVisible();
   await expect(page.getByTestId("current-company")).toContainText("JNJ Building · Site team");
   await expect(page.getByTestId("jobs-empty")).toContainText("No jobs yet");
+  // On the web build the browser tab names the Company too.
+  await expect(page).toHaveTitle("JNJ Building");
 
   // The session survives a reload (AsyncStorage on web is localStorage).
   await page.reload();
@@ -21,4 +24,5 @@ test("a Site team member logs into the Mobile app with an SMS code and sees an e
 
   await page.getByRole("button", { name: "Log out" }).click();
   await expect(page.getByLabel("Mobile number")).toBeVisible();
+  await expect(page).toHaveTitle("My Builder App");
 });

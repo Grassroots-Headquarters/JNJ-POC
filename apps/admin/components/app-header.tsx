@@ -5,7 +5,7 @@ import { roleLabel } from "@mba/shared";
 import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { clearPendingLogin } from "@/lib/pending-login";
 import { createClient } from "@/lib/supabase/client";
@@ -16,7 +16,13 @@ const NAV = [
   { href: "/billing", label: "Billing", adminOnly: true },
 ];
 
+/**
+ * The header of every page that runs a Company. The header and the browser tab
+ * name the current Company; the product name (the layout's title) is only for
+ * pages seen before a Company is chosen.
+ */
 export function AppHeader({ current, canSwitch }: { current: Membership; canSwitch: boolean }) {
+  useCompanyTitle(current.companyName);
   const supabase = useMemo(() => createClient(), []);
   const router = useRouter();
   const pathname = usePathname();
@@ -65,6 +71,23 @@ export function AppHeader({ current, canSwitch }: { current: Membership; canSwit
       </Button>
     </header>
   );
+}
+
+function useCompanyTitle(companyName: string) {
+  useEffect(() => {
+    const productTitle = document.title;
+    const apply = () => {
+      if (document.title !== companyName) document.title = companyName;
+    };
+    apply();
+    // Next.js puts the layout's <title> back on client-side navigation, after this effect has run.
+    const observer = new MutationObserver(apply);
+    observer.observe(document.head, { childList: true, subtree: true, characterData: true });
+    return () => {
+      observer.disconnect();
+      document.title = productTitle;
+    };
+  }, [companyName]);
 }
 
 /** Jobs stays highlighted on a Job's own pages. */
