@@ -2,6 +2,9 @@
 module.exports = {
   content: ["./src/**/*.{js,jsx,ts,tsx}"],
   presets: [require("nativewind/preset")],
+  // The app is dark only (app.json userInterfaceStyle) and uses no dark: variants. With the default
+  // "media", NativeWind's web dev runtime throws "Cannot manually set color scheme" once its CSS loads.
+  darkMode: "class",
   theme: {
     extend: {
       // The demo palette (demo/*/index.html :root block).
