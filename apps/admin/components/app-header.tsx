@@ -11,7 +11,7 @@ import { clearPendingLogin } from "@/lib/pending-login";
 import { createClient } from "@/lib/supabase/client";
 
 const NAV = [
-  { href: "/", label: "Home", adminOnly: false },
+  { href: "/", label: "Jobs", adminOnly: false },
   { href: "/team", label: "Team", adminOnly: true },
   { href: "/billing", label: "Billing", adminOnly: true },
 ];
@@ -44,9 +44,9 @@ export function AppHeader({ current, canSwitch }: { current: Membership; canSwit
           <Link
             key={item.href}
             href={item.href}
-            aria-current={pathname === item.href ? "page" : undefined}
+            aria-current={isCurrent(item.href, pathname) ? "page" : undefined}
             className={
-              pathname === item.href
+              isCurrent(item.href, pathname)
                 ? "border-b-2 border-primary pb-0.5 font-semibold text-foreground"
                 : "text-muted-foreground hover:text-foreground"
             }
@@ -65,4 +65,10 @@ export function AppHeader({ current, canSwitch }: { current: Membership; canSwit
       </Button>
     </header>
   );
+}
+
+/** Jobs stays highlighted on a Job's own pages. */
+function isCurrent(href: string, pathname: string): boolean {
+  if (href === "/") return pathname === "/" || pathname.startsWith("/jobs/") || pathname === "/welcome";
+  return pathname === href;
 }

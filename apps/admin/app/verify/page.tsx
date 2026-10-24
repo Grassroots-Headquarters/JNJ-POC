@@ -54,7 +54,8 @@ export default function VerifyPage() {
         rememberCompanyId(companyId);
       }
       clearPendingLogin();
-      router.push("/");
+      // A new Company goes straight into the guided first Job.
+      router.push(pending.signUp ? "/welcome" : "/");
       router.refresh();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Could not log in.");

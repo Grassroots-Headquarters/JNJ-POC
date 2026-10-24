@@ -6,7 +6,8 @@ import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { AppHeader } from "@/components/app-header";
-import { ConnectedCard } from "@/components/connected-card";
+import { ConnectedStatus } from "@/components/connected-status";
+import { JobsList } from "@/components/jobs-list";
 import { Button } from "@/components/ui/button";
 import { getRememberedCompanyId } from "@/lib/current-company";
 import { getPendingInviteCode } from "@/lib/pending-invite";
@@ -14,7 +15,7 @@ import { createClient } from "@/lib/supabase/client";
 import { useIsClient } from "@/lib/use-is-client";
 import { useMemberships } from "@/lib/use-memberships";
 
-/** The logged-in home: picks up a waiting Invite, works out the current Company, then shows it. */
+/** The logged-in home: picks up a waiting Invite, works out the current Company, then lists its Jobs. */
 export function Home() {
   const router = useRouter();
   const memberships = useMemberships();
@@ -62,8 +63,9 @@ export function Home() {
   return (
     <>
       <AppHeader current={choice.membership} canSwitch={memberships.data.length > 1} />
-      <main className="flex flex-1 items-center justify-center p-6">
-        <ConnectedCard />
+      <main className="mx-auto grid w-full max-w-[640px] content-start gap-6 p-6">
+        <JobsList membership={choice.membership} />
+        <ConnectedStatus />
       </main>
     </>
   );

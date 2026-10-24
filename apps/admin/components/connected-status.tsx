@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
 
-/** One-line platform status for the login screens; the home page shows the full card. */
+/** One-line platform status, under the login forms and the Jobs list. */
 export function ConnectedStatus() {
   const supabase = useMemo(() => createClient(), []);
   const status = useQuery({

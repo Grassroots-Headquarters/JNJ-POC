@@ -3,7 +3,6 @@
 import {
   cancelInvite,
   changeMemberRole,
-  createInvite,
   inviteStatusLabel,
   listInvites,
   listMembers,
@@ -16,21 +15,15 @@ import {
   type Role,
 } from "@jnj/shared";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useMemo, useState, type FormEvent, type ReactNode } from "react";
+import { useMemo, useState } from "react";
 import { AppHeader } from "@/components/app-header";
+import { InviteForm, ROLE_OPTIONS, selectClass } from "@/components/invite-form";
+import { Pill } from "@/components/pill";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/supabase/client";
 import { useCurrentCompany } from "@/lib/use-current-company";
 import { membershipsQueryKey } from "@/lib/use-memberships";
-
-/** Role order from the Admin demo's Invite form. */
-const ROLE_OPTIONS: Role[] = ["site_team", "subcontractor", "admin"];
-
-const selectClass =
-  "w-full rounded-[10px] border border-border bg-background p-3 text-[15px] text-foreground outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:opacity-45";
 
 /** Team: who is in the Company, with their Role, and the Invites sent to join it. */
 export function Team() {
@@ -246,106 +239,5 @@ function TeamAdmin({ companyId }: { companyId: string }) {
         </ul>
       </section>
     </>
-  );
-}
-
-function InviteForm({
-  companyId,
-  onSent,
-  onError,
-}: {
-  companyId: string;
-  onSent: (mobile: string) => void;
-  onError: (message: string) => void;
-}) {
-  const supabase = useMemo(() => createClient(), []);
-  const [name, setName] = useState("");
-  const [mobile, setMobile] = useState("");
-  const [role, setRole] = useState<Role>("site_team");
-  const [busy, setBusy] = useState(false);
-
-  async function onSubmit(event: FormEvent) {
-    event.preventDefault();
-    setBusy(true);
-    try {
-      const invite = await createInvite(supabase, { companyId, phone: mobile, role, fullName: name });
-      try {
-        await sendInvite(supabase, invite.id);
-      } catch (e) {
-        onError(
-          `The Invite was saved but the text could not be sent (${e instanceof Error ? e.message : "unknown error"}). Resend it below.`,
-        );
-        return;
-      }
-      onSent(mobile.trim());
-      setName("");
-      setMobile("");
-      setRole("site_team");
-    } catch (e) {
-      onError(e instanceof Error ? e.message : "Could not send the Invite.");
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  return (
-    <section className="grid gap-2.5" aria-labelledby="invite-heading">
-      <h2 id="invite-heading" className="text-[13px] font-semibold tracking-[0.04em] text-muted-foreground uppercase">
-        Invite someone
-      </h2>
-      <form onSubmit={onSubmit} className="grid gap-2.5">
-        <div className="flex gap-2 *:flex-1">
-          <Label>
-            Name
-            <Input name="name" placeholder="e.g. Tom" autoComplete="off" value={name} onChange={(e) => setName(e.target.value)} />
-          </Label>
-          <Label>
-            Mobile
-            <Input
-              name="mobile"
-              inputMode="tel"
-              autoComplete="off"
-              placeholder="07…"
-              value={mobile}
-              onChange={(e) => setMobile(e.target.value)}
-              required
-            />
-          </Label>
-        </div>
-        <Label>
-          Role
-          <select
-            name="role"
-            aria-label="Role"
-            className={selectClass}
-            value={role}
-            onChange={(e) => setRole(e.target.value as Role)}
-          >
-            {ROLE_OPTIONS.map((option) => (
-              <option key={option} value={option}>
-                {roleLabel[option]}
-              </option>
-            ))}
-          </select>
-        </Label>
-        <Button type="submit" size="lg" className="h-12 rounded-xl text-[15px] font-semibold" disabled={busy}>
-          Send invite by SMS
-        </Button>
-      </form>
-    </section>
-  );
-}
-
-function Pill({ children, tone }: { children: ReactNode; tone?: Invite["status"] }) {
-  const colour =
-    tone === "pending"
-      ? "border-[#F59E0B]/50 bg-[#F59E0B]/12 text-[#F59E0B]"
-      : tone === "accepted"
-        ? "border-[#10B981]/50 bg-[#10B981]/12 text-[#10B981]"
-        : "border-border text-muted-foreground";
-  return (
-    <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium ${colour}`}>
-      {children}
-    </span>
   );
 }
