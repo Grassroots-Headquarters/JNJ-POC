@@ -1,4 +1,4 @@
-import { acceptInvite, getMyProfile, inviteStatusLabel, previewInvite, roleLabel } from "@jnj/shared";
+import { acceptInvite, inviteStatusLabel, previewInvite, roleLabel } from "@jnj/shared";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
@@ -8,7 +8,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Bar, Field, GhostButton, Input, Note, PrimaryButton } from "@/components/ui";
 import { rememberCompanyId } from "@/lib/current-company";
 import { clearPendingInviteCode, rememberPendingInviteCode } from "@/lib/pending-invite";
-import { membershipsQueryKey, profileQueryKey, rememberedCompanyQueryKey } from "@/lib/queries";
+import { membershipsQueryKey, myUserQueryKey, rememberedCompanyQueryKey, useMyUser } from "@/lib/queries";
 import { useSession } from "@/lib/session";
 import { supabase } from "@/lib/supabase";
 
@@ -37,19 +37,14 @@ export default function InviteScreen() {
     enabled: loggedIn && Boolean(code),
     retry: false,
   });
-  const profile = useQuery({
-    queryKey: profileQueryKey,
-    queryFn: () => getMyProfile(supabase),
-    enabled: loggedIn,
-    retry: false,
-  });
+  const me = useMyUser({ enabled: loggedIn });
 
   const [typedName, setTypedName] = useState<string | null>(null);
   const [trade, setTrade] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  // Prefilled with the Invite's name if the Admin typed one, else the profile's, until edited.
-  const fullName = typedName ?? (preview.data?.invitedName || profile.data?.fullName || "");
+  // Prefilled with the Invite's name if the Admin typed one, else the User's own, until edited.
+  const fullName = typedName ?? (preview.data?.invitedName || me.data?.fullName || "");
 
   const unusable = preview.isError || (preview.isSuccess && (preview.data === null || preview.data.status !== "pending"));
   useEffect(() => {
@@ -66,7 +61,7 @@ export default function InviteScreen() {
       await rememberCompanyId(companyId);
       queryClient.setQueryData(rememberedCompanyQueryKey, companyId);
       await queryClient.invalidateQueries({ queryKey: membershipsQueryKey });
-      await queryClient.invalidateQueries({ queryKey: profileQueryKey });
+      await queryClient.invalidateQueries({ queryKey: myUserQueryKey });
       router.replace("/");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Could not accept the Invite.");
@@ -79,7 +74,7 @@ export default function InviteScreen() {
     router.replace("/");
   }
 
-  if (!loggedIn || preview.isPending || profile.isPending) {
+  if (!loggedIn || preview.isPending || me.isPending) {
     return (
       <SafeAreaView className="flex-1 bg-bg">
         <Text className="p-4 text-muted">Loading…</Text>

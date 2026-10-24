@@ -7,7 +7,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Bar, BarAction, GhostButton, PrimaryButton } from "@/components/ui";
 import { getPendingInviteCode } from "@/lib/pending-invite";
-import { useJobs, useMemberships, useMyProfile, useRememberedCompanyId } from "@/lib/queries";
+import { useJobs, useMemberships, useMyUser, useRememberedCompanyId } from "@/lib/queries";
 import { useSession } from "@/lib/session";
 import { supabase } from "@/lib/supabase";
 
@@ -15,7 +15,7 @@ import { supabase } from "@/lib/supabase";
 export default function MyJobsScreen() {
   const memberships = useMemberships();
   const remembered = useRememberedCompanyId();
-  const profile = useMyProfile();
+  const me = useMyUser();
   const router = useRouter();
   const queryClient = useQueryClient();
   // An Invite opened before login is picked up now (User story 29).
@@ -86,7 +86,7 @@ export default function MyJobsScreen() {
           </View>
         }
       />
-      <JobList membership={membership} loggedInAs={profile.data?.fullName} />
+      <JobList membership={membership} loggedInAs={me.data?.fullName} />
     </SafeAreaView>
   );
 }

@@ -24,8 +24,8 @@ describe("Membership visibility across Companies", () => {
     const bea = await signInAs(TEST_USERS.beaBoss);
     const { data: memberships } = await bea.from("memberships").select("user_id").eq("company_id", COMPANY_A.id);
     expect(memberships).toEqual([]);
-    const { data: profiles } = await bea.from("profiles").select("full_name");
-    expect(profiles?.map((p) => p.full_name).sort()).toEqual(["Bea Boss", "Dee Dual"]);
+    const { data: users } = await bea.from("profiles").select("full_name");
+    expect(users?.map((p) => p.full_name).sort()).toEqual(["Bea Boss", "Dee Dual"]);
   });
 
   it("stops a Company B Admin adding themselves to Company A", async () => {

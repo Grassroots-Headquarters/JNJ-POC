@@ -1,6 +1,6 @@
 "use client";
 
-import { acceptInvite, getMyProfile, inviteStatusLabel, previewInvite, roleLabel } from "@jnj/shared";
+import { acceptInvite, inviteStatusLabel, previewInvite, roleLabel } from "@jnj/shared";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -15,6 +15,7 @@ import { clearPendingInviteCode, getPendingInviteCode } from "@/lib/pending-invi
 import { createClient } from "@/lib/supabase/client";
 import { useIsClient } from "@/lib/use-is-client";
 import { membershipsQueryKey } from "@/lib/use-memberships";
+import { myUserQueryKey, useMyUser } from "@/lib/use-my-user";
 
 /**
  * Accepting an Invite on the web (an invited Admin may do this instead of
@@ -34,14 +35,14 @@ export default function AcceptInvitePage() {
     enabled: typeof code === "string",
     retry: false,
   });
-  const profile = useQuery({ queryKey: ["profile"], queryFn: () => getMyProfile(supabase), retry: false });
+  const me = useMyUser();
 
   const [typedName, setTypedName] = useState<string | null>(null);
   const [trade, setTrade] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  // Prefilled with the Invite's name if the Admin typed one, else the profile's, until edited.
-  const fullName = typedName ?? (preview.data?.invitedName || profile.data?.fullName || "");
+  // Prefilled with the Invite's name if the Admin typed one, else the User's own, until edited.
+  const fullName = typedName ?? (preview.data?.invitedName || me.data?.fullName || "");
 
   const unusable =
     code === null ||
@@ -66,7 +67,7 @@ export default function AcceptInvitePage() {
       </AuthScreen>
     );
   }
-  if (!preview.isSuccess || !preview.data || !profile.isSuccess) {
+  if (!preview.isSuccess || !preview.data || !me.isSuccess) {
     return <main className="p-6 text-muted-foreground">Loading…</main>;
   }
   const invite = preview.data;
@@ -95,7 +96,7 @@ export default function AcceptInvitePage() {
       clearPendingInviteCode();
       rememberCompanyId(companyId);
       await queryClient.invalidateQueries({ queryKey: membershipsQueryKey });
-      await queryClient.invalidateQueries({ queryKey: ["profile"] });
+      await queryClient.invalidateQueries({ queryKey: myUserQueryKey });
       router.push("/");
       router.refresh();
     } catch (e) {

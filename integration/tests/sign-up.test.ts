@@ -23,8 +23,8 @@ describe("Company sign-up", () => {
     expect(company?.referred_by_company_id).toBe(COMPANY_A.id);
     expect(company?.referral_code).toMatch(/^[A-HJ-NP-Z2-9]{6}$/);
 
-    const { data: profile } = await client.from("profiles").select("full_name").single();
-    expect(profile?.full_name).toBe("Vic Vitest");
+    const { data: me } = await client.from("profiles").select("full_name").single();
+    expect(me?.full_name).toBe("Vic Vitest");
   });
 
   it("rejects an unknown Referral code without creating anything", async () => {

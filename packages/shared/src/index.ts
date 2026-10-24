@@ -5,10 +5,10 @@ export { normalisePhone } from "./phone";
 export {
   listMyMemberships,
   signUpCompany,
-  getMyProfile,
+  getMyUser,
   roleLabel,
   type Membership,
-  type Profile,
+  type MyUser,
   type Role,
   type SignUpCompanyInput,
 } from "./memberships";

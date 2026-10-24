@@ -23,6 +23,7 @@ _Avoid_: Tenant, account, organisation, builder
 **User**:
 One real person with one login, who can belong to any number of Companies.
 _Avoid_: Account, profile
+_Note_: in the database a User's details (their name) live in the `profiles` table, one row per Supabase auth user. That name follows Supabase convention and is not a separate concept; code above the database says User (`getMyUser`, `MyUser`).
 
 **Membership**:
 A User's place in one Company, carrying their Role in that Company.

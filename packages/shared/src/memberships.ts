@@ -22,9 +22,7 @@ export const roleLabel: Record<Role, string> = {
  * other Members of those Companies.
  */
 export async function listMyMemberships(client: TypedClient): Promise<Membership[]> {
-  const { data: session } = await client.auth.getSession();
-  const userId = session.session?.user.id;
-  if (!userId) throw new Error("Not logged in");
+  const userId = await loggedInUserId(client);
   const { data, error } = await client
     .from("memberships")
     .select("company_id, role, companies(name)")
@@ -56,16 +54,15 @@ export async function signUpCompany(client: TypedClient, input: SignUpCompanyInp
   return data;
 }
 
-export type Profile = {
+/** The logged-in User's own details (stored in the `profiles` table). */
+export type MyUser = {
   userId: string;
   fullName: string;
 };
 
-/** The logged-in User's own profile. */
-export async function getMyProfile(client: TypedClient): Promise<Profile> {
-  const { data: session } = await client.auth.getSession();
-  const userId = session.session?.user.id;
-  if (!userId) throw new Error("Not logged in");
+/** The logged-in User's own details. */
+export async function getMyUser(client: TypedClient): Promise<MyUser> {
+  const userId = await loggedInUserId(client);
   const { data, error } = await client
     .from("profiles")
     .select("user_id, full_name")
@@ -73,4 +70,11 @@ export async function getMyProfile(client: TypedClient): Promise<Profile> {
     .single();
   if (error) throw new Error(error.message);
   return { userId: data.user_id, fullName: data.full_name };
+}
+
+async function loggedInUserId(client: TypedClient): Promise<string> {
+  const { data } = await client.auth.getSession();
+  const userId = data.session?.user.id;
+  if (!userId) throw new Error("Not logged in");
+  return userId;
 }
