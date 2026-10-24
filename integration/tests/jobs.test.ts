@@ -8,6 +8,7 @@ import {
   createServiceClient,
   freeTestPhone,
   signInAs,
+  userIdForPhone,
 } from "@jnj/harness";
 import {
   acceptInvite,
@@ -129,9 +130,8 @@ describe("Inviting someone straight onto a Job", () => {
     alex = await signInAs(TEST_USERS.alexAdmin);
     const service = createServiceClient();
     await service.from("invites").delete().eq("phone", JOE);
-    const { data } = await service.auth.admin.listUsers({ perPage: 1000 });
-    const joe = data.users.find((u) => u.phone === JOE.slice(1));
-    if (joe) await service.from("memberships").delete().eq("user_id", joe.id);
+    const joe = await userIdForPhone(JOE);
+    if (joe) await service.from("memberships").delete().eq("user_id", joe);
     job = await createJob(alex, { companyId: COMPANY_A.id, name: "Invite Lane" });
   });
 

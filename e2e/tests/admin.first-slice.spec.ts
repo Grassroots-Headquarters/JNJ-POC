@@ -1,6 +1,7 @@
-import { createServiceClient } from "@jnj/harness";
-import { inviteCodeFromSms } from "@jnj/shared";
+import { createServiceClient, inviteCodeTextedTo, userIdForPhone } from "@jnj/harness";
+import { normalisePhone } from "@jnj/shared";
 import { expect, test, type Browser, type Page } from "@playwright/test";
+import { logInToAdminApp } from "./log-in";
 
 // The first slice from spec #23, across the Admin app and the Mobile app's web
 // build: an Admin signs their Company up, logs a Job and invites a Site team
@@ -8,44 +9,19 @@ import { expect, test, type Browser, type Page } from "@playwright/test";
 // which follows her Assignment; a second Company's User cannot see it.
 // +447700900013 and +447700900014 are reserved for this journey (contracts: #29 uses 013-015).
 const ADMIN_MOBILE = "07700 900013";
-const ADMIN_PHONE = "+447700900013";
+const ADMIN_PHONE = normalisePhone(ADMIN_MOBILE)!;
 const SITE_TEAM_MOBILE = "07700 900014";
-const SITE_TEAM_PHONE = "+447700900014";
+const SITE_TEAM_PHONE = normalisePhone(SITE_TEAM_MOBILE)!;
 const COMPANY = "Slice Builders";
 const SITE_TEAM_NAME = "Tia Trowel";
 const JOB = "Birch Close kitchen";
 const JOB_ADDRESS = "3 Birch Close, Bromley";
 const MOBILE_WEB_URL = "http://localhost:8081";
 
-/** The test User with this phone, if one exists yet, read as the test harness. */
-async function userIdFor(phone: string): Promise<string | undefined> {
-  const { data, error } = await createServiceClient().auth.admin.listUsers({ perPage: 1000 });
-  if (error) throw new Error(error.message);
-  return data.users.find((u) => u.phone === phone.slice(1))?.id;
-}
-
-/** The Invite code texted to a number, read from the fake SMS outbox. */
-async function inviteCodeTextedTo(phone: string): Promise<string> {
-  const { data, error } = await createServiceClient()
-    .from("outbound_sms")
-    .select("body")
-    .eq("to", phone)
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .single();
-  if (error) throw new Error(error.message);
-  const code = inviteCodeFromSms(data.body);
-  if (!code) throw new Error(`No Invite link in the SMS: ${data.body}`);
-  return code;
-}
-
-async function logInToAdminApp(browser: Browser, mobile: string): Promise<Page> {
+/** A fresh browser context logged into the Admin app, on the Jobs list. */
+async function adminAppAs(browser: Browser, mobile: string): Promise<Page> {
   const page = await (await browser.newContext()).newPage();
-  await page.goto("/login");
-  await page.getByLabel("Mobile number").fill(mobile);
-  await page.getByRole("button", { name: "Send login code" }).click();
-  await page.getByLabel("Login code").fill("123456");
-  await page.getByRole("button", { name: "Log in" }).click();
+  await logInToAdminApp(page, mobile);
   await expect(page.getByRole("heading", { name: "Jobs" })).toBeVisible();
   return page;
 }
@@ -53,13 +29,13 @@ async function logInToAdminApp(browser: Browser, mobile: string): Promise<Page> 
 // Start each run (and retry) from nobody: no Company for the Admin, no Membership for the Site team member.
 test.beforeEach(async () => {
   const service = createServiceClient();
-  const admin = await userIdFor(ADMIN_PHONE);
+  const admin = await userIdForPhone(ADMIN_PHONE);
   if (admin) {
     const { data } = await service.from("memberships").select("company_id").eq("user_id", admin);
     const companies = (data ?? []).map((m) => m.company_id);
     if (companies.length) await service.from("companies").delete().in("id", companies);
   }
-  const siteTeamMember = await userIdFor(SITE_TEAM_PHONE);
+  const siteTeamMember = await userIdForPhone(SITE_TEAM_PHONE);
   if (siteTeamMember) await service.from("memberships").delete().eq("user_id", siteTeamMember);
   await service.from("invites").delete().eq("phone", SITE_TEAM_PHONE);
 });
@@ -145,7 +121,7 @@ test("an Admin signs up, logs a Job and invites a Site team member, who sees it 
   await expect(page.getByTestId("job").filter({ hasText: JOB })).toContainText(`Job lead ${SITE_TEAM_NAME}`);
 
   // 4. A User from a second Company cannot see the Job, in either app.
-  const bea = await logInToAdminApp(browser, "07700 900003");
+  const bea = await adminAppAs(browser, "07700 900003");
   await expect(bea.getByTestId("current-company")).toHaveText("Hart Builders");
   await expect(bea.getByTestId("job").filter({ hasText: "Hart Lane refit" })).toBeVisible();
   await expect(bea.getByTestId("job").filter({ hasText: JOB })).toHaveCount(0);

@@ -1,4 +1,4 @@
-import { COMPANY_A, TEST_USERS, createServiceClient, freeTestPhone, signInAs } from "@jnj/harness";
+import { COMPANY_A, TEST_USERS, createServiceClient, freeTestPhone, lastSmsTo, signInAs } from "@jnj/harness";
 import {
   SendInviteError,
   acceptInvite,
@@ -20,19 +20,6 @@ import { beforeAll, describe, expect, it } from "vitest";
 const IVY = freeTestPhone(9);
 const OWEN = freeTestPhone(11);
 const PAT = freeTestPhone(12);
-
-/** The last SMS the fake outbox recorded for a number, read as the test harness, not as a User. */
-async function lastSmsTo(phone: string): Promise<{ to: string; body: string } | null> {
-  const { data, error } = await createServiceClient()
-    .from("outbound_sms")
-    .select("to, body")
-    .eq("to", phone)
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-  if (error) throw new Error(error.message);
-  return data;
-}
 
 describe("Inviting a new person to the Company", () => {
   let alex: TypedClient;

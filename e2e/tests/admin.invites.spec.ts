@@ -1,36 +1,20 @@
-import { createServiceClient } from "@jnj/harness";
-import { inviteCodeFromSms } from "@jnj/shared";
+import { createServiceClient, inviteCodeTextedTo, userIdForPhone } from "@jnj/harness";
+import { normalisePhone } from "@jnj/shared";
 import { expect, test } from "@playwright/test";
+import { logInToAdminApp } from "./log-in";
 
 // +447700900010 is reserved for this journey (contracts: ticket #28 uses 009-012).
 const INVITEE_MOBILE = "07700 900010";
-const INVITEE_PHONE = "+447700900010";
+const INVITEE_PHONE = normalisePhone(INVITEE_MOBILE)!;
 const INVITEE_NAME = "Iris Invitee";
 const ADMIN_URL = "http://localhost:3000";
 const MOBILE_WEB_URL = "http://localhost:8081";
 
-/** The text the invitee would have received, read from the fake SMS outbox as the test harness. */
-async function inviteCodeTextedTo(phone: string): Promise<string> {
-  const { data, error } = await createServiceClient()
-    .from("outbound_sms")
-    .select("body")
-    .eq("to", phone)
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .single();
-  if (error) throw new Error(error.message);
-  const code = inviteCodeFromSms(data.body);
-  if (!code) throw new Error(`No Invite link in the SMS: ${data.body}`);
-  return code;
-}
-
 // Leave the invitee as a fresh person again, so the journey can be re-run (and retried) on one database.
 test.beforeEach(async () => {
   const service = createServiceClient();
-  const { data, error } = await service.auth.admin.listUsers({ perPage: 1000 });
-  if (error) throw new Error(error.message);
-  const invitee = data.users.find((u) => u.phone === INVITEE_PHONE.slice(1));
-  if (invitee) await service.from("memberships").delete().eq("user_id", invitee.id);
+  const invitee = await userIdForPhone(INVITEE_PHONE);
+  if (invitee) await service.from("memberships").delete().eq("user_id", invitee);
   await service.from("invites").delete().eq("phone", INVITEE_PHONE);
 });
 
@@ -39,11 +23,7 @@ test("an Admin invites a Site team member by SMS and they join from the Mobile a
   browser,
 }) => {
   // Alex, Admin of JNJ Building, logs into the Admin app.
-  await page.goto("/login");
-  await page.getByLabel("Mobile number").fill("07700 900001");
-  await page.getByRole("button", { name: "Send login code" }).click();
-  await page.getByLabel("Login code").fill("123456");
-  await page.getByRole("button", { name: "Log in" }).click();
+  await logInToAdminApp(page, "07700 900001");
   await expect(page.getByTestId("current-company")).toHaveText("JNJ Building");
 
   // Team: invite Iris as Site team.

@@ -1,15 +1,11 @@
 import { expect, test, type Page } from "@playwright/test";
+import { logInToAdminApp } from "./log-in";
 
 // Seeded Users (contracts): Alex Admin of Company A, Sam Site team of Company A.
 // No Stripe keys exist locally, so this stops short of Stripe's hosted pages.
 
 async function logIn(page: Page, mobile: string) {
-  await page.goto("/login");
-  await page.getByLabel("Mobile number").fill(mobile);
-  await page.getByRole("button", { name: "Send login code" }).click();
-  await expect(page).toHaveURL(/\/verify$/);
-  await page.getByLabel("Login code").fill("123456");
-  await page.getByRole("button", { name: "Log in" }).click();
+  await logInToAdminApp(page, mobile);
   await expect(page).toHaveURL(/\/$/);
   await expect(page.getByTestId("current-company")).toHaveText("JNJ Building");
 }
