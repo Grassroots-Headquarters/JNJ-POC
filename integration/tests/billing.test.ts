@@ -25,10 +25,14 @@ let eventCounter = 0;
 
 const SUB_A = `sub_a_${run}`;
 const ITEM_A = `si_a_${run}`;
+const SUB_A2 = `sub_a2_${run}`;
+const ITEM_A2 = `si_a2_${run}`;
+const SUB_A3 = `sub_a3_${run}`;
+const ITEM_A3 = `si_a3_${run}`;
 const CUSTOMER_A = `cus_a_${run}`;
 const periodEnd = Math.floor(Date.now() / 1000) + 30 * 24 * 3600;
 
-type EventOverrides = { id?: string; signature?: string };
+type EventOverrides = { id?: string; signature?: string; /** Unix seconds; Stripe's event.created. */ created?: number };
 
 async function sendEvent(type: string, object: Record<string, unknown>, overrides: EventOverrides = {}) {
   const id = overrides.id ?? `evt_${run}_${++eventCounter}`;
@@ -36,7 +40,7 @@ async function sendEvent(type: string, object: Record<string, unknown>, override
     id,
     object: "event",
     api_version: "2026-09-30.endive",
-    created: Math.floor(Date.now() / 1000),
+    created: overrides.created ?? Math.floor(Date.now() / 1000),
     livemode: false,
     pending_webhooks: 1,
     request: { id: null, idempotency_key: null },
@@ -174,24 +178,54 @@ describe("the Client Portal Add-on follows Stripe", () => {
   });
 
   it("treats a replayed event id as already handled", async () => {
+    // A new subscription: the one above was cancelled, and a cancelled Stripe subscription stays cancelled.
     const first = await sendEvent(
       "customer.subscription.updated",
-      subscription(COMPANY_A.id, SUB_A, "active", CUSTOMER_A, ITEM_A),
+      subscription(COMPANY_A.id, SUB_A2, "active", CUSTOMER_A, ITEM_A2),
     );
     expect(first.body).toEqual({ received: true });
     expect(await companyHasAddOn(sam, COMPANY_A.id, "client_portal")).toBe(true);
 
-    await sendEvent("customer.subscription.deleted", subscription(COMPANY_A.id, SUB_A, "canceled", CUSTOMER_A, ITEM_A));
+    await sendEvent("customer.subscription.deleted", subscription(COMPANY_A.id, SUB_A2, "canceled", CUSTOMER_A, ITEM_A2));
     expect(await companyHasAddOn(sam, COMPANY_A.id, "client_portal")).toBe(false);
 
     // Stripe redelivers the earlier "active" event: it must not switch the Add-on back on.
     const replay = await sendEvent(
       "customer.subscription.updated",
-      subscription(COMPANY_A.id, SUB_A, "active", CUSTOMER_A, ITEM_A),
+      subscription(COMPANY_A.id, SUB_A2, "active", CUSTOMER_A, ITEM_A2),
       { id: first.id },
     );
     expect(replay.response.status).toBe(200);
     expect(replay.body).toEqual({ received: true, duplicate: true });
+    expect(await companyHasAddOn(sam, COMPANY_A.id, "client_portal")).toBe(false);
+  });
+
+  it("ignores events that arrive after a newer one, and never revives a cancelled subscription", async () => {
+    const now = Math.floor(Date.now() / 1000);
+    await sendEvent("customer.subscription.updated", subscription(COMPANY_A.id, SUB_A3, "active", CUSTOMER_A, ITEM_A3), {
+      created: now,
+    });
+    await sendEvent("customer.subscription.updated", subscription(COMPANY_A.id, SUB_A3, "past_due", CUSTOMER_A, ITEM_A3), {
+      created: now + 20,
+    });
+    // An "active" update from before the payment failed turns up late.
+    await sendEvent("customer.subscription.updated", subscription(COMPANY_A.id, SUB_A3, "active", CUSTOMER_A, ITEM_A3), {
+      created: now + 10,
+    });
+    expect((await listAddOns(sam, COMPANY_A.id))[0]).toMatchObject({ status: "past_due", active: true });
+
+    await sendEvent("customer.subscription.deleted", subscription(COMPANY_A.id, SUB_A3, "canceled", CUSTOMER_A, ITEM_A3), {
+      created: now + 40,
+    });
+    // The invoice paid before the cancellation arrives after it.
+    const latePaid = await sendEvent("invoice.paid", invoice(COMPANY_A.id, CUSTOMER_A, SUB_A3, true), { created: now + 30 });
+    expect(latePaid.response.status).toBe(200);
+    expect((await listAddOns(sam, COMPANY_A.id))[0]).toMatchObject({ status: "canceled", active: false });
+
+    // Even an event stamped after the cancellation cannot bring the same subscription back.
+    await sendEvent("customer.subscription.updated", subscription(COMPANY_A.id, SUB_A3, "active", CUSTOMER_A, ITEM_A3), {
+      created: now + 50,
+    });
     expect(await companyHasAddOn(sam, COMPANY_A.id, "client_portal")).toBe(false);
   });
 });

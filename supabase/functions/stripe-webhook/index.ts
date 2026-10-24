@@ -16,7 +16,9 @@ import { Sentry, serve } from "../_shared/sentry.ts";
 // The only thing that switches an Add-on on or off (ADR 0008). Stripe posts
 // signed events here (`verify_jwt = false`; the signature is the check).
 // Events can repeat and arrive out of order, so every event id is recorded
-// first and apply_stripe_subscription ignores stale terminal statuses.
+// and apply_stripe_subscription is given the event's `created` time: it
+// ignores events older than the last one applied and never revives a
+// cancelled subscription.
 //
 // Subscribed events (set by the account wizard): checkout.session.completed,
 // customer.subscription.created|updated|deleted, invoice.paid,
@@ -25,8 +27,6 @@ import { Sentry, serve } from "../_shared/sentry.ts";
 const cryptoProvider = Stripe.createSubtleCryptoProvider();
 // Signature checking needs no API key; the placeholder keeps the SDK happy locally.
 const webhooks = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "sk_test_unset").webhooks;
-
-const OFF_STATUSES = new Set(["canceled", "unpaid", "incomplete_expired"]);
 
 serve(async (req) => {
   if (req.method !== "POST") return json({ error: "method not allowed" }, 405);
@@ -59,24 +59,25 @@ serve(async (req) => {
 type Outcome = { ignored?: string };
 
 async function handle(event: Stripe.Event, db: SupabaseClient): Promise<Outcome> {
+  const at = isoFrom(event.created)!;
   switch (event.type) {
     case "checkout.session.completed":
-      return await onCheckoutCompleted(event.data.object, db);
+      return await onCheckoutCompleted(event.data.object, at, db);
     case "customer.subscription.created":
     case "customer.subscription.updated":
-      return await onSubscription(event.data.object, event.data.object.status, db);
+      return await onSubscription(event.data.object, event.data.object.status, at, db);
     case "customer.subscription.deleted":
-      return await onSubscription(event.data.object, "canceled", db);
+      return await onSubscription(event.data.object, "canceled", at, db);
     case "invoice.paid":
-      return await onInvoicePaid(event.data.object, db);
+      return await onInvoicePaid(event.data.object, at, db);
     case "invoice.payment_failed":
-      return await onInvoicePaymentFailed(event.data.object, db);
+      return await onInvoicePaymentFailed(event.data.object, at, db);
     default:
       return { ignored: `unhandled event type ${event.type}` };
   }
 }
 
-async function onCheckoutCompleted(session: Stripe.Checkout.Session, db: SupabaseClient): Promise<Outcome> {
+async function onCheckoutCompleted(session: Stripe.Checkout.Session, at: string, db: SupabaseClient): Promise<Outcome> {
   const customerId = idOf(session.customer);
   const companyId = await companyIdFor(db, {
     metadataCompanyId: session.metadata?.company_id,
@@ -90,7 +91,7 @@ async function onCheckoutCompleted(session: Stripe.Checkout.Session, db: Supabas
   // Switch on only once Stripe says the first payment is in; the subscription
   // events that follow carry the item id and period end.
   if (session.mode === "subscription" && subscriptionId && session.payment_status === "paid") {
-    await apply(db, companyId, addOnOf(session.metadata), subscriptionId, null, "active", null);
+    await apply(db, { companyId, addOn: addOnOf(session.metadata), subscriptionId, status: "active", at });
   }
   return {};
 }
@@ -98,6 +99,7 @@ async function onCheckoutCompleted(session: Stripe.Checkout.Session, db: Supabas
 async function onSubscription(
   subscription: Stripe.Subscription,
   status: string,
+  at: string,
   db: SupabaseClient,
 ): Promise<Outcome> {
   const customerId = idOf(subscription.customer);
@@ -107,11 +109,19 @@ async function onSubscription(
 
   const item = subscription.items?.data?.[0];
   const periodEnd = item?.current_period_end ?? (subscription as { current_period_end?: number }).current_period_end;
-  await apply(db, companyId, addOnOf(subscription.metadata), subscription.id, item?.id ?? null, status, isoFrom(periodEnd));
+  await apply(db, {
+    companyId,
+    addOn: addOnOf(subscription.metadata),
+    subscriptionId: subscription.id,
+    itemId: item?.id,
+    status,
+    periodEnd: isoFrom(periodEnd),
+    at,
+  });
   return {};
 }
 
-async function onInvoicePaid(invoice: Stripe.Invoice, db: SupabaseClient): Promise<Outcome> {
+async function onInvoicePaid(invoice: Stripe.Invoice, at: string, db: SupabaseClient): Promise<Outcome> {
   const { subscriptionId, metadata, customerId } = invoiceSubscription(invoice);
   if (!subscriptionId) return { ignored: "invoice is not for a subscription" };
   const companyId = await companyIdFor(db, { metadataCompanyId: metadata.company_id, customerId });
@@ -119,12 +129,12 @@ async function onInvoicePaid(invoice: Stripe.Invoice, db: SupabaseClient): Promi
   await linkCustomer(db, companyId, customerId);
 
   const periodEnd = invoice.lines?.data?.[0]?.period?.end;
-  await apply(db, companyId, addOnOf(metadata), subscriptionId, null, "active", isoFrom(periodEnd));
+  await apply(db, { companyId, addOn: addOnOf(metadata), subscriptionId, status: "active", periodEnd: isoFrom(periodEnd), at });
   await grantReferralReward(db, companyId, subscriptionId);
   return {};
 }
 
-async function onInvoicePaymentFailed(invoice: Stripe.Invoice, db: SupabaseClient): Promise<Outcome> {
+async function onInvoicePaymentFailed(invoice: Stripe.Invoice, at: string, db: SupabaseClient): Promise<Outcome> {
   const { subscriptionId, metadata, customerId } = invoiceSubscription(invoice);
   if (!subscriptionId) return { ignored: "invoice is not for a subscription" };
   const companyId = await companyIdFor(db, { metadataCompanyId: metadata.company_id, customerId });
@@ -136,15 +146,15 @@ async function onInvoicePaymentFailed(invoice: Stripe.Invoice, db: SupabaseClien
   const addOn = addOnOf(metadata);
   const { data: current, error } = await db
     .from("add_on_subscriptions")
-    .select("stripe_subscription_id, status")
+    .select("stripe_subscription_id, active")
     .eq("company_id", companyId)
     .eq("add_on", addOn)
     .maybeSingle();
   if (error) throw new Error(error.message);
-  if (!current || current.stripe_subscription_id !== subscriptionId || OFF_STATUSES.has(current.status)) {
+  if (!current || current.stripe_subscription_id !== subscriptionId || !current.active) {
     return { ignored: "payment failure for a subscription that is not on" };
   }
-  await apply(db, companyId, addOn, subscriptionId, null, "past_due", null);
+  await apply(db, { companyId, addOn, subscriptionId, status: "past_due", at });
   return {};
 }
 
@@ -209,22 +219,28 @@ async function grantReferralReward(db: SupabaseClient, companyId: string, subscr
   }
 }
 
-async function apply(
-  db: SupabaseClient,
-  companyId: string,
-  addOn: AddOn,
-  subscriptionId: string,
-  itemId: string | null,
-  status: string,
-  periodEnd: string | null,
-): Promise<void> {
+type SubscriptionChange = {
+  companyId: string;
+  addOn: AddOn;
+  subscriptionId: string;
+  /** Omitted: keep the stored one. */
+  itemId?: string | null;
+  status: string;
+  /** Omitted: keep the stored one. */
+  periodEnd?: string | null;
+  /** The event's `created` time; older events than the last applied are ignored. */
+  at: string;
+};
+
+async function apply(db: SupabaseClient, change: SubscriptionChange): Promise<void> {
   const { error } = await db.rpc("apply_stripe_subscription", {
-    company: companyId,
-    add_on: addOn,
-    subscription_id: subscriptionId,
-    item_id: itemId,
-    status,
-    period_end: periodEnd,
+    company: change.companyId,
+    add_on: change.addOn,
+    subscription_id: change.subscriptionId,
+    item_id: change.itemId ?? null,
+    status: change.status,
+    period_end: change.periodEnd ?? null,
+    event_created: change.at,
   });
   if (error) throw new Error(`apply_stripe_subscription failed: ${error.message}`);
 }

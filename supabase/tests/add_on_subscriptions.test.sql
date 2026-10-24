@@ -1,7 +1,7 @@
 -- Add-on state follows Stripe and stays inside the Company (ADR 0007, ADR 0008).
 -- Seeded Users: Alex Admin (A), Sam Site (A), Bea Boss (B).
 begin;
-select plan(23);
+select plan(27);
 
 \set alex '10000000-0000-4000-8000-000000000001'
 \set sam  '10000000-0000-4000-8000-000000000002'
@@ -34,7 +34,7 @@ select throws_ok(
   'an Admin cannot switch an Add-on on by inserting'
 );
 select throws_ok(
-  $$ select public.apply_stripe_subscription('20000000-0000-4000-8000-00000000000a', 'client_portal', 'sub_forged', null, 'active', null) $$,
+  $$ select public.apply_stripe_subscription('20000000-0000-4000-8000-00000000000a', 'client_portal', 'sub_forged', null, 'active', null, now()) $$,
   '42501',
   'permission denied for function apply_stripe_subscription',
   'authenticated cannot call apply_stripe_subscription'
@@ -43,7 +43,7 @@ select throws_ok(
 -- Stripe (the webhook, as service_role) switches it on.
 set local role service_role;
 select lives_ok(
-  $$ select public.apply_stripe_subscription('20000000-0000-4000-8000-00000000000a', 'client_portal', 'sub_a1', 'si_a1', 'active', now() + interval '30 days') $$,
+  $$ select public.apply_stripe_subscription('20000000-0000-4000-8000-00000000000a', 'client_portal', 'sub_a1', 'si_a1', 'active', now() + interval '30 days', '2026-10-01 10:00') $$,
   'service_role applies a paid subscription'
 );
 
@@ -79,25 +79,62 @@ select is(
 
 -- Stripe moves it through past_due (still on) to canceled (off).
 set local role service_role;
-select public.apply_stripe_subscription(:'company_a', 'client_portal', 'sub_a1', null, 'past_due', null);
+select public.apply_stripe_subscription(:'company_a', 'client_portal', 'sub_a1', null, 'past_due', null, '2026-10-02 10:00');
 set local role authenticated;
 set local request.jwt.claims = '{"sub": "10000000-0000-4000-8000-000000000002", "role": "authenticated"}';
 select ok(public.company_has_add_on(:'company_a', 'client_portal'), 'past_due keeps the Client Portal on while Stripe retries');
 
+-- An event from before the payment failed, delivered late, changes nothing.
 set local role service_role;
-select public.apply_stripe_subscription(:'company_a', 'client_portal', 'sub_a1', null, 'canceled', null);
+select public.apply_stripe_subscription(:'company_a', 'client_portal', 'sub_a1', null, 'active', null, '2026-10-01 12:00');
+reset role;
+select is(
+  (select status from public.add_on_subscriptions where company_id = :'company_a'),
+  'past_due',
+  'an event older than the last one applied is ignored'
+);
+
+set local role service_role;
+select public.apply_stripe_subscription(:'company_a', 'client_portal', 'sub_a1', null, 'canceled', null, '2026-10-03 10:00');
+-- Nothing brings a cancelled subscription back on: not a late paid invoice,
+-- not even an event stamped after the cancellation.
+select public.apply_stripe_subscription(:'company_a', 'client_portal', 'sub_a1', null, 'active', null, '2026-10-02 12:00');
+select public.apply_stripe_subscription(:'company_a', 'client_portal', 'sub_a1', null, 'active', null, '2026-10-04 10:00');
+reset role;
+select is(
+  (select status from public.add_on_subscriptions where company_id = :'company_a'),
+  'canceled',
+  'a cancelled subscription stays cancelled'
+);
+
+set local role service_role;
 -- The death of an older, replaced subscription does not switch off the current one.
-select public.apply_stripe_subscription(:'company_a', 'client_portal', 'sub_a2', 'si_a2', 'active', null);
-select public.apply_stripe_subscription(:'company_a', 'client_portal', 'sub_a1', null, 'canceled', null);
+select public.apply_stripe_subscription(:'company_a', 'client_portal', 'sub_a2', 'si_a2', 'active', null, '2026-10-05 10:00');
+select public.apply_stripe_subscription(:'company_a', 'client_portal', 'sub_a1', null, 'canceled', null, '2026-10-06 10:00');
 set local role authenticated;
 set local request.jwt.claims = '{"sub": "10000000-0000-4000-8000-000000000002", "role": "authenticated"}';
 select ok(public.company_has_add_on(:'company_a', 'client_portal'), 'a canceled event for a replaced subscription is ignored');
 
 set local role service_role;
-select public.apply_stripe_subscription(:'company_a', 'client_portal', 'sub_a2', null, 'unpaid', null);
+select public.apply_stripe_subscription(:'company_a', 'client_portal', 'sub_a2', null, 'unpaid', null, '2026-10-07 10:00');
 set local role authenticated;
 set local request.jwt.claims = '{"sub": "10000000-0000-4000-8000-000000000002", "role": "authenticated"}';
 select ok(not public.company_has_add_on(:'company_a', 'client_portal'), 'unpaid switches the Client Portal off');
+
+-- unpaid is not final: paying the open invoice switches it back on.
+set local role service_role;
+select public.apply_stripe_subscription(:'company_a', 'client_portal', 'sub_a2', null, 'active', null, '2026-10-08 10:00');
+set local role authenticated;
+set local request.jwt.claims = '{"sub": "10000000-0000-4000-8000-000000000002", "role": "authenticated"}';
+select ok(public.company_has_add_on(:'company_a', 'client_portal'), 'an unpaid subscription comes back on when paid');
+
+set local role service_role;
+select throws_ok(
+  $$ select public.apply_stripe_subscription('20000000-0000-4000-8000-00000000000a', 'client_portal', 'sub_a2', null, 'active', null, null) $$,
+  'P0001',
+  'company, subscription_id, status and event_created are required',
+  'every change carries the time of the Stripe event'
+);
 
 reset role;
 select * from finish();

@@ -25,14 +25,14 @@ export type Database = {
           Tables: {
             "add_on_subscriptions": {
                   Row: {
-                    "active": boolean,"add_on": Database["public"]['Enums']["add_on"],"company_id": string,"created_at": string,"current_period_end": string | null,"status": string,"stripe_subscription_id": string,"stripe_subscription_item_id": string | null,"updated_at": string
+                    "active": boolean,"add_on": Database["public"]['Enums']["add_on"],"company_id": string,"created_at": string,"current_period_end": string | null,"last_event_at": string | null,"status": string,"stripe_subscription_id": string,"stripe_subscription_item_id": string | null,"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "active"?: never,"add_on": Database["public"]['Enums']["add_on"],"company_id": string,"created_at"?: string,"current_period_end"?: string | null,"status": string,"stripe_subscription_id": string,"stripe_subscription_item_id"?: string | null,"updated_at"?: string
+                    "active"?: never,"add_on": Database["public"]['Enums']["add_on"],"company_id": string,"created_at"?: string,"current_period_end"?: string | null,"last_event_at"?: string | null,"status": string,"stripe_subscription_id": string,"stripe_subscription_item_id"?: string | null,"updated_at"?: string
                   }
                   Update: {
-                    "active"?: never,"add_on"?: Database["public"]['Enums']["add_on"],"company_id"?: string,"created_at"?: string,"current_period_end"?: string | null,"status"?: string,"stripe_subscription_id"?: string,"stripe_subscription_item_id"?: string | null,"updated_at"?: string
+                    "active"?: never,"add_on"?: Database["public"]['Enums']["add_on"],"company_id"?: string,"created_at"?: string,"current_period_end"?: string | null,"last_event_at"?: string | null,"status"?: string,"stripe_subscription_id"?: string,"stripe_subscription_item_id"?: string | null,"updated_at"?: string
                   }
                   Relationships: [
                     {
@@ -258,8 +258,11 @@ isOneToOne: false
             "accept_invite":
 { Args: { "code": string,"full_name": string,"trade"?: string }; Returns: string
                            },
+"add_on_status_is_on":
+{ Args: { "status": string }; Returns: boolean
+                           },
 "apply_stripe_subscription":
-{ Args: { "add_on": Database["public"]['Enums']["add_on"],"company": string,"item_id": string,"period_end": string,"status": string,"subscription_id": string }; Returns: undefined
+{ Args: { "add_on": Database["public"]['Enums']["add_on"],"company": string,"event_created": string,"item_id": string,"period_end": string,"status": string,"subscription_id": string }; Returns: undefined
                            },
 "assign_to_job":
 { Args: { "job": string,"job_lead"?: boolean,"user_id": string }; Returns: undefined
