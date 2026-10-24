@@ -1,13 +1,21 @@
 import "../../global.css";
 
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider, focusManager } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
+import { AppState, Platform } from "react-native";
 
 import { Sentry } from "@/lib/sentry";
 import { SessionProvider, useSession } from "@/lib/session";
 
 const queryClient = new QueryClient();
+
+// Refetch when the app comes back to the foreground, so a Job assigned or
+// removed while it was in the background shows up straight away. The web
+// build gets this from the browser's visibility events already.
+if (Platform.OS !== "web") {
+  AppState.addEventListener("change", (state) => focusManager.setFocused(state === "active"));
+}
 
 function RootNavigator() {
   const { session } = useSession();
