@@ -37,6 +37,20 @@ export const COMPANY_B = {
   referralCode: "BH2M9T",
 } as const;
 
+/** Company A's first Job: Dee is its Job lead and Cleo its Client. */
+export const JOB_A = {
+  id: "30000000-0000-4000-8000-0000000000a1",
+  companyId: COMPANY_A.id,
+  name: "Overbury Avenue",
+} as const;
+
+/** Company B's Job: Dee is on it as a Subcontractor. */
+export const JOB_B = {
+  id: "30000000-0000-4000-8000-0000000000b1",
+  companyId: COMPANY_B.id,
+  name: "Hart Lane refit",
+} as const;
+
 /**
  * An unseeded test number for sign-up flows: `freeTestPhone(6)` is
  * +447700900006. Numbers 6-19 are configured; each test picks a distinct one.

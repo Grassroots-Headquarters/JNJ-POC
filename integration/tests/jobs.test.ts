@@ -1,4 +1,14 @@
-import { COMPANY_A, COMPANY_B, TEST_USERS, TEST_USER_IDS, createServiceClient, freeTestPhone, signInAs } from "@jnj/harness";
+import {
+  COMPANY_A,
+  COMPANY_B,
+  JOB_A as OVERBURY,
+  JOB_B as HART_LANE,
+  TEST_USERS,
+  TEST_USER_IDS,
+  createServiceClient,
+  freeTestPhone,
+  signInAs,
+} from "@jnj/harness";
 import {
   acceptInvite,
   assignToJob,
@@ -16,10 +26,6 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 // Free test numbers for ticket #29 are 013-015. Playwright uses 013 and 014;
 // these tests use 015 for a person invited straight onto a Job.
 const JOE = freeTestPhone(15);
-
-/** Seeded in supabase/seed.sql. */
-const OVERBURY = { id: "30000000-0000-4000-8000-0000000000a1", name: "Overbury Avenue" };
-const HART_LANE = { id: "30000000-0000-4000-8000-0000000000b1", name: "Hart Lane refit" };
 
 describe("Logging a Job and assigning people", () => {
   let alex: TypedClient;
@@ -89,7 +95,7 @@ describe("Logging a Job and assigning people", () => {
   });
 
   it("lists the people on a Job with their Role, Job lead first, and the Client last", async () => {
-    const people = await listJobPeople(alex, { id: OVERBURY.id, companyId: COMPANY_A.id });
+    const people = await listJobPeople(alex, OVERBURY);
     expect(people).toEqual([
       { userId: TEST_USER_IDS.deeDual, fullName: "Dee Dual", role: "site_team", trade: null, isJobLead: true },
       { userId: TEST_USER_IDS.cleoClient, fullName: "Cleo Client", role: null, trade: null, isJobLead: false },
@@ -105,7 +111,7 @@ describe("Logging a Job and assigning people", () => {
   it("keeps another Company's Admin away from the Job and its Assignments", async () => {
     expect((await listJobs(bea, COMPANY_A.id)).length).toBe(0);
     expect(await getJob(bea, job.id)).toBeNull();
-    expect(await listJobPeople(bea, { id: OVERBURY.id, companyId: COMPANY_A.id })).toEqual([]);
+    expect(await listJobPeople(bea, OVERBURY)).toEqual([]);
     await expect(assignToJob(bea, { jobId: job.id, userId: TEST_USER_IDS.beaBoss })).rejects.toThrow("Job not found");
     await expect(unassignFromJob(bea, { jobId: OVERBURY.id, userId: TEST_USER_IDS.deeDual })).rejects.toThrow(
       "Job not found",
