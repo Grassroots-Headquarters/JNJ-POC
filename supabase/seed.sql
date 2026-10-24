@@ -42,3 +42,15 @@ insert into public.memberships (user_id, company_id, role) values
   ('10000000-0000-4000-8000-000000000003', '20000000-0000-4000-8000-00000000000b', 'admin'),
   ('10000000-0000-4000-8000-000000000004', '20000000-0000-4000-8000-00000000000a', 'site_team'),
   ('10000000-0000-4000-8000-000000000004', '20000000-0000-4000-8000-00000000000b', 'subcontractor');
+
+-- One Job in each Company. Dee is the Job lead of Overbury Avenue (A) and a
+-- Subcontractor on Hart Lane refit (B); Cleo is the Client of Overbury Avenue
+-- and holds no Membership. Sam and Bea are on no Job.
+insert into public.jobs (id, company_id, name, address, start_date) values
+  ('30000000-0000-4000-8000-0000000000a1', '20000000-0000-4000-8000-00000000000a', 'Overbury Avenue', '12 Overbury Ave, Beckenham', '2026-09-14'),
+  ('30000000-0000-4000-8000-0000000000b1', '20000000-0000-4000-8000-00000000000b', 'Hart Lane refit', '5 Hart Lane, Croydon', '2026-10-05');
+
+insert into public.assignments (job_id, user_id, company_id, is_job_lead) values
+  ('30000000-0000-4000-8000-0000000000a1', '10000000-0000-4000-8000-000000000004', '20000000-0000-4000-8000-00000000000a', true),
+  ('30000000-0000-4000-8000-0000000000a1', '10000000-0000-4000-8000-000000000005', '20000000-0000-4000-8000-00000000000a', false),
+  ('30000000-0000-4000-8000-0000000000b1', '10000000-0000-4000-8000-000000000004', '20000000-0000-4000-8000-00000000000b', false);

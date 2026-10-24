@@ -17,7 +17,7 @@ select has_table('public', 'outbound_sms', 'outbound_sms table exists');
 select has_column('public', 'memberships', 'trade', 'memberships has a trade column for Subcontractors');
 select ok((select relrowsecurity from pg_class where oid = 'public.invites'::regclass), 'RLS is on for invites');
 select ok((select relrowsecurity from pg_class where oid = 'public.outbound_sms'::regclass), 'RLS is on for outbound_sms');
-select has_function('public', 'create_invite', array['uuid', 'text', 'public.role', 'text'], 'create_invite(company, phone, role, full_name) exists');
+select has_function('public', 'create_invite', array['uuid', 'text', 'public.role', 'text', 'uuid'], 'create_invite(company, phone, role, full_name, job) exists');
 select has_function('public', 'cancel_invite', array['uuid'], 'cancel_invite(invite) exists');
 select has_function('public', 'resend_invite', array['uuid'], 'resend_invite(invite) exists');
 select has_function('public', 'accept_invite', array['text', 'text', 'text'], 'accept_invite(code, full_name, trade) exists');

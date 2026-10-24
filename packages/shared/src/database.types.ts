@@ -43,6 +43,38 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"assignments": {
+                  Row: {
+                    "company_id": string,"created_at": string,"is_job_lead": boolean,"job_id": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "company_id": string,"created_at"?: string,"is_job_lead"?: boolean,"job_id": string,"user_id": string
+                  }
+                  Update: {
+                    "company_id"?: string,"created_at"?: string,"is_job_lead"?: boolean,"job_id"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "assignments_company_id_fkey"
+      columns: ["company_id"]
+isOneToOne: false
+      referencedRelation: "companies"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "assignments_job_id_company_id_fkey"
+      columns: ["job_id","company_id"]
+isOneToOne: false
+      referencedRelation: "jobs"
+      referencedColumns: ["id","company_id"]
+    },{
+      foreignKeyName: "assignments_user_id_profiles_fkey"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["user_id"]
+    }
+                  ]
                 },"companies": {
                   Row: {
                     "billing_email": string | null,"created_at": string,"id": string,"name": string,"referral_code": string,"referred_by_company_id": string | null,"stripe_customer_id": string | null
@@ -65,18 +97,44 @@ isOneToOne: false
                   ]
                 },"invites": {
                   Row: {
-                    "accepted_at": string | null,"accepted_by": string | null,"cancelled_at": string | null,"code": string,"company_id": string,"created_at": string,"created_by": string | null,"expires_at": string,"full_name": string | null,"id": string,"phone": string,"role": Database["public"]['Enums']["role"]
+                    "accepted_at": string | null,"accepted_by": string | null,"cancelled_at": string | null,"code": string,"company_id": string,"created_at": string,"created_by": string | null,"expires_at": string,"full_name": string | null,"id": string,"job_id": string | null,"phone": string,"role": Database["public"]['Enums']["role"]
                   }
                   ComputedFields: never
                   Insert: {
-                    "accepted_at"?: string | null,"accepted_by"?: string | null,"cancelled_at"?: string | null,"code": string,"company_id": string,"created_at"?: string,"created_by"?: string | null,"expires_at"?: string,"full_name"?: string | null,"id"?: string,"phone": string,"role": Database["public"]['Enums']["role"]
+                    "accepted_at"?: string | null,"accepted_by"?: string | null,"cancelled_at"?: string | null,"code": string,"company_id": string,"created_at"?: string,"created_by"?: string | null,"expires_at"?: string,"full_name"?: string | null,"id"?: string,"job_id"?: string | null,"phone": string,"role": Database["public"]['Enums']["role"]
                   }
                   Update: {
-                    "accepted_at"?: string | null,"accepted_by"?: string | null,"cancelled_at"?: string | null,"code"?: string,"company_id"?: string,"created_at"?: string,"created_by"?: string | null,"expires_at"?: string,"full_name"?: string | null,"id"?: string,"phone"?: string,"role"?: Database["public"]['Enums']["role"]
+                    "accepted_at"?: string | null,"accepted_by"?: string | null,"cancelled_at"?: string | null,"code"?: string,"company_id"?: string,"created_at"?: string,"created_by"?: string | null,"expires_at"?: string,"full_name"?: string | null,"id"?: string,"job_id"?: string | null,"phone"?: string,"role"?: Database["public"]['Enums']["role"]
                   }
                   Relationships: [
                     {
       foreignKeyName: "invites_company_id_fkey"
+      columns: ["company_id"]
+isOneToOne: false
+      referencedRelation: "companies"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "invites_job_id_fkey"
+      columns: ["job_id"]
+isOneToOne: false
+      referencedRelation: "jobs"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"jobs": {
+                  Row: {
+                    "address": string | null,"company_id": string,"created_at": string,"created_by": string | null,"id": string,"name": string,"start_date": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "address"?: string | null,"company_id": string,"created_at"?: string,"created_by"?: string | null,"id"?: string,"name": string,"start_date"?: string | null
+                  }
+                  Update: {
+                    "address"?: string | null,"company_id"?: string,"created_at"?: string,"created_by"?: string | null,"id"?: string,"name"?: string,"start_date"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "jobs_company_id_fkey"
       columns: ["company_id"]
 isOneToOne: false
       referencedRelation: "companies"
@@ -203,6 +261,9 @@ isOneToOne: false
 "apply_stripe_subscription":
 { Args: { "add_on": Database["public"]['Enums']["add_on"],"company": string,"item_id": string,"period_end": string,"status": string,"subscription_id": string }; Returns: undefined
                            },
+"assign_to_job":
+{ Args: { "job": string,"job_lead"?: boolean,"user_id": string }; Returns: undefined
+                           },
 "cancel_invite":
 { Args: { "invite": string }; Returns: undefined
                            },
@@ -213,7 +274,7 @@ isOneToOne: false
 { Args: { "add_on": Database["public"]['Enums']["add_on"],"company": string }; Returns: boolean
                            },
 "create_invite":
-{ Args: { "company": string,"full_name"?: string,"phone": string,"role": Database["public"]['Enums']["role"] }; Returns: {
+{ Args: { "company": string,"full_name"?: string,"job"?: string,"phone": string,"role": Database["public"]['Enums']["role"] }; Returns: {
               "accepted_at": string | null,
 "accepted_by": string | null,
 "cancelled_at": string | null,
@@ -224,6 +285,7 @@ isOneToOne: false
 "expires_at": string,
 "full_name": string | null,
 "id": string,
+"job_id": string | null,
 "phone": string,
 "role": Database["public"]['Enums']["role"]
             }
@@ -250,6 +312,9 @@ isOneToOne: false
 "is_admin":
 { Args: { "company": string }; Returns: boolean
                            },
+"is_assigned":
+{ Args: { "job": string }; Returns: boolean
+                           },
 "is_member":
 { Args: { "company": string }; Returns: boolean
                            },
@@ -274,6 +339,7 @@ isOneToOne: false
 "expires_at": string,
 "full_name": string | null,
 "id": string,
+"job_id": string | null,
 "phone": string,
 "role": Database["public"]['Enums']["role"]
             }
@@ -285,6 +351,9 @@ isOneToOne: false
       } },
 "sign_up_company":
 { Args: { "company_name": string,"full_name": string,"referral_code"?: string }; Returns: string
+                           },
+"unassign_from_job":
+{ Args: { "job": string,"user_id": string }; Returns: undefined
                            }
           }
           Enums: {
