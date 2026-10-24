@@ -1,0 +1,27 @@
+.env.accounts
+.vercel
+
+# dependencies
+node_modules
+
+# build output
+.next
+dist
+.expo
+out
+*.tsbuildinfo
+next-env.d.ts
+expo-env.d.ts
+
+# local Supabase state
+supabase/.temp
+supabase/.branches
+
+# environment files (examples are committed)
+.env*
+!.env.example
+
+# test output
+playwright-report
+test-results
+coverage

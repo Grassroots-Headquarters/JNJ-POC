@@ -1,0 +1,76 @@
+{
+  "expo": {
+    "name": "My Builder App",
+    "slug": "my-builder-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "mybuilderapp",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "enabled": true,
+      "checkAutomatically": "ON_LOAD",
+      "fallbackToCacheTimeout": 0
+    },
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#0A0A0C",
+    "ios": {
+      "bundleIdentifier": "com.dnddevelopmentuk.mybuilderapp",
+      "supportsTablet": false,
+      "associatedDomains": ["applinks:app.example.com"]
+    },
+    "android": {
+      "package": "com.dnddevelopmentuk.mybuilderapp",
+      "adaptiveIcon": {
+        "backgroundColor": "#0A0A0C",
+        "foregroundImage": "./assets/images/android-icon-foreground.png",
+        "backgroundImage": "./assets/images/android-icon-background.png",
+        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false,
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [{ "scheme": "https", "host": "app.example.com", "pathPrefix": "/invite" }],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ]
+    },
+    "web": {
+      "output": "single",
+      "favicon": "./assets/images/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#0A0A0C",
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 76
+        }
+      ],
+      [
+        "@sentry/react-native/expo",
+        {
+          "organization": "dnd-development-uk",
+          "project": "my-builder-mobile",
+          "url": "https://sentry.io/"
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": ""
+      }
+    }
+  }
+}

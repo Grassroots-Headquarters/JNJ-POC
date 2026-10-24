@@ -1,0 +1,14 @@
+# next.js
+/.next/
+/out/
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# env files (examples are committed)
+.env*
+!.env.example
+
+# sentry
+.sentryclirc

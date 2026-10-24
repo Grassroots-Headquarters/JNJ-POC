@@ -1,0 +1,246 @@
+# Local Supabase for My Builder App. Reference:
+# https://supabase.com/docs/guides/local-development/cli/config
+# Ports are in the 553xx range so this stack can run beside other local
+# Supabase projects on the same machine.
+project_id = "my-builder-app"
+
+[api]
+enabled = true
+port = 55321
+schemas = ["public", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[api.tls]
+enabled = false
+
+[db]
+port = 55322
+shadow_port = 55320
+health_timeout = "2m"
+major_version = 17
+orioledb_version = ""
+
+[db.pooler]
+enabled = false
+port = 55329
+pool_mode = "transaction"
+default_pool_size = 20
+max_client_conn = 100
+
+[db.migrations]
+enabled = true
+schema_paths = []
+
+[db.seed]
+enabled = true
+sql_paths = ["./seed.sql"]
+
+[db.network_restrictions]
+enabled = false
+allowed_cidrs = ["0.0.0.0/0"]
+allowed_cidrs_v6 = ["::/0"]
+
+[realtime]
+enabled = true
+
+[studio]
+enabled = true
+port = 55323
+api_url = "http://127.0.0.1"
+openai_api_key = "env(OPENAI_API_KEY)"
+
+# Email testing server (emails are captured, never sent). Phone login does not
+# use it, but Studio and auth expect it to exist.
+[local_smtp]
+enabled = true
+port = 55324
+
+[storage]
+enabled = true
+file_size_limit = "50MiB"
+
+[storage.s3_protocol]
+enabled = true
+
+[storage.analytics]
+enabled = false
+max_namespaces = 5
+max_tables = 10
+max_catalogs = 2
+
+[storage.vector]
+enabled = true
+max_buckets = 10
+max_indexes = 5
+
+[auth]
+enabled = true
+site_url = "http://localhost:3000"
+additional_redirect_urls = ["http://localhost:8081", "mybuilderapp://"]
+jwt_expiry = 3600
+enable_refresh_token_rotation = true
+refresh_token_reuse_interval = 10
+enable_signup = true
+enable_anonymous_sign_ins = false
+enable_manual_linking = false
+minimum_password_length = 6
+password_requirements = ""
+
+[auth.rate_limit]
+email_sent = 2
+sms_sent = 30
+anonymous_users = 30
+token_refresh = 150
+sign_in_sign_ups = 30
+# Raised from the default 30 so Playwright and Vitest runs that log in many
+# fixed test users from one IP are not throttled.
+token_verifications = 1000
+web3 = 30
+
+# Email is collected for billing receipts only and is never a way to log in.
+[auth.email]
+enable_signup = false
+double_confirm_changes = true
+enable_confirmations = false
+secure_password_change = false
+max_frequency = "1s"
+otp_length = 6
+otp_expiry = 3600
+
+# Every User logs in with a one-time SMS code. Locally no SMS provider is
+# enabled; the fixed test numbers below short-circuit the send. Twilio Verify is
+# configured in the Supabase dashboard for staging and production.
+[auth.sms]
+enable_signup = true
+enable_confirmations = true
+template = "Your code is {{ .Code }}"
+# Practically no wait between codes locally: tests and Playwright log the
+# same fixed Users in many times in a row ("0s" means the 60 s default).
+# Hosted projects keep Supabase's default.
+max_frequency = "1ms"
+
+# Fixed test phone numbers (Ofcom test range). Keys omit the leading +.
+[auth.sms.test_otp]
+447700900001 = "123456"
+447700900002 = "123456"
+447700900003 = "123456"
+447700900004 = "123456"
+447700900005 = "123456"
+447700900006 = "123456"
+447700900007 = "123456"
+447700900008 = "123456"
+447700900009 = "123456"
+447700900010 = "123456"
+447700900011 = "123456"
+447700900012 = "123456"
+447700900013 = "123456"
+447700900014 = "123456"
+447700900015 = "123456"
+447700900016 = "123456"
+447700900017 = "123456"
+447700900018 = "123456"
+447700900019 = "123456"
+
+# The CLI only switches phone login on when an SMS provider block is enabled,
+# so Twilio Verify is enabled here with placeholder values. The fixed test
+# numbers above short-circuit before any provider is called, so nothing is
+# ever sent locally; a non-test number fails to send, which is what we want.
+# Real Twilio Verify credentials live in the Supabase dashboard for staging
+# and production (set by scripts/setup-accounts.sh), never in this file.
+[auth.sms.twilio_verify]
+enabled = true
+account_sid = "local-placeholder"
+message_service_sid = "local-placeholder"
+auth_token = "env(SUPABASE_AUTH_SMS_TWILIO_VERIFY_AUTH_TOKEN)"
+
+[auth.mfa]
+max_enrolled_factors = 10
+
+[auth.mfa.totp]
+enroll_enabled = false
+verify_enabled = false
+
+[auth.mfa.phone]
+enroll_enabled = false
+verify_enabled = false
+otp_length = 6
+template = "Your code is {{ .Code }}"
+max_frequency = "5s"
+
+[auth.web3.solana]
+enabled = false
+
+[auth.third_party.firebase]
+enabled = false
+
+[auth.third_party.auth0]
+enabled = false
+
+[auth.third_party.aws_cognito]
+enabled = false
+
+[auth.third_party.clerk]
+enabled = false
+
+[auth.oauth_server]
+enabled = false
+authorization_url_path = "/oauth/consent"
+allow_dynamic_registration = false
+
+[edge_runtime]
+enabled = true
+policy = "per_worker"
+inspector_port = 55330
+deno_version = 2
+
+[analytics]
+enabled = true
+port = 55327
+backend = "postgres"
+
+[experimental]
+s3_host = "env(S3_HOST)"
+s3_region = "env(S3_REGION)"
+s3_access_key = "env(S3_ACCESS_KEY)"
+s3_secret_key = "env(S3_SECRET_KEY)"
+
+[experimental.pgdelta]
+enabled = true
+
+[functions.health]
+enabled = true
+verify_jwt = false
+import_map = "./functions/health/deno.json"
+entrypoint = "./functions/health/index.ts"
+
+[functions.send-invite]
+enabled = true
+# The caller's JWT is checked at the gateway and again inside: the Invite is read under the caller's token.
+verify_jwt = true
+import_map = "./functions/send-invite/deno.json"
+entrypoint = "./functions/send-invite/index.ts"
+# Stripe calls this; it checks Stripe's signature instead of a Supabase JWT (ADR 0008).
+[functions.stripe-webhook]
+enabled = true
+verify_jwt = false
+import_map = "./functions/stripe-webhook/deno.json"
+entrypoint = "./functions/stripe-webhook/index.ts"
+
+[functions.billing-checkout]
+enabled = true
+verify_jwt = true
+import_map = "./functions/billing-checkout/deno.json"
+entrypoint = "./functions/billing-checkout/index.ts"
+
+[functions.billing-portal]
+enabled = true
+verify_jwt = true
+import_map = "./functions/billing-portal/deno.json"
+entrypoint = "./functions/billing-portal/index.ts"
+
+[functions.billing-email]
+enabled = true
+verify_jwt = true
+import_map = "./functions/billing-email/deno.json"
+entrypoint = "./functions/billing-email/index.ts"

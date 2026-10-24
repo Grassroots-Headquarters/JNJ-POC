@@ -1,10 +1,14 @@
-# JNJ Site App
+# My Builder App
 
-An app that gives each building job one place for team chat, materials, photos, issues and site attendance, replacing per-job WhatsApp groups. Any construction company can sign up; JNJ is the pilot company.
+My Builder App gives each building job one place for team chat, materials, photos, issues and site attendance, replacing per-job WhatsApp groups. Any construction company can sign up; JNJ is the pilot company.
 
 ## Language
 
 ### Product
+
+**My Builder App**:
+The product: the Mobile app and the Admin app together. Screens a User sees before choosing a Company carry this name; once they are working in a Company, the apps show that Company's name instead.
+_Avoid_: Site App
 
 **Mobile app**:
 The app on iOS and Android that everyone uses: Site team, Subcontractors, Job leads, Clients, and Admins when away from a desk.
@@ -23,6 +27,7 @@ _Avoid_: Tenant, account, organisation, builder
 **User**:
 One real person with one login, who can belong to any number of Companies.
 _Avoid_: Account, profile
+_Note_: in the database a User's details (their name) live in the `profiles` table, one row per Supabase auth user. That name follows Supabase convention and is not a separate concept; code above the database says User (`getMyUser`, `MyUser`).
 
 **Membership**:
 A User's place in one Company, carrying their Role in that Company.
