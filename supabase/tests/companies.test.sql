@@ -1,7 +1,7 @@
 -- Company separation on companies, memberships and profiles (ADR 0007).
 -- Seeded Users: Alex Admin (A), Sam Site (A), Bea Boss (B), Dee Dual (A + B), Cleo Client (none).
 begin;
-select plan(22);
+select plan(25);
 
 \set alex '10000000-0000-4000-8000-000000000001'
 \set sam  '10000000-0000-4000-8000-000000000002'
@@ -44,7 +44,7 @@ select is(
 select throws_ok(
   $$ insert into public.memberships (user_id, company_id, role) values ('10000000-0000-4000-8000-000000000003', '20000000-0000-4000-8000-00000000000a', 'admin') $$,
   '42501',
-  'new row violates row-level security policy for table "memberships"',
+  'permission denied for table memberships',
   'Bea cannot add herself to Company A'
 );
 update public.companies set name = 'Hacked' where id = :'company_a';
@@ -93,6 +93,30 @@ select is(
   'JNJ Building Ltd',
   'An Admin can rename their Company'
 );
+
+-- An Admin may change the name, not the Referral link, the Referral code or
+-- the Stripe customer: those are the platform's.
+set local role authenticated;
+set local request.jwt.claims = '{"sub": "10000000-0000-4000-8000-000000000001", "role": "authenticated"}';
+select throws_ok(
+  $$ update public.companies set referred_by_company_id = '20000000-0000-4000-8000-00000000000b' where id = '20000000-0000-4000-8000-00000000000a' $$,
+  '42501',
+  'permission denied for table companies',
+  'an Admin cannot rewrite who referred their Company'
+);
+select throws_ok(
+  $$ update public.companies set referral_code = 'ZZZZZZ' where id = '20000000-0000-4000-8000-00000000000a' $$,
+  '42501',
+  'permission denied for table companies',
+  'an Admin cannot change their Referral code'
+);
+select throws_ok(
+  $$ update public.companies set stripe_customer_id = 'cus_forged' where id = '20000000-0000-4000-8000-00000000000a' $$,
+  '42501',
+  'permission denied for table companies',
+  'an Admin cannot point their Company at another Stripe customer'
+);
+reset role;
 
 select * from finish();
 rollback;

@@ -1,7 +1,7 @@
 -- Admins change Roles and remove Memberships; both apply on the next query
 -- and never reach across Companies (ADR 0007).
 begin;
-select plan(13);
+select plan(16);
 
 \set alex '10000000-0000-4000-8000-000000000001'
 \set sam  '10000000-0000-4000-8000-000000000002'
@@ -82,6 +82,29 @@ select throws_ok(
   'P0001',
   'That person is not a Member of this Company',
   'removing someone who is not a Member is reported'
+);
+
+-- Memberships change only through Invites, change_member_role and
+-- remove_member, so the "at least one Admin" rule cannot be side-stepped.
+-- Bea is the only Admin of Company B.
+set local request.jwt.claims = '{"sub": "10000000-0000-4000-8000-000000000003", "role": "authenticated"}';
+select throws_ok(
+  $$ insert into public.memberships (user_id, company_id, role) values ('10000000-0000-4000-8000-000000000005', '20000000-0000-4000-8000-00000000000b', 'admin') $$,
+  '42501',
+  'permission denied for table memberships',
+  'an Admin cannot add a Membership without an Invite'
+);
+select throws_ok(
+  $$ update public.memberships set role = 'site_team' where company_id = '20000000-0000-4000-8000-00000000000b' and user_id = '10000000-0000-4000-8000-000000000003' $$,
+  '42501',
+  'permission denied for table memberships',
+  'the last Admin cannot demote themselves by writing the table'
+);
+select throws_ok(
+  $$ delete from public.memberships where company_id = '20000000-0000-4000-8000-00000000000b' and user_id = '10000000-0000-4000-8000-000000000003' $$,
+  '42501',
+  'permission denied for table memberships',
+  'the last Admin cannot remove themselves by writing the table'
 );
 
 reset role;
