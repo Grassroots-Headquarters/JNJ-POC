@@ -48,15 +48,7 @@ export const inviteStatusLabel: Record<InviteStatus, string> = {
   expired: "Expired",
 };
 
-/** The link carried by the Invite SMS; the Admin app serves it as the fallback page. */
-export function inviteLink(baseUrl: string, code: string): string {
-  return `${baseUrl.replace(/\/$/, "")}/invite/${code}`;
-}
-
-/** The Invite code inside an SMS body, or null when there is no Invite link in it. */
-export function inviteCodeFromSms(body: string): string | null {
-  return /\/invite\/([A-HJ-NP-Z2-9]{12})\b/.exec(body)?.[1] ?? null;
-}
+export { inviteLink, inviteSms, inviteCodeFromSms } from "./wording";
 
 function toInvite(row: Tables<"invites">): Invite {
   return {

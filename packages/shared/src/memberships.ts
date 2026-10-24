@@ -10,11 +10,7 @@ export type Membership = {
   role: Role;
 };
 
-export const roleLabel: Record<Role, string> = {
-  admin: "Admin",
-  site_team: "Site team",
-  subcontractor: "Subcontractor",
-};
+export { roleLabel } from "./wording";
 
 /**
  * The current User's own Memberships, oldest first. RLS already limits the

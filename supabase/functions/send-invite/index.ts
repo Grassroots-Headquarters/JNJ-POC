@@ -1,7 +1,9 @@
 import "@supabase/functions-js/edge-runtime.d.ts";
-import { createClient } from "@supabase/supabase-js";
 
+import { inviteSms } from "../../../packages/shared/src/wording.ts";
+import { json, preflight } from "../_shared/http.ts";
 import { serve } from "../_shared/sentry.ts";
+import { callerClient, serviceClient } from "../_shared/supabase.ts";
 
 // Texts an Invite to the invited mobile number. Called by the Admin app right
 // after create_invite or resend_invite, with the Admin's JWT:
@@ -10,18 +12,10 @@ import { serve } from "../_shared/sentry.ts";
 // of the Invite's Company sees the row; everyone else gets 403.
 // With TWILIO_ACCOUNT_SID set the SMS goes through Twilio Messaging; without
 // it (local, CI) the message is recorded in outbound_sms for tests to read.
-
-const ROLE_LABEL: Record<string, string> = {
-  admin: "Admin",
-  site_team: "Site team",
-  subcontractor: "Subcontractor",
-};
-
-function json(body: unknown, status = 200): Response {
-  return Response.json(body, { status });
-}
+// The SMS wording comes from @jnj/shared, which the tests read it back with.
 
 serve(async (request) => {
+  if (request.method === "OPTIONS") return preflight();
   if (request.method !== "POST") return json({ error: "Use POST" }, 405);
 
   const authorization = request.headers.get("Authorization") ?? "";
@@ -35,12 +29,7 @@ serve(async (request) => {
   }
   if (typeof inviteId !== "string" || inviteId === "") return json({ error: "inviteId is required" }, 400);
 
-  const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-  const asCaller = createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY")!, {
-    global: { headers: { Authorization: authorization } },
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
-  const { data: invite, error } = await asCaller
+  const { data: invite, error } = await callerClient(authorization)
     .from("invites")
     .select("id, code, phone, role, accepted_at, cancelled_at, companies(name)")
     .eq("id", inviteId)
@@ -54,10 +43,12 @@ serve(async (request) => {
   if (invite.accepted_at || invite.cancelled_at) return json({ error: "This Invite is no longer pending" }, 409);
 
   const company = invite.companies as unknown as { name: string } | null;
-  const baseUrl = (Deno.env.get("INVITE_LINK_BASE_URL") || "https://app.example.com").replace(/\/$/, "");
-  const body =
-    `${company?.name ?? "A Company"} has invited you to the JNJ Site App as ${ROLE_LABEL[invite.role] ?? invite.role}. ` +
-    `Open ${baseUrl}/invite/${invite.code}`;
+  const body = inviteSms({
+    companyName: company?.name ?? "A Company",
+    role: invite.role,
+    baseUrl: Deno.env.get("INVITE_LINK_BASE_URL") || "https://app.example.com",
+    code: invite.code,
+  });
 
   const twilioAccountSid = Deno.env.get("TWILIO_ACCOUNT_SID");
   if (twilioAccountSid) {
@@ -65,10 +56,7 @@ serve(async (request) => {
     return json({ ok: true, delivery: "twilio" });
   }
 
-  const asService = createClient(supabaseUrl, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
-  const { error: recordError } = await asService.from("outbound_sms").insert({ to: invite.phone, body });
+  const { error: recordError } = await serviceClient().from("outbound_sms").insert({ to: invite.phone, body });
   if (recordError) throw new Error(`Could not record the SMS: ${recordError.message}`);
   return json({ ok: true, delivery: "recorded" });
 });

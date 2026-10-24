@@ -1,14 +1,8 @@
 import "@supabase/functions-js/edge-runtime.d.ts";
 
-import {
-  isUuid,
-  json,
-  preflight,
-  readJson,
-  requireAdmin,
-  serviceClient,
-  stripeClient,
-} from "../_shared/billing.ts";
+import { requireAdmin, stripeClient } from "../_shared/billing.ts";
+import { isUuid, json, preflight, readJson } from "../_shared/http.ts";
+import { serviceClient } from "../_shared/supabase.ts";
 import { serve } from "../_shared/sentry.ts";
 
 // POST { companyId, email } as a logged-in Admin: sets where Stripe sends the

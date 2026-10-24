@@ -25,6 +25,7 @@ export {
   inviteStatus,
   inviteStatusLabel,
   inviteLink,
+  inviteSms,
   inviteCodeFromSms,
   SendInviteError,
   type Invite,

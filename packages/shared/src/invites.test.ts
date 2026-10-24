@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { inviteCodeFromSms, inviteLink, inviteStatus } from "./invites";
+import { inviteCodeFromSms, inviteLink, inviteSms, inviteStatus } from "./invites";
 
 const now = new Date("2026-10-23T12:00:00Z");
 const pending = { accepted_at: null, cancelled_at: null, expires_at: "2026-10-30T12:00:00Z" };
@@ -21,6 +21,16 @@ describe("inviteStatus", () => {
 
   it("is cancelled when an Admin cancelled it", () => {
     expect(inviteStatus({ ...pending, cancelled_at: "2026-10-23T10:00:00Z" }, now)).toBe("cancelled");
+  });
+});
+
+describe("inviteSms", () => {
+  it("names the Company and the Role and carries the link", () => {
+    const body = inviteSms({ companyName: "JNJ Building", role: "site_team", baseUrl: "https://app.example.com/", code: "ABCDEFGHJKLM" });
+    expect(body).toBe(
+      "JNJ Building has invited you to the JNJ Site App as Site team. Open https://app.example.com/invite/ABCDEFGHJKLM",
+    );
+    expect(inviteCodeFromSms(body)).toBe("ABCDEFGHJKLM");
   });
 });
 

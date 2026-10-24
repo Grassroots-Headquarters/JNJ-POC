@@ -2,15 +2,9 @@ import "@supabase/functions-js/edge-runtime.d.ts";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import Stripe from "stripe";
-import {
-  REFERRAL_COUPON,
-  isAddOn,
-  isUuid,
-  json,
-  serviceClient,
-  stripeClient,
-  type AddOn,
-} from "../_shared/billing.ts";
+import { REFERRAL_COUPON, isAddOn, stripeClient, type AddOn } from "../_shared/billing.ts";
+import { isUuid, json } from "../_shared/http.ts";
+import { serviceClient } from "../_shared/supabase.ts";
 import { Sentry, serve } from "../_shared/sentry.ts";
 
 // The only thing that switches an Add-on on or off (ADR 0008). Stripe posts
