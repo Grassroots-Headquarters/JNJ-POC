@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 
 // Placeholders until the apps are in the stores (spec: Accounts and identity).
 const APP_STORE_URL = "https://apps.apple.com/app/id0000000000";
-const GOOGLE_PLAY_URL = "https://play.google.com/store/apps/details?id=com.grassrootshq.jnjsite";
+const GOOGLE_PLAY_URL = "https://play.google.com/store/apps/details?id=com.grassrootshq.mybuilderapp";
 
 /**
  * The fallback for an Invite link when the Mobile app is not installed: what
@@ -21,7 +21,7 @@ export default async function InvitePage({ params }: { params: Promise<{ code: s
   return (
     <main className="flex flex-1 items-center justify-center p-6">
       <div className="grid w-full max-w-[390px] gap-4 rounded-[28px] border border-border bg-card p-6 text-center">
-        <p className="text-xs text-[#64748B]">JNJ Site App</p>
+        <p className="text-xs text-[#64748B]">My Builder App</p>
         {preview === null && (
           <>
             <h1 className="text-xl font-semibold">This Invite link is not valid</h1>
@@ -62,7 +62,7 @@ export default async function InvitePage({ params }: { params: Promise<{ code: s
                 Get it on Google Play
               </a>
               <a
-                href={`jnjsite://invite/${code}`}
+                href={`mybuilderapp://invite/${code}`}
                 className="rounded-[10px] border border-border px-3 py-2 text-[13px] font-medium"
                 data-testid="open-in-app"
               >

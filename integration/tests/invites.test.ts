@@ -37,7 +37,7 @@ describe("Inviting a new person to the Company", () => {
 
     const sms = await lastSmsTo(IVY);
     expect(sms?.body).toBe(
-      `JNJ Building has invited you to the JNJ Site App as Site team. Open https://app.example.com/invite/${invite.code}`,
+      `JNJ Building has invited you to My Builder App as Site team. Open https://app.example.com/invite/${invite.code}`,
     );
     expect(inviteCodeFromSms(sms!.body)).toBe(invite.code);
   });

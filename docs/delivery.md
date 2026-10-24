@@ -24,9 +24,9 @@ workspace packages.
 | Deployment | Supabase project | How it is set |
 |---|---|---|
 | Local (`pnpm dev`) | Local CLI stack, `http://127.0.0.1:55321` | `.env.local` written by `scripts/dev.sh` |
-| Admin app PR previews (`jnj-admin`, Vercel Preview env) | staging | Vercel env vars `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` (wizard stage 12) |
-| Admin app production (`jnj-admin`, Vercel Production env, branch `main`) | **production** | Vercel Production env vars (wizard stage 12) |
-| Mobile web test site (`jnj-mobile-web-test`, every env) | staging only | Vercel env vars `EXPO_PUBLIC_SUPABASE_URL` / `EXPO_PUBLIC_SUPABASE_ANON_KEY` (wizard stage 13) |
+| Admin app PR previews (`my-builder-admin`, Vercel Preview env) | staging | Vercel env vars `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` (wizard stage 12) |
+| Admin app production (`my-builder-admin`, Vercel Production env, branch `main`) | **production** | Vercel Production env vars (wizard stage 12) |
+| Mobile web test site (`my-builder-mobile-web-test`, every env) | staging only | Vercel env vars `EXPO_PUBLIC_SUPABASE_URL` / `EXPO_PUBLIC_SUPABASE_ANON_KEY` (wizard stage 13) |
 | Mobile staging build (EAS profile `staging`, channel `staging`) | staging | EAS environment `preview` variables (first-run checklist below) |
 | Mobile production build (EAS profile `production`, channel `production`) | production | EAS environment `production` variables (first-run checklist below) |
 | Edge Functions | The project they are deployed to | Secrets set per project by the wizard; `SENTRY_RELEASE` and `SENTRY_ENVIRONMENT` set per deploy by the workflows |
@@ -37,7 +37,7 @@ staging settle, then tag.
 
 ### The Mobile web test site is internal only
 
-`jnj-mobile-web-test` exists so the Mobile app's web build can be tried in a
+`my-builder-mobile-web-test` exists so the Mobile app's web build can be tried in a
 browser against staging. It must never be linked from the Admin app, Invite
 SMS, store listings or any page a User sees. The wizard turns on Vercel
 Deployment Protection (Vercel Authentication, all deployments including
@@ -65,9 +65,9 @@ level. Without `EXPO_TOKEN` the Mobile jobs print a notice and skip; without
 
 | Project | Release label | Who creates it |
 |---|---|---|
-| `jnj-admin` | `admin@<sha>` | `apps/admin/next.config.ts` derives it from `VERCEL_GIT_COMMIT_SHA`, inlines it as `NEXT_PUBLIC_SENTRY_RELEASE` and `withSentryConfig` uploads source maps during the Vercel build when `SENTRY_AUTH_TOKEN` is set |
-| `jnj-mobile` | `mobile@<version>+<sha>` | `apps/mobile/app.config.ts` derives it from `EAS_BUILD_GIT_COMMIT_HASH` (EAS Build), `VERCEL_GIT_COMMIT_SHA` (web test site) or `GITHUB_SHA` (`eas update`); the `@sentry/react-native/expo` plugin uploads source maps during EAS Build when `SENTRY_AUTH_TOKEN` is an EAS environment variable; `staging.yml`/`release.yml` record the release and deploy environment |
-| `jnj-edge-functions` | `edge@<sha>` | `staging.yml`/`release.yml` set the `SENTRY_RELEASE` function secret and record the release; `supabase/functions/_shared/sentry.ts` reads it |
+| `my-builder-admin` | `admin@<sha>` | `apps/admin/next.config.ts` derives it from `VERCEL_GIT_COMMIT_SHA`, inlines it as `NEXT_PUBLIC_SENTRY_RELEASE` and `withSentryConfig` uploads source maps during the Vercel build when `SENTRY_AUTH_TOKEN` is set |
+| `my-builder-mobile` | `mobile@<version>+<sha>` | `apps/mobile/app.config.ts` derives it from `EAS_BUILD_GIT_COMMIT_HASH` (EAS Build), `VERCEL_GIT_COMMIT_SHA` (web test site) or `GITHUB_SHA` (`eas update`); the `@sentry/react-native/expo` plugin uploads source maps during EAS Build when `SENTRY_AUTH_TOKEN` is an EAS environment variable; `staging.yml`/`release.yml` record the release and deploy environment |
+| `my-builder-edge-functions` | `edge@<sha>` | `staging.yml`/`release.yml` set the `SENTRY_RELEASE` function secret and record the release; `supabase/functions/_shared/sentry.ts` reads it |
 
 ## EAS build profiles and updates
 
@@ -148,7 +148,7 @@ these are done the workflows either skip (no `EXPO_TOKEN`) or fail at the first
    `ascAppId` (App Store Connect → the app → App Information → Apple ID) and
    `appleTeamId` (`.env.accounts` `APPLE_TEAM_ID`). The Play app needs one
    manual upload before `eas submit` can target a track.
-5. Confirm the bundle id `com.grassrootshq.jnjsite` and the domain before the
+5. Confirm the bundle id `com.grassrootshq.mybuilderapp` and the domain before the
    first store build; the bundle id is permanent once in the stores.
 6. Merge to `main` and watch the `staging` run: `supabase db push` succeeds,
    the EAS build appears in the dashboard, Sentry shows `edge@<sha>` and

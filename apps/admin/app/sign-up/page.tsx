@@ -56,7 +56,7 @@ export default function SignUpPage() {
   }
 
   return (
-    <AuthScreen title="Site App" caption="Sign your Company up">
+    <AuthScreen title="My Builder App" caption="Sign your Company up">
       <form onSubmit={onSubmit} className="grid gap-3">
         <h2 className="text-[17px] font-semibold">Create your Company</h2>
         <Label>

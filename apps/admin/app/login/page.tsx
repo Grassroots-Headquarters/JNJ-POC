@@ -39,7 +39,7 @@ export default function LoginPage() {
   }
 
   return (
-    <AuthScreen title="Site App" caption="Admin app">
+    <AuthScreen title="My Builder App" caption="Admin app">
       <form onSubmit={onSubmit} className="grid gap-3">
         <h2 className="text-[17px] font-semibold">Log in</h2>
         <Label>

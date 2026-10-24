@@ -48,7 +48,7 @@ test("an Admin invites a Site team member by SMS and they join from the Mobile a
   await expect(visitorPage.getByTestId("invite-company")).toHaveText("JNJ Building has invited you");
   await expect(visitorPage.getByTestId("app-store")).toBeVisible();
   await expect(visitorPage.getByTestId("google-play")).toBeVisible();
-  await expect(visitorPage.getByTestId("open-in-app")).toHaveAttribute("href", `jnjsite://invite/${code}`);
+  await expect(visitorPage.getByTestId("open-in-app")).toHaveAttribute("href", `mybuilderapp://invite/${code}`);
   await visitor.close();
 
   // With the app, the link lands on the Invite screen: log in, confirm the name, join.

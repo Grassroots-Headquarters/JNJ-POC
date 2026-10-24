@@ -1,10 +1,10 @@
-# JNJ Site App
+# My Builder App
 
 ## Agent skills
 
 ### Issue tracker
 
-Issues and specs are GitHub issues on grassroots-headquarters/jnj-poc, managed through `gh api` (REST). See `docs/agents/issue-tracker.md`.
+Issues and specs are GitHub issues on grassroots-headquarters/my-builder-app, managed through `gh api` (REST). See `docs/agents/issue-tracker.md`.
 
 ### Triage labels
 

@@ -60,7 +60,7 @@ export default function LoginScreen() {
             <Bar title="Log in" />
             <ScrollView contentContainerClassName="flex-grow justify-center gap-4 p-4">
               <View className="items-center gap-1">
-                <Text className="text-xl font-bold text-fg">Site App</Text>
+                <Text className="text-xl font-bold text-fg">My Builder App</Text>
                 <Text className="text-xs text-faint">Mobile app</Text>
               </View>
               <View className="gap-3">

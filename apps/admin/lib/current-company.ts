@@ -1,4 +1,4 @@
-const KEY = "jnj.currentCompanyId";
+const KEY = "mba.currentCompanyId";
 
 /** The Company the Admin last chose on this browser; RLS still decides access. */
 export function getRememberedCompanyId(): string | null {

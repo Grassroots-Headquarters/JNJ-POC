@@ -6,7 +6,8 @@
 #   - the wizard library (everything above the STAGES marker), sourced on its own:
 #     write_env upserts, keeps secrets off the screen, and ask() reads them back;
 #   - the whole script as a program: it parses, TOTAL_STAGES matches the stage()
-#     calls, the GitHub secret/variable names match the delivery contracts, and
+#     calls, the GitHub secret/variable names match the delivery contracts, the
+#     app id, Sentry project and URL scheme match apps/mobile/app.json, and
 #     with no human on stdin it renders the banner and stage 1 then stops.
 
 set -uo pipefail
@@ -97,6 +98,18 @@ if [[ "$found_secrets" == "$expected_secrets" ]]; then ok "set_secret names matc
 else fail "set_secret names match the delivery contracts" "found: $(echo "$found_secrets" | tr '\n' ' ')"; fi
 if [[ "$found_vars" == "$expected_vars" ]]; then ok "set_var names match the delivery contracts"
 else fail "set_var names match the delivery contracts" "found: $(echo "$found_vars" | tr '\n' ' ')"; fi
+
+# The names the wizard creates must match what the apps are built with.
+APP_JSON="$HERE/../../apps/mobile/app.json"
+json_value() { grep -oE "\"$1\": *\"[^\"]*\"" "$APP_JSON" | head -n1 | sed -E 's/.*: *"([^"]*)"/\1/'; }
+script_value() { grep -E "^$1=" "$SCRIPT" | head -n1 | sed -E 's/^[A-Z_]+="([^"]*)"/\1/'; }
+app_id=$(script_value APP_ID)
+check "APP_ID ($app_id) is the iOS bundle id in app.json" test "$app_id" == "$(json_value bundleIdentifier)"
+check "APP_ID ($app_id) is the Android package in app.json" test "$app_id" == "$(json_value package)"
+check "SENTRY_PROJECT_MOBILE is the Sentry project in app.json" \
+  test "$(script_value SENTRY_PROJECT_MOBILE)" == "$(json_value project)"
+check "the Supabase redirect URLs allow the app.json scheme" grep -q "$(json_value scheme)://\*\*" "$SCRIPT"
+check "every service is named after My Builder App, not the old name" bash -c "! grep -niE 'jnj|site app' '$SCRIPT'"
 
 check "the wizard writes to .env.accounts, not .env" grep -q 'ENV_FILE=.*\.env\.accounts' "$SCRIPT"
 check "no secret value is echoed anywhere in the script" \

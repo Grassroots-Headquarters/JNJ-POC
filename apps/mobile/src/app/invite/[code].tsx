@@ -13,7 +13,7 @@ import { useSession } from "@/lib/session";
 import { supabase } from "@/lib/supabase";
 
 /**
- * Where an Invite link lands: jnjsite://invite/<code> and
+ * Where an Invite link lands: mybuilderapp://invite/<code> and
  * https://app.example.com/invite/<code> both open this screen. Logged out, the
  * code is kept and the person logs in first; logged in, they confirm their
  * name (and trade, for a Subcontractor) and join the Company.

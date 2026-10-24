@@ -197,7 +197,7 @@ finish() {
 # the whole file before the first prompt, so an edit mid-run can't break it.
 # ──────────────────────────────────────────────────────────────────────────
 #
-# JNJ Site App account setup (ticket #25 of spec #23).
+# My Builder App account setup (ticket #25 of spec #23).
 #
 # Walks a human through creating every service account the platform needs,
 # all owned by Grassroots Headquarters, and stores each key where the delivery
@@ -212,10 +212,10 @@ finish() {
 REPO_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 
 # Sentry project names and the mobile app id are fixed by the contracts.
-SENTRY_PROJECT_ADMIN="jnj-admin"
-SENTRY_PROJECT_MOBILE="jnj-mobile"
-SENTRY_PROJECT_EDGE="jnj-edge-functions"
-APP_ID="com.grassrootshq.jnjsite"
+SENTRY_PROJECT_ADMIN="my-builder-admin"
+SENTRY_PROJECT_MOBILE="my-builder-mobile"
+SENTRY_PROJECT_EDGE="my-builder-edge-functions"
+APP_ID="com.grassrootshq.mybuilderapp"
 
 die() { warn "$1"; exit 1; }
 
@@ -300,7 +300,7 @@ require_cmd npx "install Node 24 (source ~/.nvm/nvm.sh && nvm use 24)"
 require_cmd curl "install curl"
 cd "$REPO_ROOT"
 
-banner "JNJ Site App: service accounts"
+banner "My Builder App: service accounts"
 
 # ── 1. GitHub ─────────────────────────────────────────────────────────────
 stage "GitHub: access, repository and environments"
@@ -344,7 +344,7 @@ step "If there is no organisation called 'Grassroots Headquarters', click New or
 note "Production must be on Pro (daily backups, never pauses). Staging lives in the same organisation; it adds a small compute charge."
 pause "Press Enter when the organisation exists"
 open_url "https://supabase.com/dashboard/account/tokens"
-step "Generate new token → name 'jnj-site-app ci' → copy it (it is shown once)."
+step "Generate new token → name 'my-builder-app ci' → copy it (it is shown once)."
 ask_secret SUPABASE_ACCESS_TOKEN "Paste the Supabase access token:"
 write_env SUPABASE_ACCESS_TOKEN "$SUPABASE_ACCESS_TOKEN"
 if SUPABASE_ACCESS_TOKEN="$SUPABASE_ACCESS_TOKEN" supabase_cli projects list >/dev/null 2>&1; then
@@ -356,7 +356,7 @@ fi
 # ── 3. Supabase staging ───────────────────────────────────────────────────
 stage "Supabase: staging project"
 open_url "https://supabase.com/dashboard/new"
-step "Organisation: Grassroots Headquarters. Name: jnj-site-app-staging. Region: West EU (London)."
+step "Organisation: Grassroots Headquarters. Name: my-builder-app-staging. Region: West EU (London)."
 step "Click Generate a password for the database and copy it now; the dashboard never shows it again."
 ask_secret SUPABASE_STAGING_DB_PASSWORD "Paste the staging database password:"
 write_env SUPABASE_STAGING_DB_PASSWORD "$SUPABASE_STAGING_DB_PASSWORD"
@@ -374,7 +374,7 @@ write_env SUPABASE_STAGING_ANON_KEY "$SUPABASE_STAGING_ANON_KEY"
 # ── 4. Supabase production ────────────────────────────────────────────────
 stage "Supabase: production project (Pro, daily backups)"
 open_url "https://supabase.com/dashboard/new"
-step "Organisation: Grassroots Headquarters. Name: jnj-site-app-production. Region: West EU (London)."
+step "Organisation: Grassroots Headquarters. Name: my-builder-app-production. Region: West EU (London)."
 step "Generate a database password and copy it now."
 ask_secret SUPABASE_PRODUCTION_DB_PASSWORD "Paste the production database password:"
 write_env SUPABASE_PRODUCTION_DB_PASSWORD "$SUPABASE_PRODUCTION_DB_PASSWORD"
@@ -403,13 +403,13 @@ write_env TWILIO_ACCOUNT_SID "$TWILIO_ACCOUNT_SID"
 ask_secret TWILIO_AUTH_TOKEN "Paste the Auth Token:"
 write_env TWILIO_AUTH_TOKEN "$TWILIO_AUTH_TOKEN"
 open_url "https://console.twilio.com/us1/develop/verify/services"
-step "Create new → Friendly name 'JNJ Site App' (it appears in the SMS: 'Your JNJ Site App verification code is…') → Create."
+step "Create new → Friendly name 'My Builder App' (it appears in the SMS: 'Your My Builder App verification code is…') → Create."
 step "Copy the Service SID (VA…) from the service's settings page."
 ask TWILIO_VERIFY_SERVICE_SID "Paste the Verify Service SID:"
 write_env TWILIO_VERIFY_SERVICE_SID "$TWILIO_VERIFY_SERVICE_SID"
 open_url "https://console.twilio.com/us1/develop/sms/services"
-step "Create Messaging Service → name 'JNJ Site App Invites', use case 'Notify my users'."
-step "Add a sender: buy a UK mobile number (needs a UK regulatory bundle and address), or add an alphanumeric sender id such as JNJSITE."
+step "Create Messaging Service → name 'My Builder App Invites', use case 'Notify my users'."
+step "Add a sender: buy a UK mobile number (needs a UK regulatory bundle and address), or add an alphanumeric sender id such as MYBUILDER."
 step "Copy the Messaging Service SID (MG…). Edge Functions send Invite SMS through it."
 ask TWILIO_MESSAGING_SERVICE_SID "Paste the Messaging Service SID:"
 write_env TWILIO_MESSAGING_SERVICE_SID "$TWILIO_MESSAGING_SERVICE_SID"
@@ -516,7 +516,7 @@ write_env SENTRY_PROJECT_ADMIN "$SENTRY_PROJECT_ADMIN"
 write_env SENTRY_PROJECT_MOBILE "$SENTRY_PROJECT_MOBILE"
 write_env SENTRY_PROJECT_EDGE "$SENTRY_PROJECT_EDGE"
 open_url "$SENTRY_URL/settings/auth-tokens/"
-step "Create New Token → name 'jnj-site-app ci' (organisation token; it can upload source maps and create releases). Copy it."
+step "Create New Token → name 'my-builder-app ci' (organisation token; it can upload source maps and create releases). Copy it."
 ask_secret SENTRY_AUTH_TOKEN "Paste the Sentry auth token:"
 write_env SENTRY_AUTH_TOKEN "$SENTRY_AUTH_TOKEN"
 
@@ -566,22 +566,22 @@ warn "App id $APP_ID is a placeholder and becomes permanent at the first store u
 pause
 
 # ── 12. Vercel: Admin app ─────────────────────────────────────────────────
-stage "Vercel: jnj-admin (Admin app)"
+stage "Vercel: my-builder-admin (Admin app)"
 open_url "https://vercel.com/new"
 step "Sign in; choose or create the Grassroots Headquarters team. Import Git Repository → install the Vercel GitHub app on the organisation with access to $GITHUB_REPO → Import."
-step "Project name: jnj-admin. Framework: Next.js. Root Directory: apps/admin (tick 'Include source files outside of the Root Directory')."
+step "Project name: my-builder-admin. Framework: Next.js. Root Directory: apps/admin (tick 'Include source files outside of the Root Directory')."
 step "Leave build/install defaults (pnpm is detected from packageManager). Deploy; a failed first build is fine before the app exists on main."
 step "After creating: Settings → Git → Production Branch: main. Previews are built for every pull request by default."
 ask VERCEL_TEAM "Vercel team slug (from https://vercel.com/<team>):"
 write_env VERCEL_TEAM "$VERCEL_TEAM"
-ask ADMIN_APP_URL "Admin app URL (its Vercel domain, e.g. https://jnj-admin.vercel.app, until app.example.com is confirmed):"
+ask ADMIN_APP_URL "Admin app URL (its Vercel domain, e.g. https://my-builder-admin.vercel.app, until app.example.com is confirmed):"
 ADMIN_APP_URL="${ADMIN_APP_URL%/}"
 write_env ADMIN_APP_URL "$ADMIN_APP_URL"
-say "Environment variables for jnj-admin:"
+say "Environment variables for my-builder-admin:"
 say "  Production : NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY = production project, NEXT_PUBLIC_APP_URL = $ADMIN_APP_URL"
 say "  Preview+Dev: NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY = staging project"
 say "  All        : NEXT_PUBLIC_SENTRY_DSN, SENTRY_ORG, SENTRY_PROJECT=$SENTRY_PROJECT_ADMIN, SENTRY_URL, SENTRY_AUTH_TOKEN (sensitive)"
-if confirm "Write them with the Vercel CLI now (it links apps/admin to the project)?" && vercel_link "$REPO_ROOT/apps/admin" jnj-admin; then
+if confirm "Write them with the Vercel CLI now (it links apps/admin to the project)?" && vercel_link "$REPO_ROOT/apps/admin" my-builder-admin; then
   vercel_env "$REPO_ROOT/apps/admin" NEXT_PUBLIC_SUPABASE_URL "$SUPABASE_PRODUCTION_URL" production
   vercel_env "$REPO_ROOT/apps/admin" NEXT_PUBLIC_SUPABASE_ANON_KEY "$SUPABASE_PRODUCTION_ANON_KEY" production
   vercel_env "$REPO_ROOT/apps/admin" NEXT_PUBLIC_APP_URL "$ADMIN_APP_URL" production
@@ -598,24 +598,24 @@ if confirm "Write them with the Vercel CLI now (it links apps/admin to the proje
   done
 else
   warn "set them by hand: values are in $ENV_FILE (SENTRY_AUTH_TOKEN as a Sensitive variable)."
-  SKIPPED+=("Vercel jnj-admin environment variables: https://vercel.com/$VERCEL_TEAM/jnj-admin/settings/environment-variables")
+  SKIPPED+=("Vercel my-builder-admin environment variables: https://vercel.com/$VERCEL_TEAM/my-builder-admin/settings/environment-variables")
 fi
 for ref in "$SUPABASE_STAGING_PROJECT_REF" "$SUPABASE_PRODUCTION_PROJECT_REF"; do
   open_url "https://supabase.com/dashboard/project/$ref/auth/url-configuration"
-  redirects="$ADMIN_APP_URL/**, jnjsite://**"
+  redirects="$ADMIN_APP_URL/**, mybuilderapp://**"
   [[ "$ref" == "$SUPABASE_STAGING_PROJECT_REF" ]] && redirects+=", https://*-$VERCEL_TEAM.vercel.app/** (PR previews)"
   step "Site URL: $ADMIN_APP_URL. Redirect URLs: $redirects. Save."
   pause
 done
 
 # ── 13. Vercel: Mobile web test site ──────────────────────────────────────
-stage "Vercel: jnj-mobile-web-test (Mobile app web build, internal only)"
+stage "Vercel: my-builder-mobile-web-test (Mobile app web build, internal only)"
 open_url "https://vercel.com/new"
-step "Import $GITHUB_REPO again. Project name: jnj-mobile-web-test. Framework Preset: Other. Root Directory: apps/mobile (include files outside the root)."
+step "Import $GITHUB_REPO again. Project name: my-builder-mobile-web-test. Framework Preset: Other. Root Directory: apps/mobile (include files outside the root)."
 step "Build Command: pnpm exec expo export -p web   Output Directory: dist   Install Command: default. Deploy."
 step "Settings → Git → Production Branch: main."
 say "Environment variables (all environments): EXPO_PUBLIC_SUPABASE_URL / EXPO_PUBLIC_SUPABASE_ANON_KEY = staging project, EXPO_PUBLIC_SENTRY_DSN."
-if confirm "Write them with the Vercel CLI now (it links apps/mobile to the project)?" && vercel_link "$REPO_ROOT/apps/mobile" jnj-mobile-web-test; then
+if confirm "Write them with the Vercel CLI now (it links apps/mobile to the project)?" && vercel_link "$REPO_ROOT/apps/mobile" my-builder-mobile-web-test; then
   for environment in production preview development; do
     vercel_env "$REPO_ROOT/apps/mobile" EXPO_PUBLIC_SUPABASE_URL "$SUPABASE_STAGING_URL" "$environment"
     vercel_env "$REPO_ROOT/apps/mobile" EXPO_PUBLIC_SUPABASE_ANON_KEY "$SUPABASE_STAGING_ANON_KEY" "$environment"
@@ -623,12 +623,12 @@ if confirm "Write them with the Vercel CLI now (it links apps/mobile to the proj
   done
 else
   warn "set them by hand from $ENV_FILE."
-  SKIPPED+=("Vercel jnj-mobile-web-test environment variables: https://vercel.com/$VERCEL_TEAM/jnj-mobile-web-test/settings/environment-variables")
+  SKIPPED+=("Vercel my-builder-mobile-web-test environment variables: https://vercel.com/$VERCEL_TEAM/my-builder-mobile-web-test/settings/environment-variables")
 fi
-open_url "https://vercel.com/$VERCEL_TEAM/jnj-mobile-web-test/settings/deployment-protection"
+open_url "https://vercel.com/$VERCEL_TEAM/my-builder-mobile-web-test/settings/deployment-protection"
 step "Vercel Authentication: ON for all deployments (production included), so only team members can open the site. Save."
-confirm "Is deployment protection on for every deployment?" || SKIPPED+=("Vercel deployment protection on jnj-mobile-web-test")
-ask MOBILE_WEB_TEST_URL "Mobile web test site URL (e.g. https://jnj-mobile-web-test.vercel.app):"
+confirm "Is deployment protection on for every deployment?" || SKIPPED+=("Vercel deployment protection on my-builder-mobile-web-test")
+ask MOBILE_WEB_TEST_URL "Mobile web test site URL (e.g. https://my-builder-mobile-web-test.vercel.app):"
 write_env MOBILE_WEB_TEST_URL "${MOBILE_WEB_TEST_URL%/}"
 
 # ── 14. Publish ───────────────────────────────────────────────────────────

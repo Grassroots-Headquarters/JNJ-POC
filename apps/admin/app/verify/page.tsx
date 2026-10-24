@@ -27,7 +27,7 @@ export default function VerifyPage() {
   if (pending === undefined) return null;
   if (pending === null) {
     return (
-      <AuthScreen title="Site App" caption="Admin app">
+      <AuthScreen title="My Builder App" caption="Admin app">
         <p className="text-center text-[13px] text-muted-foreground">
           Start again from{" "}
           <Link href="/login" className="text-primary">
@@ -79,7 +79,7 @@ export default function VerifyPage() {
   }
 
   return (
-    <AuthScreen title="Site App" caption={pending.signUp ? "Sign your Company up" : "Admin app"}>
+    <AuthScreen title="My Builder App" caption={pending.signUp ? "Sign your Company up" : "Admin app"}>
       <form onSubmit={onSubmit} className="grid gap-3">
         <div className="flex items-center gap-2.5">
           <Link href={backHref} className="text-[15px] font-medium text-primary">

@@ -28,7 +28,7 @@ describe("inviteSms", () => {
   it("names the Company and the Role and carries the link", () => {
     const body = inviteSms({ companyName: "JNJ Building", role: "site_team", baseUrl: "https://app.example.com/", code: "ABCDEFGHJKLM" });
     expect(body).toBe(
-      "JNJ Building has invited you to the JNJ Site App as Site team. Open https://app.example.com/invite/ABCDEFGHJKLM",
+      "JNJ Building has invited you to My Builder App as Site team. Open https://app.example.com/invite/ABCDEFGHJKLM",
     );
     expect(inviteCodeFromSms(body)).toBe("ABCDEFGHJKLM");
   });
@@ -41,7 +41,7 @@ describe("inviteLink and inviteCodeFromSms", () => {
   });
 
   it("reads the code back out of the text", () => {
-    const body = "JNJ Building has invited you to the JNJ Site App as Site team. Open https://app.example.com/invite/ABCDEFGHJKLM";
+    const body = "JNJ Building has invited you to My Builder App as Site team. Open https://app.example.com/invite/ABCDEFGHJKLM";
     expect(inviteCodeFromSms(body)).toBe("ABCDEFGHJKLM");
   });
 

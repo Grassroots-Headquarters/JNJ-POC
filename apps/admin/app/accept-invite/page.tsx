@@ -56,7 +56,7 @@ export default function AcceptInvitePage() {
   if (code === undefined) return null;
   if (code === null || preview.isError || (preview.isSuccess && preview.data === null)) {
     return (
-      <AuthScreen title="Site App" caption="Admin app">
+      <AuthScreen title="My Builder App" caption="Admin app">
         <p className="text-center text-[13px] text-muted-foreground">
           {preview.isError ? preview.error.message : "That Invite link is not valid."}{" "}
           <Link href="/" className="text-primary">
@@ -73,7 +73,7 @@ export default function AcceptInvitePage() {
   const invite = preview.data;
   if (invite.status !== "pending") {
     return (
-      <AuthScreen title="Site App" caption="Admin app">
+      <AuthScreen title="My Builder App" caption="Admin app">
         <p className="text-center text-[13px] text-muted-foreground">
           This Invite is no longer open ({inviteStatusLabel[invite.status].toLowerCase()}). Ask {invite.companyName} to
           send a new one.{" "}

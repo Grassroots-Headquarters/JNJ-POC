@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const KEY = "jnj.pendingInviteCode";
+const KEY = "mba.pendingInviteCode";
 
 /**
  * The Invite code the app was opened with while logged out, kept until the

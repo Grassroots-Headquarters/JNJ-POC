@@ -1,4 +1,4 @@
-const KEY = "jnj.pendingInviteCode";
+const KEY = "mba.pendingInviteCode";
 
 /**
  * The Invite code a visitor arrived with on /invite/<code>, kept until they

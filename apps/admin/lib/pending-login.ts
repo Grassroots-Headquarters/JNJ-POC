@@ -1,4 +1,4 @@
-const KEY = "jnj.pendingLogin";
+const KEY = "mba.pendingLogin";
 
 /** What the code entry page needs to finish a login or a Company sign-up. */
 export type PendingLogin = {

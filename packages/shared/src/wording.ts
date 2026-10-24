@@ -17,7 +17,7 @@ export function inviteLink(baseUrl: string, code: string): string {
 /** The text of the Invite SMS. */
 export function inviteSms(invite: { companyName: string; role: Enums<"role">; baseUrl: string; code: string }): string {
   return (
-    `${invite.companyName} has invited you to the JNJ Site App as ${roleLabel[invite.role]}. ` +
+    `${invite.companyName} has invited you to My Builder App as ${roleLabel[invite.role]}. ` +
     `Open ${inviteLink(invite.baseUrl, invite.code)}`
   );
 }

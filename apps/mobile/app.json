@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "JNJ Site App",
-    "slug": "jnj-site-app",
+    "name": "My Builder App",
+    "slug": "my-builder-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "jnjsite",
+    "scheme": "mybuilderapp",
     "runtimeVersion": {
       "policy": "appVersion"
     },
@@ -17,12 +17,12 @@
     "userInterfaceStyle": "dark",
     "backgroundColor": "#0A0A0C",
     "ios": {
-      "bundleIdentifier": "com.grassrootshq.jnjsite",
+      "bundleIdentifier": "com.grassrootshq.mybuilderapp",
       "supportsTablet": false,
       "associatedDomains": ["applinks:app.example.com"]
     },
     "android": {
-      "package": "com.grassrootshq.jnjsite",
+      "package": "com.grassrootshq.mybuilderapp",
       "adaptiveIcon": {
         "backgroundColor": "#0A0A0C",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -58,7 +58,7 @@
         "@sentry/react-native/expo",
         {
           "organization": "grassroots-headquarters",
-          "project": "jnj-mobile",
+          "project": "my-builder-mobile",
           "url": "https://sentry.io/"
         }
       ]
