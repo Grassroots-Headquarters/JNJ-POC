@@ -28,6 +28,8 @@ function RootNavigator() {
         <Stack.Screen name="index" />
         <Stack.Screen name="choose-company" />
       </Stack.Protected>
+      {/* Invite links land here logged in or out; the screen decides what to do. */}
+      <Stack.Screen name="invite/[code]" />
     </Stack>
   );
 }

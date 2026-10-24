@@ -319,7 +319,13 @@ function InviteForm({
         </div>
         <Label>
           Role
-          <select name="role" className={selectClass} value={role} onChange={(e) => setRole(e.target.value as Role)}>
+          <select
+            name="role"
+            aria-label="Role"
+            className={selectClass}
+            value={role}
+            onChange={(e) => setRole(e.target.value as Role)}
+          >
             {ROLE_OPTIONS.map((option) => (
               <option key={option} value={option}>
                 {roleLabel[option]}

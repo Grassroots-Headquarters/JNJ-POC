@@ -1,10 +1,12 @@
 import { pickCurrentCompany, roleLabel } from "@jnj/shared";
 import { useQueryClient } from "@tanstack/react-query";
 import { Redirect, useRouter } from "expo-router";
+import { useEffect, useState } from "react";
 import { Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Bar, BarAction, GhostButton, PrimaryButton } from "@/components/ui";
+import { getPendingInviteCode } from "@/lib/pending-invite";
 import { useMemberships, useMyProfile, useRememberedCompanyId } from "@/lib/queries";
 import { supabase } from "@/lib/supabase";
 
@@ -15,13 +17,26 @@ export default function MyJobsScreen() {
   const profile = useMyProfile();
   const router = useRouter();
   const queryClient = useQueryClient();
+  // An Invite opened before login is picked up now (User story 29).
+  const [pendingInvite, setPendingInvite] = useState<string | null | undefined>(undefined);
+  useEffect(() => {
+    let active = true;
+    getPendingInviteCode().then((code) => {
+      if (!active) return;
+      setPendingInvite(code);
+      if (code) router.replace(`/invite/${code}`);
+    });
+    return () => {
+      active = false;
+    };
+  }, [router]);
 
   async function logOut() {
     await supabase.auth.signOut();
     queryClient.clear();
   }
 
-  if (memberships.isPending || remembered.isPending) {
+  if (pendingInvite !== null || memberships.isPending || remembered.isPending) {
     return (
       <SafeAreaView className="flex-1 bg-bg">
         <Text className="p-4 text-muted">Loading…</Text>
