@@ -230,6 +230,37 @@ describe("the Client Portal Add-on follows Stripe", () => {
   });
 });
 
+describe("a webhook event that fails", () => {
+  it("is applied when Stripe retries it", async () => {
+    // A Company the webhook cannot find yet: the first delivery fails.
+    const companyId = crypto.randomUUID();
+    const subscriptionId = `sub_retry_${run}`;
+    const service = createServiceClient();
+    const eventId = `evt_retry_${run}`;
+    const session = checkoutSession(companyId, `cus_retry_${run}`, subscriptionId);
+
+    const failed = await sendEvent("checkout.session.completed", session, { id: eventId });
+    expect(failed.response.status).toBe(500);
+
+    const { error } = await service
+      .from("companies")
+      .insert({ id: companyId, name: `Retry Builders ${run}`, referral_code: "RETRY2" });
+    expect(error).toBeNull();
+    try {
+      const retried = await sendEvent("checkout.session.completed", session, { id: eventId });
+      expect(retried.response.status).toBe(200);
+      expect(retried.body).toEqual({ received: true });
+      const { data } = await service
+        .from("add_on_subscriptions")
+        .select("stripe_subscription_id, active")
+        .eq("company_id", companyId);
+      expect(data).toEqual([{ stripe_subscription_id: subscriptionId, active: true }]);
+    } finally {
+      await service.from("companies").delete().eq("id", companyId);
+    }
+  });
+});
+
 describe("the Referral free month", () => {
   it("is granted once when a referred Company first pays for an Add-on", async () => {
     const referred = await signInAs(freeTestPhone(16));

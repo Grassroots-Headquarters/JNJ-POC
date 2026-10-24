@@ -15,8 +15,8 @@ import { Sentry, serve } from "../_shared/sentry.ts";
 
 // The only thing that switches an Add-on on or off (ADR 0008). Stripe posts
 // signed events here (`verify_jwt = false`; the signature is the check).
-// Events can repeat and arrive out of order, so every event id is recorded
-// and apply_stripe_subscription is given the event's `created` time: it
+// Events can repeat and arrive out of order, so every handled event id is
+// recorded and apply_stripe_subscription is given the event's `created` time: it
 // ignores events older than the last one applied and never revives a
 // cancelled subscription.
 //
@@ -46,13 +46,19 @@ serve(async (req) => {
   }
 
   const db = serviceClient();
-  const { error: recordError } = await db.from("stripe_events").insert({ id: event.id, type: event.type });
-  if (recordError) {
-    if (recordError.code === "23505") return json({ received: true, duplicate: true });
-    throw new Error(`could not record event ${event.id}: ${recordError.message}`);
-  }
+  const { data: seen, error: seenError } = await db.from("stripe_events").select("id").eq("id", event.id).maybeSingle();
+  if (seenError) throw new Error(`could not check event ${event.id}: ${seenError.message}`);
+  if (seen) return json({ received: true, duplicate: true });
 
+  // Recorded only once handled: if handling throws, Stripe's retry runs it
+  // again. Two deliveries racing both get handled, which is safe because
+  // apply_stripe_subscription orders events and the Referral reward is
+  // granted once per Company.
   const outcome = await handle(event, db);
+  const { error: recordError } = await db
+    .from("stripe_events")
+    .upsert({ id: event.id, type: event.type }, { onConflict: "id", ignoreDuplicates: true });
+  if (recordError) throw new Error(`could not record event ${event.id}: ${recordError.message}`);
   return json({ received: true, ...outcome });
 });
 
