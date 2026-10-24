@@ -55,13 +55,16 @@ jobs:
       - name: Start local Supabase
         run: pnpm supabase start -x "$SUPABASE_EXCLUDE"
       - name: Expose local Supabase to the apps
+        # `status -o env` prints NAME="value"; $GITHUB_ENV keeps quotes as part of the value, so strip them.
         run: |
           pnpm --silent supabase status -o env \
             --override-name api.url=NEXT_PUBLIC_SUPABASE_URL \
-            --override-name auth.anon_key=NEXT_PUBLIC_SUPABASE_ANON_KEY >> "$GITHUB_ENV"
+            --override-name auth.anon_key=NEXT_PUBLIC_SUPABASE_ANON_KEY \
+            | sed 's/^\([A-Z_]*\)="\(.*\)"$/\1=\2/' >> "$GITHUB_ENV"
           pnpm --silent supabase status -o env \
             --override-name api.url=EXPO_PUBLIC_SUPABASE_URL \
-            --override-name auth.anon_key=EXPO_PUBLIC_SUPABASE_ANON_KEY >> "$GITHUB_ENV"
+            --override-name auth.anon_key=EXPO_PUBLIC_SUPABASE_ANON_KEY \
+            | sed 's/^\([A-Z_]*\)="\(.*\)"$/\1=\2/' >> "$GITHUB_ENV"
       - run: pnpm exec playwright install --with-deps chromium
         working-directory: e2e
       - name: Build the Admin app
