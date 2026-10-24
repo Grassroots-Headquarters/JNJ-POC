@@ -8,7 +8,15 @@ import {
   postFunctionAs,
   signInAs,
 } from "@jnj/harness";
-import { companyHasAddOn, listAddOns, signUpCompany, startCheckout, type TypedClient } from "@jnj/shared";
+import {
+  companyHasAddOn,
+  getCompanyBilling,
+  listAddOns,
+  setBillingEmail,
+  signUpCompany,
+  startCheckout,
+  type TypedClient,
+} from "@jnj/shared";
 import Stripe from "stripe";
 import { beforeAll, describe, expect, it } from "vitest";
 
@@ -332,5 +340,23 @@ describe("Stripe's hosted pages are for Admins only", () => {
   it("rejects a malformed request before anything else", async () => {
     const response = await postFunctionAs(alex, "billing-checkout", { companyId: "not-a-uuid", addOn: "client_portal", returnUrl });
     expect(response.status).toBe(400);
+  });
+});
+
+describe("the billing email", () => {
+  it("is set by an Admin through the billing-email Edge Function, which also updates the Stripe customer", async () => {
+    // No STRIPE_SECRET_KEY locally: the Stripe call is skipped and the Company row is still saved.
+    await setBillingEmail(alex, COMPANY_A.id, ` accounts-${run}@example.com `);
+    expect((await getCompanyBilling(alex, COMPANY_A.id)).billingEmail).toBe(`accounts-${run}@example.com`);
+
+    await setBillingEmail(alex, COMPANY_A.id, "");
+    expect((await getCompanyBilling(alex, COMPANY_A.id)).billingEmail).toBeNull();
+  });
+
+  it("refuses anyone who is not an Admin of the Company, and a malformed address", async () => {
+    await expect(setBillingEmail(sam, COMPANY_A.id, "sam@example.com")).rejects.toThrow("Only Admins can manage billing");
+    await expect(setBillingEmail(bea, COMPANY_A.id, "bea@example.com")).rejects.toThrow("Only Admins can manage billing");
+    await expect(setBillingEmail(alex, COMPANY_A.id, "not an email")).rejects.toThrow("Enter an email address like accounts@example.com");
+    expect((await getCompanyBilling(alex, COMPANY_A.id)).billingEmail).toBeNull();
   });
 });

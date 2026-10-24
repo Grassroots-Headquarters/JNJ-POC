@@ -104,14 +104,13 @@ export async function functionErrorMessage(error: unknown): Promise<string> {
   return error instanceof Error ? error.message : "Something went wrong talking to billing.";
 }
 
-/** Where Stripe sends receipts for this Company. Admins only (RLS). */
+/**
+ * Where Stripe sends receipts for this Company; empty clears it. Goes through
+ * the billing-email Edge Function so the Stripe customer changes too. Admins only.
+ */
 export async function setBillingEmail(client: TypedClient, companyId: string, email: string): Promise<void> {
-  const trimmed = email.trim();
-  const { error } = await client
-    .from("companies")
-    .update({ billing_email: trimmed === "" ? null : trimmed })
-    .eq("id", companyId);
-  if (error) throw new Error(error.message);
+  const { error } = await client.functions.invoke("billing-email", { body: { companyId, email } });
+  if (error) throw new Error(await functionErrorMessage(error));
 }
 
 export type CompanyBilling = {

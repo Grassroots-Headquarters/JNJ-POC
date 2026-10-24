@@ -1,7 +1,7 @@
 -- Company separation on companies, memberships and profiles (ADR 0007).
 -- Seeded Users: Alex Admin (A), Sam Site (A), Bea Boss (B), Dee Dual (A + B), Cleo Client (none).
 begin;
-select plan(25);
+select plan(27);
 
 \set alex '10000000-0000-4000-8000-000000000001'
 \set sam  '10000000-0000-4000-8000-000000000002'
@@ -14,6 +14,7 @@ select has_table('public', 'companies', 'companies table exists');
 select has_table('public', 'profiles', 'profiles table exists');
 select has_table('public', 'memberships', 'memberships table exists');
 select has_enum('public', 'role', 'role enum exists');
+select hasnt_column('public', 'profiles', 'billing_email', 'a User has no billing email: billing email belongs to the Company');
 select ok((select relrowsecurity from pg_class where oid = 'public.companies'::regclass), 'RLS is on for companies');
 select ok((select relrowsecurity from pg_class where oid = 'public.profiles'::regclass), 'RLS is on for profiles');
 select ok((select relrowsecurity from pg_class where oid = 'public.memberships'::regclass), 'RLS is on for memberships');
@@ -95,7 +96,8 @@ select is(
 );
 
 -- An Admin may change the name, not the Referral link, the Referral code or
--- the Stripe customer: those are the platform's.
+-- the Stripe customer: those are the platform's. The billing email goes
+-- through the billing-email Edge Function so it reaches Stripe too.
 set local role authenticated;
 set local request.jwt.claims = '{"sub": "10000000-0000-4000-8000-000000000001", "role": "authenticated"}';
 select throws_ok(
@@ -115,6 +117,12 @@ select throws_ok(
   '42501',
   'permission denied for table companies',
   'an Admin cannot point their Company at another Stripe customer'
+);
+select throws_ok(
+  $$ update public.companies set billing_email = 'x@example.com' where id = '20000000-0000-4000-8000-00000000000a' $$,
+  '42501',
+  'permission denied for table companies',
+  'the billing email is not written straight to the table'
 );
 reset role;
 

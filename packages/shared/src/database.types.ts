@@ -197,14 +197,14 @@ isOneToOne: false
                   ]
                 },"profiles": {
                   Row: {
-                    "billing_email": string | null,"created_at": string,"full_name": string,"user_id": string
+                    "created_at": string,"full_name": string,"user_id": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "billing_email"?: string | null,"created_at"?: string,"full_name"?: string,"user_id": string
+                    "created_at"?: string,"full_name"?: string,"user_id": string
                   }
                   Update: {
-                    "billing_email"?: string | null,"created_at"?: string,"full_name"?: string,"user_id"?: string
+                    "created_at"?: string,"full_name"?: string,"user_id"?: string
                   }
                   Relationships: [
                     

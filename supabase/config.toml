@@ -238,3 +238,9 @@ enabled = true
 verify_jwt = true
 import_map = "./functions/billing-portal/deno.json"
 entrypoint = "./functions/billing-portal/index.ts"
+
+[functions.billing-email]
+enabled = true
+verify_jwt = true
+import_map = "./functions/billing-email/deno.json"
+entrypoint = "./functions/billing-email/index.ts"
