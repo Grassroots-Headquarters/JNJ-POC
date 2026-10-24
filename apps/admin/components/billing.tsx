@@ -21,7 +21,7 @@ import { useAddOns } from "@/lib/use-add-ons";
 import { useCurrentCompany } from "@/lib/use-current-company";
 import { useIsClient } from "@/lib/use-is-client";
 
-/** /billing: the Client Portal Add-on, Stripe's hosted pages, the receipts email and the Referral code. */
+/** /billing: the Client Portal Add-on, Stripe's hosted pages and the receipts email. */
 export function Billing() {
   const { memberships, membership, canSwitch } = useCurrentCompany();
 
@@ -150,21 +150,6 @@ function AdminBilling({ companyId }: { companyId: string }) {
         loaded={company.isSuccess}
         onSaved={() => queryClient.invalidateQueries({ queryKey: ["company_billing", companyId] })}
       />
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Your Referral code</CardTitle>
-          <CardDescription>
-            Share it with another company. When they pay for their first month of an Add-on, you both get a month
-            free.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p className="font-mono text-2xl font-semibold tracking-[0.2em]" data-testid="referral-code">
-            {company.data?.referralCode ?? "…"}
-          </p>
-        </CardContent>
-      </Card>
     </>
   );
 }

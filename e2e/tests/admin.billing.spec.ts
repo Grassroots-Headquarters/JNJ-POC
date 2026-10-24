@@ -14,7 +14,7 @@ async function logIn(page: Page, mobile: string) {
   await expect(page.getByTestId("current-company")).toHaveText("JNJ Building");
 }
 
-test("an Admin opens Billing and sees the Client Portal off and the Company's Referral code", async ({ page }) => {
+test("an Admin opens Billing and sees the Client Portal off", async ({ page }) => {
   await logIn(page, "07700 900001");
   await page.getByRole("link", { name: "Billing" }).click();
 
@@ -24,7 +24,6 @@ test("an Admin opens Billing and sees the Client Portal off and the Company's Re
   await expect(page.getByTestId("client-portal-detail")).toHaveText("Not switched on.");
   await expect(page.getByRole("button", { name: "Switch on Client Portal" })).toBeEnabled();
   await expect(page.getByRole("button", { name: "Manage card and invoices" })).toBeVisible();
-  await expect(page.getByTestId("referral-code")).toHaveText("A7Q4KX");
   await expect(page.getByLabel("Billing email")).toBeVisible();
   // No price is shown anywhere on the page.
   await expect(page.locator("main")).not.toContainText(/£|\$\d/);

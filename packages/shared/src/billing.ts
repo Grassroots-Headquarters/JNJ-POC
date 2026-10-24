@@ -116,21 +116,19 @@ export async function setBillingEmail(client: TypedClient, companyId: string, em
 export type CompanyBilling = {
   name: string;
   billingEmail: string | null;
-  referralCode: string;
   hasStripeCustomer: boolean;
 };
 
 export async function getCompanyBilling(client: TypedClient, companyId: string): Promise<CompanyBilling> {
   const { data, error } = await client
     .from("companies")
-    .select("name, billing_email, referral_code, stripe_customer_id")
+    .select("name, billing_email, stripe_customer_id")
     .eq("id", companyId)
     .single();
   if (error) throw new Error(error.message);
   return {
     name: data.name,
     billingEmail: data.billing_email,
-    referralCode: data.referral_code,
     hasStripeCustomer: data.stripe_customer_id !== null,
   };
 }
