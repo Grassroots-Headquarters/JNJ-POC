@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 // +447700900006 is reserved for this journey (contracts: free test numbers).
 const ADMIN_MOBILE = "07700 900006";
 
-test("an Admin signs their Company up with an SMS code and lands on its home", async ({ page }) => {
+test("an Admin signs their Company up with an SMS code and lands on the guided first Job", async ({ page }) => {
   await page.goto("/sign-up");
   await page.getByLabel("Company name").fill("Playwright Builders");
   await page.getByLabel("Your name").fill("Pat Playwright");
@@ -24,8 +24,15 @@ test("an Admin signs their Company up with an SMS code and lands on its home", a
   await page.getByLabel("Login code").fill("123456");
   await page.getByRole("button", { name: "Create company" }).click();
 
+  // A new Company goes into the guided first Job, which can be skipped.
+  await expect(page).toHaveURL(/\/welcome$/);
+  await expect(page.getByRole("heading", { name: "Log your first Job" })).toBeVisible();
+  await expect(page.getByTestId("current-company")).toHaveText("Playwright Builders");
+  await page.getByRole("link", { name: "Skip for now" }).click();
+
   await expect(page).toHaveURL(/\/$/);
   await expect(page.getByTestId("current-company")).toHaveText("Playwright Builders");
+  await expect(page.getByTestId("jobs-empty")).toContainText("No jobs here yet.");
   await expect(page.getByTestId("connected")).toContainText("Connected");
 
   await page.getByRole("button", { name: "Log out" }).click();
