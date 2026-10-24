@@ -34,27 +34,22 @@ const selectClass =
 
 /** Team: who is in the Company, with their Role, and the Invites sent to join it. */
 export function Team() {
-  const current = useCurrentCompany();
+  const { memberships, membership, canSwitch } = useCurrentCompany();
 
-  if (current.status === "loading" || current.status === "choose") {
-    return <main className="p-6 text-muted-foreground">Loading…</main>;
-  }
-  if (current.status === "error") {
+  if (memberships.isError) {
     return (
       <main className="p-6" role="alert">
         <p className="font-medium text-destructive">Could not load your Companies</p>
-        <p className="text-sm text-muted-foreground">{current.error.message}</p>
+        <p className="text-sm text-muted-foreground">{memberships.error.message}</p>
       </main>
     );
   }
-  if (current.status === "none") {
-    return <main className="p-6 text-muted-foreground">You are not part of a Company yet.</main>;
-  }
+  // Loading, or on the way to the chooser or home.
+  if (!membership) return <main className="p-6 text-muted-foreground">Loading…</main>;
 
-  const { membership, memberships } = current;
   return (
     <>
-      <AppHeader current={membership} canSwitch={memberships.length > 1} />
+      <AppHeader current={membership} canSwitch={canSwitch} />
       <main className="mx-auto grid w-full max-w-[640px] gap-6 p-6">
         <h1 className="text-[17px] font-semibold">Team</h1>
         {membership.role === "admin" ? (

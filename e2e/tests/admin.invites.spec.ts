@@ -5,6 +5,7 @@ import { expect, test } from "@playwright/test";
 // +447700900010 is reserved for this journey (contracts: ticket #28 uses 009-012).
 const INVITEE_MOBILE = "07700 900010";
 const INVITEE_PHONE = "+447700900010";
+const INVITEE_NAME = "Iris Invitee";
 const ADMIN_URL = "http://localhost:3000";
 const MOBILE_WEB_URL = "http://localhost:8081";
 
@@ -23,6 +24,16 @@ async function inviteCodeTextedTo(phone: string): Promise<string> {
   return code;
 }
 
+// Leave the invitee as a fresh person again, so the journey can be re-run (and retried) on one database.
+test.beforeEach(async () => {
+  const service = createServiceClient();
+  const { data, error } = await service.auth.admin.listUsers({ perPage: 1000 });
+  if (error) throw new Error(error.message);
+  const invitee = data.users.find((u) => u.phone === INVITEE_PHONE.slice(1));
+  if (invitee) await service.from("memberships").delete().eq("user_id", invitee.id);
+  await service.from("invites").delete().eq("phone", INVITEE_PHONE);
+});
+
 test("an Admin invites a Site team member by SMS and they join from the Mobile app's web build", async ({
   page,
   browser,
@@ -35,10 +46,10 @@ test("an Admin invites a Site team member by SMS and they join from the Mobile a
   await page.getByRole("button", { name: "Log in" }).click();
   await expect(page.getByTestId("current-company")).toHaveText("JNJ Building");
 
-  // Team: invite Ivy as Site team.
+  // Team: invite Iris as Site team.
   await page.getByRole("link", { name: "Team" }).click();
   await expect(page).toHaveURL(/\/team$/);
-  await page.getByLabel("Name", { exact: true }).fill("Ivy Invitee");
+  await page.getByLabel("Name", { exact: true }).fill(INVITEE_NAME);
   await page.getByLabel("Mobile", { exact: true }).fill(INVITEE_MOBILE);
   await page.getByLabel("Role", { exact: true }).selectOption({ label: "Site team" });
   await page.getByRole("button", { name: "Send invite by SMS" }).click();
@@ -70,15 +81,15 @@ test("an Admin invites a Site team member by SMS and they join from the Mobile a
   await app.getByRole("button", { name: "Log in" }).click();
 
   await expect(app.getByTestId("invite-company")).toHaveText("JNJ Building");
-  await expect(app.getByLabel("Your name")).toHaveValue("Ivy Invitee");
+  await expect(app.getByLabel("Your name")).toHaveValue(INVITEE_NAME);
   await app.getByRole("button", { name: "Join JNJ Building" }).click();
 
   await expect(app.getByText("My jobs")).toBeVisible();
-  await expect(app.getByTestId("current-company")).toContainText("JNJ Building · Site team · Logged in as Ivy Invitee");
+  await expect(app.getByTestId("current-company")).toContainText(`JNJ Building · Site team · Logged in as ${INVITEE_NAME}`);
   await phone.close();
 
-  // Back in the Admin app the Invite reads Accepted and Ivy is on the team.
+  // Back in the Admin app the Invite reads Accepted and Iris is on the team.
   await page.reload();
   await expect(page.getByTestId("invite").filter({ hasText: INVITEE_PHONE })).toContainText("Accepted");
-  await expect(page.getByTestId("member").filter({ hasText: "Ivy Invitee" })).toContainText("Site team");
+  await expect(page.getByTestId("member").filter({ hasText: INVITEE_NAME })).toContainText("Site team");
 });

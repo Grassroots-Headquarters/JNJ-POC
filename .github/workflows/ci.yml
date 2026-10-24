@@ -27,6 +27,8 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm test
       - uses: supabase/setup-cli@v3
+      - name: Local Edge Function env (read by the edge runtime at start; holds the test-only webhook secret)
+        run: cp supabase/functions/.env.example supabase/functions/.env
       - name: Start local Supabase
         run: pnpm supabase start -x "$SUPABASE_EXCLUDE"
       - run: pnpm supabase db reset
@@ -48,6 +50,8 @@ jobs:
           cache: true
           require-lockfile: true
       - uses: supabase/setup-cli@v3
+      - name: Local Edge Function env (read by the edge runtime at start; holds the test-only webhook secret)
+        run: cp supabase/functions/.env.example supabase/functions/.env
       - name: Start local Supabase
         run: pnpm supabase start -x "$SUPABASE_EXCLUDE"
       - name: Expose local Supabase to the apps

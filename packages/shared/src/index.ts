@@ -34,3 +34,19 @@ export {
   type AcceptInviteInput,
 } from "./invites";
 export { listMembers, changeMemberRole, removeMember, type Member } from "./members";
+export {
+  addOnLabel,
+  listAddOns,
+  companyHasAddOn,
+  summariseAddOn,
+  startCheckout,
+  openBillingPortal,
+  functionErrorMessage,
+  setBillingEmail,
+  getCompanyBilling,
+  type AddOn,
+  type AddOnState,
+  type AddOnSummary,
+  type CheckoutInput,
+  type CompanyBilling,
+} from "./billing";

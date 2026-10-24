@@ -220,3 +220,21 @@ enabled = true
 verify_jwt = true
 import_map = "./functions/send-invite/deno.json"
 entrypoint = "./functions/send-invite/index.ts"
+# Stripe calls this; it checks Stripe's signature instead of a Supabase JWT (ADR 0008).
+[functions.stripe-webhook]
+enabled = true
+verify_jwt = false
+import_map = "./functions/stripe-webhook/deno.json"
+entrypoint = "./functions/stripe-webhook/index.ts"
+
+[functions.billing-checkout]
+enabled = true
+verify_jwt = true
+import_map = "./functions/billing-checkout/deno.json"
+entrypoint = "./functions/billing-checkout/index.ts"
+
+[functions.billing-portal]
+enabled = true
+verify_jwt = true
+import_map = "./functions/billing-portal/deno.json"
+entrypoint = "./functions/billing-portal/index.ts"

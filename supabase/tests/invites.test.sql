@@ -2,7 +2,7 @@
 -- are never visible while acting in another (ADR 0007).
 -- Seeded Users: Alex Admin (A), Sam Site (A), Bea Boss (B), Dee Dual (A + B), Cleo Client (none).
 begin;
-select plan(38);
+select plan(40);
 
 \set alex '10000000-0000-4000-8000-000000000001'
 \set sam  '10000000-0000-4000-8000-000000000002'
@@ -38,7 +38,7 @@ set local request.jwt.claims = '{"sub": "10000000-0000-4000-8000-000000000001", 
 select * from public.create_invite(:'company_a', '07700 900009', 'site_team', 'Ivy Invitee') \gset new_
 select is(:'new_phone'::text, '+447700900009', 'the Invite stores the phone in E.164 form');
 select is(:'new_role'::public.role, 'site_team'::public.role, 'the Invite carries the chosen Role');
-select matches(:'new_code', '^[A-HJ-NP-Z2-9]{12}$', 'the Invite gets a random single-use code');
+select matches(:'new_code'::text, '^[A-HJ-NP-Z2-9]{12}$', 'the Invite gets a random single-use code');
 select ok(:'new_expires_at'::timestamptz between now() + interval '6 days 23 hours' and now() + interval '7 days 1 hour', 'the Invite expires in 7 days');
 select is(:'new_created_by'::uuid, :'alex'::uuid, 'the Invite records who sent it');
 select throws_ok(

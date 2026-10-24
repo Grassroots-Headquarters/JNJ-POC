@@ -13,6 +13,7 @@ import { createClient } from "@/lib/supabase/client";
 const NAV = [
   { href: "/", label: "Home", adminOnly: false },
   { href: "/team", label: "Team", adminOnly: true },
+  { href: "/billing", label: "Billing", adminOnly: true },
 ];
 
 export function AppHeader({ current, canSwitch }: { current: Membership; canSwitch: boolean }) {

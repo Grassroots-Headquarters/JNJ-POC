@@ -1,5 +1,6 @@
 "use client";
 
+import { pickCurrentCompany } from "@jnj/shared";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
@@ -7,36 +8,41 @@ import { useEffect } from "react";
 import { AppHeader } from "@/components/app-header";
 import { ConnectedCard } from "@/components/connected-card";
 import { Button } from "@/components/ui/button";
+import { getRememberedCompanyId } from "@/lib/current-company";
 import { getPendingInviteCode } from "@/lib/pending-invite";
 import { createClient } from "@/lib/supabase/client";
-import { useCurrentCompany } from "@/lib/use-current-company";
 import { useIsClient } from "@/lib/use-is-client";
+import { useMemberships } from "@/lib/use-memberships";
 
 /** The logged-in home: picks up a waiting Invite, works out the current Company, then shows it. */
 export function Home() {
   const router = useRouter();
+  const memberships = useMemberships();
   const isClient = useIsClient();
+  const remembered = isClient ? getRememberedCompanyId() : null;
+  // An Invite link visited before logging in is accepted now (User story 29).
   const pendingInvite = isClient ? getPendingInviteCode() : null;
-  const current = useCurrentCompany();
+
+  const choice = memberships.isSuccess && isClient ? pickCurrentCompany(memberships.data, remembered) : null;
 
   useEffect(() => {
     if (pendingInvite) router.replace("/accept-invite");
-  }, [pendingInvite, router]);
+    else if (choice?.kind === "choose") router.replace("/choose-company");
+  }, [pendingInvite, choice?.kind, router]);
 
   if (pendingInvite) return null;
-  if (current.status === "loading" || current.status === "choose") {
-    return <main className="p-6 text-muted-foreground">Loading…</main>;
-  }
-  if (current.status === "error") {
+  if (memberships.isPending) return <main className="p-6 text-muted-foreground">Loading…</main>;
+  if (memberships.isError) {
     return (
       <main className="p-6" role="alert">
         <p className="font-medium text-destructive">Could not load your Companies</p>
-        <p className="text-sm text-muted-foreground">{current.error.message}</p>
+        <p className="text-sm text-muted-foreground">{memberships.error.message}</p>
       </main>
     );
   }
+  if (!choice || choice.kind === "choose") return null;
 
-  if (current.status === "none") {
+  if (choice.kind === "none") {
     return (
       <main className="flex flex-1 items-center justify-center p-6">
         <div className="grid max-w-[390px] gap-3 text-center">
@@ -55,7 +61,7 @@ export function Home() {
 
   return (
     <>
-      <AppHeader current={current.membership} canSwitch={current.memberships.length > 1} />
+      <AppHeader current={choice.membership} canSwitch={memberships.data.length > 1} />
       <main className="flex flex-1 items-center justify-center p-6">
         <ConnectedCard />
       </main>

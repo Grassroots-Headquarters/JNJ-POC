@@ -23,16 +23,36 @@ export type Database = {
           }
         },"public": {
           Tables: {
-            "companies": {
+            "add_on_subscriptions": {
                   Row: {
-                    "created_at": string,"id": string,"name": string,"referral_code": string,"referred_by_company_id": string | null
+                    "active": boolean,"add_on": Database["public"]['Enums']["add_on"],"company_id": string,"created_at": string,"current_period_end": string | null,"status": string,"stripe_subscription_id": string,"stripe_subscription_item_id": string | null,"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "created_at"?: string,"id"?: string,"name": string,"referral_code": string,"referred_by_company_id"?: string | null
+                    "active"?: never,"add_on": Database["public"]['Enums']["add_on"],"company_id": string,"created_at"?: string,"current_period_end"?: string | null,"status": string,"stripe_subscription_id": string,"stripe_subscription_item_id"?: string | null,"updated_at"?: string
                   }
                   Update: {
-                    "created_at"?: string,"id"?: string,"name"?: string,"referral_code"?: string,"referred_by_company_id"?: string | null
+                    "active"?: never,"add_on"?: Database["public"]['Enums']["add_on"],"company_id"?: string,"created_at"?: string,"current_period_end"?: string | null,"status"?: string,"stripe_subscription_id"?: string,"stripe_subscription_item_id"?: string | null,"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "add_on_subscriptions_company_id_fkey"
+      columns: ["company_id"]
+isOneToOne: false
+      referencedRelation: "companies"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"companies": {
+                  Row: {
+                    "billing_email": string | null,"created_at": string,"id": string,"name": string,"referral_code": string,"referred_by_company_id": string | null,"stripe_customer_id": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "billing_email"?: string | null,"created_at"?: string,"id"?: string,"name": string,"referral_code": string,"referred_by_company_id"?: string | null,"stripe_customer_id"?: string | null
+                  }
+                  Update: {
+                    "billing_email"?: string | null,"created_at"?: string,"id"?: string,"name"?: string,"referral_code"?: string,"referred_by_company_id"?: string | null,"stripe_customer_id"?: string | null
                   }
                   Relationships: [
                     {
@@ -131,6 +151,46 @@ isOneToOne: false
                   Relationships: [
                     
                   ]
+                },"referral_rewards": {
+                  Row: {
+                    "coupon": string,"granted_at": string,"referred_company_id": string,"referred_subscription_id": string,"referring_company_id": string,"referring_subscription_id": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "coupon"?: string,"granted_at"?: string,"referred_company_id": string,"referred_subscription_id": string,"referring_company_id": string,"referring_subscription_id"?: string | null
+                  }
+                  Update: {
+                    "coupon"?: string,"granted_at"?: string,"referred_company_id"?: string,"referred_subscription_id"?: string,"referring_company_id"?: string,"referring_subscription_id"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "referral_rewards_referred_company_id_fkey"
+      columns: ["referred_company_id"]
+isOneToOne: true
+      referencedRelation: "companies"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "referral_rewards_referring_company_id_fkey"
+      columns: ["referring_company_id"]
+isOneToOne: false
+      referencedRelation: "companies"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"stripe_events": {
+                  Row: {
+                    "id": string,"received_at": string,"type": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "id": string,"received_at"?: string,"type": string
+                  }
+                  Update: {
+                    "id"?: string,"received_at"?: string,"type"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
                 }
           }
           Views: {
@@ -140,11 +200,17 @@ isOneToOne: false
             "accept_invite":
 { Args: { "code": string,"full_name": string,"trade"?: string }; Returns: string
                            },
+"apply_stripe_subscription":
+{ Args: { "add_on": Database["public"]['Enums']["add_on"],"company": string,"item_id": string,"period_end": string,"status": string,"subscription_id": string }; Returns: undefined
+                           },
 "cancel_invite":
 { Args: { "invite": string }; Returns: undefined
                            },
 "change_member_role":
 { Args: { "company": string,"role": Database["public"]['Enums']["role"],"user_id": string }; Returns: undefined
+                           },
+"company_has_add_on":
+{ Args: { "add_on": Database["public"]['Enums']["add_on"],"company": string }; Returns: boolean
                            },
 "create_invite":
 { Args: { "company": string,"full_name"?: string,"phone": string,"role": Database["public"]['Enums']["role"] }; Returns: {
@@ -222,7 +288,7 @@ isOneToOne: false
                            }
           }
           Enums: {
-            "role": "admin"|"site_team"|"subcontractor"
+            "add_on": "client_portal","role": "admin"|"site_team"|"subcontractor"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -342,7 +408,7 @@ export const Constants = {
           }
         },"public": {
           Enums: {
-            "role": ["admin", "site_team", "subcontractor"]
+            "add_on": ["client_portal"],"role": ["admin", "site_team", "subcontractor"]
           }
         }
 } as const
