@@ -9,7 +9,7 @@ export function getPendingInviteCode(): string | null {
   return window.localStorage.getItem(KEY);
 }
 
-export function setPendingInviteCode(code: string): void {
+export function rememberPendingInviteCode(code: string): void {
   window.localStorage.setItem(KEY, code);
 }
 
