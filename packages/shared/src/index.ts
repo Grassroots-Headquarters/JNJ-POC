@@ -35,6 +35,23 @@ export {
 } from "./invites";
 export { listMembers, changeMemberRole, removeMember, type Member } from "./members";
 export {
+  listJobs,
+  getJob,
+  createJob,
+  listJobPeople,
+  sortJobPeople,
+  jobAddress,
+  formatStartDate,
+  jobPersonLabel,
+  canBeJobLead,
+  peopleToAssign,
+  assignToJob,
+  unassignFromJob,
+  type Job,
+  type JobPerson,
+  type CreateJobInput,
+} from "./jobs";
+export {
   addOnLabel,
   listAddOns,
   companyHasAddOn,

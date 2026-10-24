@@ -18,6 +18,8 @@ export type Invite = {
   cancelledAt: string | null;
   createdAt: string;
   status: InviteStatus;
+  /** The Job the invitee is put on when they accept, if any. */
+  jobId: string | null;
 };
 
 /** What anyone can see of an Invite from its code alone, before accepting. */
@@ -69,6 +71,7 @@ function toInvite(row: Tables<"invites">): Invite {
     cancelledAt: row.cancelled_at,
     createdAt: row.created_at,
     status: inviteStatus(row),
+    jobId: row.job_id,
   };
 }
 
@@ -89,6 +92,8 @@ export type CreateInviteInput = {
   phone: string;
   role: Role;
   fullName?: string | null;
+  /** Put the invitee on this Job of the Company when they accept. */
+  jobId?: string | null;
 };
 
 /** Creates the Invite row (Admins only). Call `sendInvite` next to text it. */
@@ -99,6 +104,7 @@ export async function createInvite(client: TypedClient, input: CreateInviteInput
     phone: input.phone,
     role: input.role,
     full_name: fullName ? fullName : undefined,
+    job: input.jobId ?? undefined,
   });
   if (error) throw new Error(error.message);
   return toInvite(data);
