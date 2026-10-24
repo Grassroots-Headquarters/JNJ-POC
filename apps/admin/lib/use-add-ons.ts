@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
 
-export const addOnsQueryKey = (companyId: string) => ["add_ons", companyId] as const;
+export const addOnsQueryKey = (companyId: string) => ["add-ons", companyId] as const;
 
 /**
  * The Company's Add-ons as Stripe last reported them, read through RLS as

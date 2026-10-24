@@ -55,6 +55,8 @@ export function Billing() {
   );
 }
 
+const companyBillingQueryKey = (companyId: string) => ["company-billing", companyId] as const;
+
 function checkoutOutcome(): "success" | "cancelled" | null {
   if (typeof window === "undefined") return null;
   const value = new URLSearchParams(window.location.search).get("checkout");
@@ -69,7 +71,7 @@ function AdminBilling({ companyId }: { companyId: string }) {
 
   const addOns = useAddOns(companyId, { refetchInterval: outcome === "success" ? 5_000 : false });
   const company = useQuery({
-    queryKey: ["company_billing", companyId],
+    queryKey: companyBillingQueryKey(companyId),
     queryFn: () => getCompanyBilling(supabase, companyId),
     retry: false,
   });
@@ -148,7 +150,7 @@ function AdminBilling({ companyId }: { companyId: string }) {
         companyId={companyId}
         billingEmail={company.data?.billingEmail ?? ""}
         loaded={company.isSuccess}
-        onSaved={() => queryClient.invalidateQueries({ queryKey: ["company_billing", companyId] })}
+        onSaved={() => queryClient.invalidateQueries({ queryKey: companyBillingQueryKey(companyId) })}
       />
     </>
   );

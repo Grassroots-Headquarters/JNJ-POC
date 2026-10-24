@@ -6,7 +6,7 @@ import { supabase } from "@/lib/supabase";
 
 export const membershipsQueryKey = ["memberships"] as const;
 export const myUserQueryKey = ["my-user"] as const;
-export const rememberedCompanyQueryKey = ["rememberedCompany"] as const;
+export const rememberedCompanyQueryKey = ["remembered-company"] as const;
 
 export function useMemberships() {
   return useQuery({ queryKey: membershipsQueryKey, queryFn: () => listMyMemberships(supabase), retry: false });

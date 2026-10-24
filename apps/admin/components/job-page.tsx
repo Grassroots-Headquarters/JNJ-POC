@@ -7,7 +7,6 @@ import {
   inviteStatusLabel,
   jobAddress,
   jobPersonLabel,
-  listInvites,
   peopleToAssign,
   roleLabel,
   unassignFromJob,
@@ -15,7 +14,7 @@ import {
   type JobPerson,
   type Membership,
 } from "@jnj/shared";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useMemo, useState, type FormEvent } from "react";
 import { CompanyPage, SectionHeading } from "@/components/company-page";
@@ -24,7 +23,9 @@ import { Pill } from "@/components/pill";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
-import { jobPeopleQueryKey, jobQueryKey, jobsQueryKey, useJob, useJobPeople, useMembers } from "@/lib/use-jobs";
+import { invitesQueryKey, useInvites } from "@/lib/use-invites";
+import { jobPeopleQueryKey, jobQueryKey, jobsQueryKey, useJob, useJobPeople } from "@/lib/use-jobs";
+import { useMembers } from "@/lib/use-members";
 
 /** /jobs/<id>: a Job's details and People. Admins assign people and mark the Job lead here. */
 export function JobPage({ jobId, justCreated }: { jobId: string; justCreated: boolean }) {
@@ -89,7 +90,7 @@ function People({ job, isAdmin }: { job: Job; isAdmin: boolean }) {
     void queryClient.invalidateQueries({ queryKey: jobPeopleQueryKey(job.id) });
     void queryClient.invalidateQueries({ queryKey: jobQueryKey(job.id) });
     void queryClient.invalidateQueries({ queryKey: jobsQueryKey(job.companyId) });
-    void queryClient.invalidateQueries({ queryKey: ["invites", job.companyId] });
+    void queryClient.invalidateQueries({ queryKey: invitesQueryKey(job.companyId) });
   }
   function done(message: string) {
     setError(null);
@@ -180,12 +181,7 @@ function People({ job, isAdmin }: { job: Job; isAdmin: boolean }) {
 
 /** Pending Invites that put their invitee on this Job when accepted. */
 function InvitedToJob({ job }: { job: Job }) {
-  const supabase = useMemo(() => createClient(), []);
-  const invites = useQuery({
-    queryKey: ["invites", job.companyId],
-    queryFn: () => listInvites(supabase, job.companyId),
-    retry: false,
-  });
+  const invites = useInvites(job.companyId);
   const pending = invites.data?.filter((i) => i.jobId === job.id && i.status === "pending") ?? [];
   if (pending.length === 0) return null;
   return (

@@ -1,6 +1,6 @@
 "use client";
 
-import type { Membership } from "@jnj/shared";
+import { canBeJobLead, type Membership } from "@jnj/shared";
 import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -10,7 +10,9 @@ import { InviteForm } from "@/components/invite-form";
 import { JobForm } from "@/components/job-form";
 import { Alert } from "@/components/ui/alert";
 import { buttonVariants } from "@/components/ui/button";
-import { useJob, useMembers } from "@/lib/use-jobs";
+import { invitesQueryKey } from "@/lib/use-invites";
+import { useJob } from "@/lib/use-jobs";
+import { useMembers } from "@/lib/use-members";
 
 /**
  * The guided first Job, run after Company sign-up: log the Job, then invite
@@ -46,7 +48,7 @@ function Step({ number, title, caption }: { number: 1 | 2; title: string; captio
 function FirstJob({ membership }: { membership: Membership }) {
   const router = useRouter();
   const members = useMembers(membership.companyId);
-  const siteTeam = members.data?.filter((m) => m.role === "site_team") ?? [];
+  const siteTeam = members.data?.filter((m) => canBeJobLead(m.role)) ?? [];
   return (
     <>
       <Step
@@ -98,7 +100,7 @@ function InviteTeam({ membership, jobId }: { membership: Membership; jobId: stri
         onSent={(mobile) => {
           setError(null);
           setToast(`Invite sent to ${mobile}.`);
-          void queryClient.invalidateQueries({ queryKey: ["invites", membership.companyId] });
+          void queryClient.invalidateQueries({ queryKey: invitesQueryKey(membership.companyId) });
         }}
         onError={(message) => {
           setToast(null);

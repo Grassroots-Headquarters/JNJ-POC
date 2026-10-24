@@ -1,10 +1,11 @@
 "use client";
 
+import { canBeJobLead } from "@jnj/shared";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { CompanyPage } from "@/components/company-page";
 import { JobForm } from "@/components/job-form";
-import { useMembers } from "@/lib/use-jobs";
+import { useMembers } from "@/lib/use-members";
 
 /** /jobs/new: the Admin demo's "New job" screen. */
 export function NewJob() {
@@ -32,6 +33,6 @@ export function NewJob() {
 function NewJobForm({ companyId }: { companyId: string }) {
   const router = useRouter();
   const members = useMembers(companyId);
-  const siteTeam = members.data?.filter((m) => m.role === "site_team") ?? [];
+  const siteTeam = members.data?.filter((m) => canBeJobLead(m.role)) ?? [];
   return <JobForm companyId={companyId} siteTeam={siteTeam} onCreated={(job) => router.push(`/jobs/${job.id}?created=1`)} />;
 }

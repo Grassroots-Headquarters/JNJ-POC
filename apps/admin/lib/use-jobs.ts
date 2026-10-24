@@ -1,6 +1,6 @@
 "use client";
 
-import { getJob, listJobPeople, listJobs, listMembers, type Job } from "@jnj/shared";
+import { getJob, listJobPeople, listJobs, type Job } from "@jnj/shared";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
@@ -28,9 +28,4 @@ export function useJobPeople(job: Job) {
     queryFn: () => listJobPeople(supabase, job),
     retry: false,
   });
-}
-
-export function useMembers(companyId: string) {
-  const supabase = useMemo(() => createClient(), []);
-  return useQuery({ queryKey: ["members", companyId], queryFn: () => listMembers(supabase, companyId), retry: false });
 }

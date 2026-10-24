@@ -7,7 +7,7 @@ import { supabase } from "@/lib/supabase";
 /** One-line platform status shown under the login form. */
 export function ConnectedStatus() {
   const status = useQuery({
-    queryKey: ["platform_status"],
+    queryKey: ["platform-status"],
     queryFn: () => getPlatformStatus(supabase),
     retry: false,
   });

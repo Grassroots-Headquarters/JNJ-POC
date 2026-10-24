@@ -9,7 +9,7 @@ import { createClient } from "@/lib/supabase/client";
 export function ConnectedStatus() {
   const supabase = useMemo(() => createClient(), []);
   const status = useQuery({
-    queryKey: ["platform_status"],
+    queryKey: ["platform-status"],
     queryFn: () => getPlatformStatus(supabase),
     retry: false,
   });

@@ -4,8 +4,6 @@ import {
   cancelInvite,
   changeMemberRole,
   inviteStatusLabel,
-  listInvites,
-  listMembers,
   removeMember,
   resendInvite,
   roleLabel,
@@ -14,7 +12,7 @@ import {
   type Member,
   type Role,
 } from "@jnj/shared";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { AppHeader } from "@/components/app-header";
 import { InviteForm, ROLE_OPTIONS, selectClass } from "@/components/invite-form";
@@ -23,6 +21,8 @@ import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
 import { useCurrentCompany } from "@/lib/use-current-company";
+import { invitesQueryKey, useInvites } from "@/lib/use-invites";
+import { membersQueryKey, useMembers } from "@/lib/use-members";
 import { membershipsQueryKey } from "@/lib/use-memberships";
 
 /** Team: who is in the Company, with their Role, and the Invites sent to join it. */
@@ -58,22 +58,14 @@ export function Team() {
 function TeamAdmin({ companyId }: { companyId: string }) {
   const supabase = useMemo(() => createClient(), []);
   const queryClient = useQueryClient();
-  const members = useQuery({
-    queryKey: ["members", companyId],
-    queryFn: () => listMembers(supabase, companyId),
-    retry: false,
-  });
-  const invites = useQuery({
-    queryKey: ["invites", companyId],
-    queryFn: () => listInvites(supabase, companyId),
-    retry: false,
-  });
+  const members = useMembers(companyId);
+  const invites = useInvites(companyId);
   const [toast, setToast] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   function refresh() {
-    void queryClient.invalidateQueries({ queryKey: ["members", companyId] });
-    void queryClient.invalidateQueries({ queryKey: ["invites", companyId] });
+    void queryClient.invalidateQueries({ queryKey: membersQueryKey(companyId) });
+    void queryClient.invalidateQueries({ queryKey: invitesQueryKey(companyId) });
     // The Admin may have changed their own Role.
     void queryClient.invalidateQueries({ queryKey: membershipsQueryKey });
   }
