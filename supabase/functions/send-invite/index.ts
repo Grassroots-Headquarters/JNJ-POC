@@ -12,7 +12,7 @@ import { callerClient, serviceClient } from "../_shared/supabase.ts";
 // of the Invite's Company sees the row; everyone else gets 403.
 // With TWILIO_ACCOUNT_SID set the SMS goes through Twilio Messaging; without
 // it (local, CI) the message is recorded in outbound_sms for tests to read.
-// The SMS wording comes from @jnj/shared, which the tests read it back with.
+// The SMS wording comes from @mba/shared, which the tests read it back with.
 
 serve(async (request) => {
   if (request.method === "OPTIONS") return preflight();

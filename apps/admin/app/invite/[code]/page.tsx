@@ -1,4 +1,4 @@
-import { inviteStatusLabel, previewInvite, roleLabel } from "@jnj/shared";
+import { inviteStatusLabel, previewInvite, roleLabel } from "@mba/shared";
 import Link from "next/link";
 import { RememberInviteCode } from "@/components/remember-invite-code";
 import { createClient } from "@/lib/supabase/server";

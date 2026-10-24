@@ -1,4 +1,4 @@
-import { createTypedClient, requestLoginCode, verifyLoginCode, type TypedClient } from "@jnj/shared";
+import { createTypedClient, requestLoginCode, verifyLoginCode, type TypedClient } from "@mba/shared";
 import { localSupabase } from "./local-supabase";
 import { TEST_OTP } from "./seed";
 

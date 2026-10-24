@@ -1,6 +1,6 @@
 "use client";
 
-import { getPlatformStatus } from "@jnj/shared";
+import { getPlatformStatus } from "@mba/shared";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";

@@ -1,7 +1,7 @@
 "use client";
 
-import type { Membership } from "@jnj/shared";
-import { roleLabel } from "@jnj/shared";
+import type { Membership } from "@mba/shared";
+import { roleLabel } from "@mba/shared";
 import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";

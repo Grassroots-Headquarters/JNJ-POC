@@ -1,6 +1,6 @@
 "use client";
 
-import { pickCurrentCompany } from "@jnj/shared";
+import { pickCurrentCompany } from "@mba/shared";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";

@@ -1,6 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
-import type { Database } from "@jnj/shared";
+import type { Database } from "@mba/shared";
 import { isPublicPath } from "@/lib/public-paths";
 
 /**

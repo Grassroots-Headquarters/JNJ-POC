@@ -1,6 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
-import type { Database } from "@jnj/shared";
+import type { Database } from "@mba/shared";
 
 /** Supabase client for Server Components, Server Actions and Route Handlers. New client per request. */
 export async function createClient() {

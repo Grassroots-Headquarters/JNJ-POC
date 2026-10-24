@@ -1,5 +1,5 @@
-import { createServiceClient, inviteCodeTextedTo, userIdForPhone } from "@jnj/harness";
-import { normalisePhone } from "@jnj/shared";
+import { createServiceClient, inviteCodeTextedTo, userIdForPhone } from "@mba/harness";
+import { normalisePhone } from "@mba/shared";
 import { expect, test } from "@playwright/test";
 import { logInToAdminApp } from "./log-in";
 

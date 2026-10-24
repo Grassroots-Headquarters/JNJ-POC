@@ -1,6 +1,6 @@
 "use client";
 
-import { createInvite, roleLabel, sendInvite, type Role } from "@jnj/shared";
+import { createInvite, roleLabel, sendInvite, type Role } from "@mba/shared";
 import { useMemo, useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

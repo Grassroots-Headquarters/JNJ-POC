@@ -9,7 +9,7 @@ import {
   freeTestPhone,
   signInAs,
   userIdForPhone,
-} from "@jnj/harness";
+} from "@mba/harness";
 import {
   acceptInvite,
   assignToJob,
@@ -21,7 +21,7 @@ import {
   unassignFromJob,
   type Job,
   type TypedClient,
-} from "@jnj/shared";
+} from "@mba/shared";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 // Free test numbers for ticket #29 are 013-015. Playwright uses 013 and 014;

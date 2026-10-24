@@ -1,4 +1,4 @@
-import { acceptInvite, inviteStatusLabel, previewInvite, roleLabel } from "@jnj/shared";
+import { acceptInvite, inviteStatusLabel, previewInvite, roleLabel } from "@mba/shared";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";

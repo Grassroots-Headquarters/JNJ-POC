@@ -1,6 +1,6 @@
 "use client";
 
-import { acceptInvite, inviteStatusLabel, previewInvite, roleLabel } from "@jnj/shared";
+import { acceptInvite, inviteStatusLabel, previewInvite, roleLabel } from "@mba/shared";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";

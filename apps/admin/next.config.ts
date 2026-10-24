@@ -10,7 +10,7 @@ const release = sentryRelease(process.env);
 const nextConfig: NextConfig = {
   // The app reads cookies on most routes, so the partial prerendering model is off.
   cacheComponents: false,
-  transpilePackages: ["@jnj/shared"],
+  transpilePackages: ["@mba/shared"],
   ...(release ? { env: { NEXT_PUBLIC_SENTRY_RELEASE: release } } : {}),
   async headers() {
     return [

@@ -1,6 +1,6 @@
 "use client";
 
-import { pickCurrentCompany, type CurrentCompanyChoice } from "@jnj/shared";
+import { pickCurrentCompany, type CurrentCompanyChoice } from "@mba/shared";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { getRememberedCompanyId } from "@/lib/current-company";

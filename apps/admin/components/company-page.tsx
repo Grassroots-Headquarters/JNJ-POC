@@ -1,6 +1,6 @@
 "use client";
 
-import type { Membership } from "@jnj/shared";
+import type { Membership } from "@mba/shared";
 import type { ReactNode } from "react";
 import { AppHeader } from "@/components/app-header";
 import { useCurrentCompany } from "@/lib/use-current-company";

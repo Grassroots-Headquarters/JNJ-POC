@@ -1,5 +1,5 @@
-import { COMPANY_A, COMPANY_B, TEST_USERS, signInAs } from "@jnj/harness";
-import { listMyMemberships } from "@jnj/shared";
+import { COMPANY_A, COMPANY_B, TEST_USERS, signInAs } from "@mba/harness";
+import { listMyMemberships } from "@mba/shared";
 import { describe, expect, it } from "vitest";
 
 describe("Membership visibility across Companies", () => {

@@ -22,7 +22,7 @@ export default defineConfig({
   webServer: [
     {
       name: "admin",
-      command: "pnpm --filter @jnj/admin start",
+      command: "pnpm --filter @mba/admin start",
       url: "http://localhost:3000",
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
@@ -30,7 +30,7 @@ export default defineConfig({
     },
     {
       name: "mobile-web",
-      command: "pnpm --filter @jnj/mobile serve:web",
+      command: "pnpm --filter @mba/mobile serve:web",
       url: "http://localhost:8081",
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,

@@ -1,4 +1,4 @@
-import type { Invite } from "@jnj/shared";
+import type { Invite } from "@mba/shared";
 import type { ReactNode } from "react";
 
 /** Demo `.pill`: amber for a pending Invite, green for accepted or a Job lead, muted otherwise. */

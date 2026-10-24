@@ -8,8 +8,8 @@ One place for each building Job: team chat, materials, photos, issues and site a
 |---|---|
 | `apps/admin` | Admin app: Next.js App Router, Tailwind 4, shadcn/ui, `@supabase/ssr`, TanStack Query, Sentry |
 | `apps/mobile` | Mobile app: Expo (Expo Router, NativeWind, TanStack Query, supabase-js, Sentry). Its web build is for internal testing only |
-| `packages/shared` | `@jnj/shared`: database types generated from the schema, the typed Supabase client factory, plain shared logic |
-| `packages/harness` | `@jnj/harness`: logs tests in as a fixed test User against local Supabase and returns a typed client |
+| `packages/shared` | `@mba/shared`: database types generated from the schema, the typed Supabase client factory, plain shared logic |
+| `packages/harness` | `@mba/harness`: logs tests in as a fixed test User against local Supabase and returns a typed client |
 | `integration` | Vitest integration tests that call the same tables, functions and Edge Functions the apps call, as a signed-in User |
 | `supabase` | Local Supabase project: `config.toml`, `migrations/`, `seed.sql`, `functions/` (Edge Functions), `tests/` (pgTAP) |
 | `e2e` | Playwright tests that run against both web builds |
@@ -42,7 +42,7 @@ Phone login uses fixed test numbers locally (`+447700900001` to `+447700900019`,
 | `pnpm typecheck` | `tsc --noEmit` in every package (the Admin app runs `next typegen` first) |
 | `pnpm test` | Vitest unit tests (`packages/*/src/**/*.test.ts`, app tests) |
 | `pnpm test:db` | pgTAP tests in `supabase/tests/` against the running local Supabase |
-| `pnpm test:integration` | Vitest tests in `integration/tests/` against the running local Supabase, logged in through `@jnj/harness` |
+| `pnpm test:integration` | Vitest tests in `integration/tests/` against the running local Supabase, logged in through `@mba/harness` |
 | `pnpm gen:types` | Regenerate `packages/shared/src/database.types.ts` from the running local database. Commit the result; CI fails on drift |
 | `pnpm test:e2e` | Playwright against the Admin production build (`next start`) and the Mobile web export (`serve -s dist`) |
 
@@ -52,8 +52,8 @@ Playwright expects both builds to exist and to have been built against local Sup
 pnpm supabase start
 eval "$(pnpm --silent supabase status -o env --override-name api.url=NEXT_PUBLIC_SUPABASE_URL --override-name auth.anon_key=NEXT_PUBLIC_SUPABASE_ANON_KEY | sed 's/^/export /')"
 export EXPO_PUBLIC_SUPABASE_URL="$NEXT_PUBLIC_SUPABASE_URL" EXPO_PUBLIC_SUPABASE_ANON_KEY="$NEXT_PUBLIC_SUPABASE_ANON_KEY"
-pnpm --filter @jnj/admin build
-pnpm --filter @jnj/mobile export:web
+pnpm --filter @mba/admin build
+pnpm --filter @mba/mobile export:web
 pnpm exec playwright install chromium   # once
 pnpm test:e2e
 pnpm supabase stop --no-backup

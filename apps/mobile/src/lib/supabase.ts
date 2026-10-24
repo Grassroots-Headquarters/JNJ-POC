@@ -1,5 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { createTypedClient } from "@jnj/shared";
+import { createTypedClient } from "@mba/shared";
 import { AppState } from "react-native";
 
 // EXPO_PUBLIC_* values are inlined at build time and must be referenced literally.

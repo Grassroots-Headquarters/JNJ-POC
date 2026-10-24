@@ -1,5 +1,5 @@
 {
-  "name": "@jnj/integration",
+  "name": "@mba/integration",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -10,8 +10,8 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.0",
-    "@jnj/harness": "workspace:*",
-    "@jnj/shared": "workspace:*",
+    "@mba/harness": "workspace:*",
+    "@mba/shared": "workspace:*",
     "@supabase/supabase-js": "2.118.0",
     "@types/node": "^24",
     "eslint": "^10.0.0",

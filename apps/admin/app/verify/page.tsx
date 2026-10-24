@@ -1,6 +1,6 @@
 "use client";
 
-import { requestLoginCode, signUpCompany, verifyLoginCode } from "@jnj/shared";
+import { requestLoginCode, signUpCompany, verifyLoginCode } from "@mba/shared";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState, type FormEvent } from "react";

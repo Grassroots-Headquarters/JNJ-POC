@@ -1,4 +1,4 @@
-import { COMPANY_A, TEST_USERS, createServiceClient, freeTestPhone, lastSmsTo, signInAs } from "@jnj/harness";
+import { COMPANY_A, TEST_USERS, createServiceClient, freeTestPhone, lastSmsTo, signInAs } from "@mba/harness";
 import {
   SendInviteError,
   acceptInvite,
@@ -12,7 +12,7 @@ import {
   signUpCompany,
   type Invite,
   type TypedClient,
-} from "@jnj/shared";
+} from "@mba/shared";
 import { beforeAll, describe, expect, it } from "vitest";
 
 // Free test numbers for ticket #28 are 009-012. Playwright uses 010; these

@@ -1,6 +1,6 @@
 "use client";
 
-import { getJob, listJobPeople, listJobs, type Job } from "@jnj/shared";
+import { getJob, listJobPeople, listJobs, type Job } from "@mba/shared";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";

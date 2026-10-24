@@ -1,4 +1,4 @@
-import { normalisePhone, requestLoginCode, verifyLoginCode } from "@jnj/shared";
+import { normalisePhone, requestLoginCode, verifyLoginCode } from "@mba/shared";
 import { useState } from "react";
 import { KeyboardAvoidingView, Platform, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";

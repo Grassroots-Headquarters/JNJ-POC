@@ -1,4 +1,4 @@
-import { formatStartDate, jobAddress, pickCurrentCompany, roleLabel, type Job, type Membership } from "@jnj/shared";
+import { formatStartDate, jobAddress, pickCurrentCompany, roleLabel, type Job, type Membership } from "@mba/shared";
 import { useQueryClient } from "@tanstack/react-query";
 import { Redirect, useRouter } from "expo-router";
 import { useEffect, useState } from "react";

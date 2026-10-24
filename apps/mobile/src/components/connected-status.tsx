@@ -1,4 +1,4 @@
-import { getPlatformStatus } from "@jnj/shared";
+import { getPlatformStatus } from "@mba/shared";
 import { useQuery } from "@tanstack/react-query";
 import { Text, View } from "react-native";
 

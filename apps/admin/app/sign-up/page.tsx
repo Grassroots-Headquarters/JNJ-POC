@@ -1,6 +1,6 @@
 "use client";
 
-import { normalisePhone, requestLoginCode, signUpCompany } from "@jnj/shared";
+import { normalisePhone, requestLoginCode, signUpCompany } from "@mba/shared";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState, type FormEvent } from "react";

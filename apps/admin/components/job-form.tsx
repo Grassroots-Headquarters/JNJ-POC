@@ -1,6 +1,6 @@
 "use client";
 
-import { assignToJob, createJob, type Job, type Member } from "@jnj/shared";
+import { assignToJob, createJob, type Job, type Member } from "@mba/shared";
 import { useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState, type FormEvent } from "react";
 import { selectClass } from "@/components/invite-form";

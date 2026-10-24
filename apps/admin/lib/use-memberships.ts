@@ -1,6 +1,6 @@
 "use client";
 
-import { listMyMemberships } from "@jnj/shared";
+import { listMyMemberships } from "@mba/shared";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";

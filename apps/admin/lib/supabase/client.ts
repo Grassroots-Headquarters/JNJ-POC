@@ -1,5 +1,5 @@
 import { createBrowserClient } from "@supabase/ssr";
-import type { Database } from "@jnj/shared";
+import type { Database } from "@mba/shared";
 
 /** Supabase client for Client Components. Sessions live in cookies via @supabase/ssr. */
 export function createClient() {

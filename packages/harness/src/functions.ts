@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import type { TypedClient } from "@jnj/shared";
+import type { TypedClient } from "@mba/shared";
 import { localSupabase } from "./local-supabase";
 
 /** The local URL of an Edge Function, as the apps call it. */

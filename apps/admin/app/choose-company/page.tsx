@@ -1,6 +1,6 @@
 "use client";
 
-import { roleLabel } from "@jnj/shared";
+import { roleLabel } from "@mba/shared";
 import { useRouter } from "next/navigation";
 import { AuthScreen } from "@/components/auth-screen";
 import { rememberCompanyId } from "@/lib/current-company";

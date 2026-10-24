@@ -11,7 +11,7 @@ import {
   type Invite,
   type Member,
   type Role,
-} from "@jnj/shared";
+} from "@mba/shared";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { AppHeader } from "@/components/app-header";

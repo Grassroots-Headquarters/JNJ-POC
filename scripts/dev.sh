@@ -54,6 +54,6 @@ cleanup() {
 trap cleanup EXIT INT TERM
 
 echo "==> Admin app on http://localhost:3000, Mobile web on http://localhost:8081"
-pnpm --filter @jnj/admin dev --port 3000 &
-pnpm --filter @jnj/mobile exec expo start --web --port 8081 &
+pnpm --filter @mba/admin dev --port 3000 &
+pnpm --filter @mba/mobile exec expo start --web --port 8081 &
 wait

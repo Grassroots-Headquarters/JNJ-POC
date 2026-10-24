@@ -7,7 +7,7 @@ import {
   setBillingEmail,
   startCheckout,
   summariseAddOn,
-} from "@jnj/shared";
+} from "@mba/shared";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState, type FormEvent } from "react";
 import { AppHeader } from "@/components/app-header";

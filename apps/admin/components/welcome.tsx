@@ -1,6 +1,6 @@
 "use client";
 
-import { canBeJobLead, type Membership } from "@jnj/shared";
+import { canBeJobLead, type Membership } from "@mba/shared";
 import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";

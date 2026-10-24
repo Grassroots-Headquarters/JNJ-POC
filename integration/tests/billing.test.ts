@@ -7,7 +7,7 @@ import {
   functionsEnv,
   postFunctionAs,
   signInAs,
-} from "@jnj/harness";
+} from "@mba/harness";
 import {
   companyHasAddOn,
   getCompanyBilling,
@@ -16,7 +16,7 @@ import {
   signUpCompany,
   startCheckout,
   type TypedClient,
-} from "@jnj/shared";
+} from "@mba/shared";
 import Stripe from "stripe";
 import { beforeAll, describe, expect, it } from "vitest";
 

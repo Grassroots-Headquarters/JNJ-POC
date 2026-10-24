@@ -1,4 +1,4 @@
-import { roleLabel } from "@jnj/shared";
+import { roleLabel } from "@mba/shared";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { Pressable, ScrollView, Text, View } from "react-native";

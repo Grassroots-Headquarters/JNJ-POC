@@ -1,6 +1,6 @@
 "use client";
 
-import { canBeJobLead } from "@jnj/shared";
+import { canBeJobLead } from "@mba/shared";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { CompanyPage } from "@/components/company-page";

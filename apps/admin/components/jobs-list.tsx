@@ -1,6 +1,6 @@
 "use client";
 
-import { formatStartDate, jobAddress, type Job, type Membership } from "@jnj/shared";
+import { formatStartDate, jobAddress, type Job, type Membership } from "@mba/shared";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 import { useJobs } from "@/lib/use-jobs";

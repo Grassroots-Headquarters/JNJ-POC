@@ -1,4 +1,4 @@
-import { getMyUser, listJobs, listMyMemberships } from "@jnj/shared";
+import { getMyUser, listJobs, listMyMemberships } from "@mba/shared";
 import { useQuery } from "@tanstack/react-query";
 
 import { getRememberedCompanyId } from "@/lib/current-company";

@@ -68,9 +68,9 @@ jobs:
       - run: pnpm exec playwright install --with-deps chromium
         working-directory: e2e
       - name: Build the Admin app
-        run: pnpm --filter @jnj/admin build
+        run: pnpm --filter @mba/admin build
       - name: Export the Mobile app's web build
-        run: pnpm --filter @jnj/mobile export:web
+        run: pnpm --filter @mba/mobile export:web
         env:
           CI: "1"
       - run: pnpm test:e2e

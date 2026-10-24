@@ -1,5 +1,5 @@
-import { TEST_OTP, TEST_USERS, createAnonClient, signInAs } from "@jnj/harness";
-import { requestLoginCode, verifyLoginCode, WRONG_CODE_MESSAGE } from "@jnj/shared";
+import { TEST_OTP, TEST_USERS, createAnonClient, signInAs } from "@mba/harness";
+import { requestLoginCode, verifyLoginCode, WRONG_CODE_MESSAGE } from "@mba/shared";
 import { describe, expect, it } from "vitest";
 
 describe("SMS code login", () => {

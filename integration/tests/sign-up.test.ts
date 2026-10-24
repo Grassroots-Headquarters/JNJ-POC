@@ -1,5 +1,5 @@
-import { COMPANY_A, freeTestPhone, signInAs } from "@jnj/harness";
-import { listMyMemberships, signUpCompany } from "@jnj/shared";
+import { COMPANY_A, freeTestPhone, signInAs } from "@mba/harness";
+import { listMyMemberships, signUpCompany } from "@mba/shared";
 import { describe, expect, it } from "vitest";
 
 // Free test numbers: Playwright uses 06; these tests use 07 and 08.

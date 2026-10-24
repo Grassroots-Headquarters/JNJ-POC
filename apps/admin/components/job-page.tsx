@@ -13,7 +13,7 @@ import {
   type Job,
   type JobPerson,
   type Membership,
-} from "@jnj/shared";
+} from "@mba/shared";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useMemo, useState, type FormEvent } from "react";

@@ -1,5 +1,5 @@
 {
-  "name": "@jnj/admin",
+  "name": "@mba/admin",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",
-    "@jnj/shared": "workspace:*",
+    "@mba/shared": "workspace:*",
     "@sentry/nextjs": "11.9.0",
     "@supabase/ssr": "0.12.7",
     "@supabase/supabase-js": "2.118.0",

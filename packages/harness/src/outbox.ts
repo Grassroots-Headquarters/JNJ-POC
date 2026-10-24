@@ -1,4 +1,4 @@
-import { inviteCodeFromSms } from "@jnj/shared";
+import { inviteCodeFromSms } from "@mba/shared";
 import { createServiceClient } from "./clients";
 
 /**
